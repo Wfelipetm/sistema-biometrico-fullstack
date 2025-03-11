@@ -1,0 +1,86 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS  # Importa o CORS
+import comtypes.client
+import pandas as pd
+import time
+import os
+
+app = Flask(__name__)
+
+# Habilitar CORS para todas as rotas
+CORS(app)
+
+NBioBSP = comtypes.client.CreateObject("NBioBSPCOM.NBioBSP")
+Device = NBioBSP.Device
+Extraction = NBioBSP.Extraction
+IndexSearch = NBioBSP.IndexSearch
+
+# Caminho do arquivo CSV
+CSV_FILE = 'fir.csv'
+
+# Função para verificar se o arquivo CSV existe
+def file_exists():
+    return os.path.exists(CSV_FILE)
+
+# Função para salvar o registro no CSV
+def save_to_csv(user_id, user_name, fir_data):
+    with open(CSV_FILE, 'a') as file:
+        file.write(f"{user_id},{user_name},{fir_data},{time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+
+# Rota para registrar o usuário
+@app.route('/register', methods=['POST'])
+def register_user():
+    data = request.json
+    user_id = data['userId']
+    user_name = data['userName']
+
+    # Se o arquivo não existe, criá-lo
+    if not file_exists():
+        with open(CSV_FILE, 'w') as file:
+            file.write('UserID,UserName,FIR,Timestamp\n')
+
+    # Verifica se o ID do usuário já existe
+    df = pd.read_csv(CSV_FILE)
+    if str(user_id) in df['UserID'].astype(str).values:
+        return jsonify({"message": "User ID already exists"}), 400
+
+    # Inicia o dispositivo e realiza a captura da biometria
+    Device.Open(255)
+    Extraction.Enroll(user_id, 0)
+    Device.Close(255)
+
+    # Salva o registro do usuário no arquivo CSV
+    save_to_csv(user_id, user_name, Extraction.TextEncodeFIR)
+
+    return jsonify({"message": "User registered successfully"}), 200
+
+# Rota para identificar o usuário
+@app.route('/identify', methods=['GET'])
+def identify_user():
+    # Carrega os dados do CSV
+    df = pd.read_csv(CSV_FILE)
+
+    # Limpa o banco de dados de indexação
+    IndexSearch.ClearDB()
+    for _, row in df.iterrows():
+        IndexSearch.AddFIR(row['FIR'], row['UserID'])
+
+    # Captura a biometria do dispositivo
+    Device.Open(255)
+    Extraction.Capture(1)
+    Device.Close(255)
+
+    # Realiza a identificação do usuário
+    TextEncodeFIR = Extraction.TextEncodeFIR
+    IndexSearch.IdentifyUser(TextEncodeFIR, 5)
+
+    # Verifica se o usuário foi identificado
+    if IndexSearch.UserID != 0:
+        user_id = IndexSearch.UserID
+        user_name = df.loc[df['UserID'].astype(str) == str(user_id), 'UserName'].values[0]
+        return jsonify({"message": f"User identified: {user_name} (ID: {user_id})"}), 200
+    else:
+        return jsonify({"message": "User not identified"}), 404
+
+if __name__ == '__main__':
+    app.run(debug=True)
