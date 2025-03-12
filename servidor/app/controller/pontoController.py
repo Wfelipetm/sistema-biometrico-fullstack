@@ -1,4 +1,3 @@
-
 from flask import  jsonify
 from app.db.database import get_db_connection
 from datetime import datetime
@@ -11,8 +10,6 @@ from app.services.biometric import IndexSearch, identify_user
 
 
 
-
-# identificar o usuário e registrar o ponto automaticamente
 def register_ponto():
     # Limpa o banco de dados de indexação
     IndexSearch.ClearDB()
@@ -57,7 +54,7 @@ def register_ponto():
 
         # Verificar o último registro de ponto para definir entrada ou saída
         cursor.execute("""
-            SELECT hora_entrada, hora_saida FROM registros_ponto 
+            SELECT id, hora_entrada, hora_saida FROM registros_ponto 
             WHERE funcionario_id = %s ORDER BY data_hora DESC LIMIT 1
         """, (funcionario_id,))
         ultimo_ponto = cursor.fetchone()
@@ -66,18 +63,21 @@ def register_ponto():
         hora_entrada = None
         hora_saida = None
 
-        if not ultimo_ponto or ultimo_ponto[1] is not None:  # Se não há registro ou já tem saída
+        if not ultimo_ponto or (ultimo_ponto[1] is not None and ultimo_ponto[2] is not None):  # Se não há registro ou já tem entrada e saída
             hora_entrada = data_hora.strftime("%H:%M:%S")  # Registra entrada
-        else:
+            cursor.execute("""
+                INSERT INTO registros_ponto (funcionario_id, unidade_id, data_hora, hora_entrada, hora_saida, id_biometrico)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (funcionario_id, unidade_id, data_hora, hora_entrada, hora_saida, id_biometrico))
+        elif ultimo_ponto[1] is not None and ultimo_ponto[2] is None:  # Se já tem entrada, mas não tem saída, atualiza a hora_saida
             hora_saida = data_hora.strftime("%H:%M:%S")  # Registra saída
+            cursor.execute("""
+                UPDATE registros_ponto
+                SET hora_saida = %s
+                WHERE id = %s
+            """, (hora_saida, ultimo_ponto[0]))
 
-        # Inserir registro de ponto automaticamente, incluindo id_biometrico
-        cursor.execute("""
-            INSERT INTO registros_ponto (funcionario_id, unidade_id, data_hora, hora_entrada, hora_saida, id_biometrico)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (funcionario_id, unidade_id, data_hora, hora_entrada, hora_saida, id_biometrico))
         conn.commit()
-
         cursor.close()
         conn.close()
 
@@ -91,8 +91,9 @@ def register_ponto():
                 "data_hora": data_hora.strftime("%d/%m/%Y %H:%M:%S"),
                 "hora_entrada": hora_entrada,
                 "hora_saida": hora_saida,
-                "id_biometrico": id_biometrico  # Retornando o id_biometrico no JSON
+                "id_biometrico": id_biometrico  
             }
         }), 200
     else:
         return jsonify({"message": "User not identified"}), 404
+
