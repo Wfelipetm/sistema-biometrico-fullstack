@@ -11,8 +11,8 @@ Este projeto oferece uma interface gráfica e de linha de comando para registro 
 ## Clonar o Repositório
 Para clonar o repositório, execute o seguinte comando:
 ```sh
-git clone https://github.com/seuusuario/eNBioBSPcom.PY.git
-cd eNBioBSPcom.PY
+git clone https://github.com/Wfelipetm/Biometria.git
+cd Biometria
 
 ```
 
