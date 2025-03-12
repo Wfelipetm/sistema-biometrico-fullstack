@@ -1,5 +1,5 @@
 import comtypes.client
-import time
+
 
 # Inicializando a biometria
 NBioBSP = comtypes.client.CreateObject("NBioBSPCOM.NBioBSP")

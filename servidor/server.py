@@ -1,9 +1,9 @@
-from app import create_app
-from app.database import get_db_connection  
+from app.routes import create_app
+from app.db.database import get_db_connection  
 
 app = create_app()
 
-# Testar conexão ao iniciar o servidor
+
 conn = get_db_connection()
 if conn:
     print("Conectado ao banco de dados com sucesso!")
