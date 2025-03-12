@@ -1,13 +1,7 @@
-from flask import  jsonify
+from flask import jsonify
 from app.db.database import get_db_connection
 from datetime import datetime
-from datetime import datetime
 from app.services.biometric import IndexSearch, identify_user
-
-
-
-
-
 
 
 def register_ponto():
@@ -21,12 +15,15 @@ def register_ponto():
     # Buscar todos os usuários no banco de dados e adicionar FIR à indexação
     cursor.execute("SELECT id_biometrico, id FROM funcionarios")
     for row in cursor.fetchall():
-        IndexSearch.AddFIR(row[0], int(row[1]))  
+        IndexSearch.AddFIR(row[0], int(row[1]))
 
     conn.close()
 
     # Captura os dados de biometria para identificação
     fir_data = identify_user()
+
+    if not fir_data:  # Verifica se o dado biométrico foi capturado
+        return jsonify({"message": "Nenhuma impressão digital capturada. Por favor, tente novamente."}), 400
 
     # Identificação do usuário
     IndexSearch.IdentifyUser(fir_data, 5)
@@ -91,9 +88,8 @@ def register_ponto():
                 "data_hora": data_hora.strftime("%d/%m/%Y %H:%M:%S"),
                 "hora_entrada": hora_entrada,
                 "hora_saida": hora_saida,
-                "id_biometrico": id_biometrico  
+                "id_biometrico": id_biometrico
             }
         }), 200
     else:
-        return jsonify({"message": "User not identified"}), 404
-
+        return jsonify({"message": "Usuário não identificado"}), 404

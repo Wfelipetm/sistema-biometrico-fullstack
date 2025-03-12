@@ -6,8 +6,6 @@ from app.services.biometric import IndexSearch, enroll_user, identify_user
 
 
 
-
-
 # identificar o usuário
 def identify_user_route():
     # Limpa o banco de dados de indexação
