@@ -1,11 +1,16 @@
+import os
 import psycopg2
+from dotenv import load_dotenv
 
-# Configuração do banco de dados
-DB_HOST = 'biometrico.itaguai.rj.gov.br'
-DB_PORT = 5432
-DB_NAME = 'biometrico'
-DB_USER = 'postgres'
-DB_PASSWORD = 'B10m3Tr1@'
+# Carregar as variáveis do arquivo .env
+load_dotenv()
+
+# Obter as variáveis do ambiente
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT")
+DB_NAME = os.getenv("DB_NAME")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
 
 # Função para conectar ao banco de dados
 def get_db_connection():

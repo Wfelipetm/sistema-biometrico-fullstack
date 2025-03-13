@@ -47,7 +47,7 @@ def register_ponto():
         unidade_id = user_data[3]
         matricula = user_data[4]
         cargo = user_data[5]
-        id_biometrico = user_data[6]  # Pegando o id_biometrico do banco
+        id_biometrico = user_data[6]  
 
         # Verificar o último registro de ponto para definir entrada ou saída
         cursor.execute("""
@@ -60,7 +60,7 @@ def register_ponto():
         hora_entrada = None
         hora_saida = None
 
-        if not ultimo_ponto or (ultimo_ponto[1] is not None and ultimo_ponto[2] is not None):  # Se não há registro ou já tem entrada e saída
+        if not ultimo_ponto or (ultimo_ponto[1] is not None and ultimo_ponto[2] is not None):  
             hora_entrada = data_hora.strftime("%H:%M:%S")  # Registra entrada
             cursor.execute("""
                 INSERT INTO registros_ponto (funcionario_id, unidade_id, data_hora, hora_entrada, hora_saida, id_biometrico)

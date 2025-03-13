@@ -49,7 +49,7 @@ def identify_user_route():
         conn.close()
 
         # Recuperando a data_admissao diretamente do banco de dados
-        data_admissao_formatada = data_admissao.strftime("%d/%m/%Y")  # Convertendo e formatando a data para o formato desejado
+        data_admissao_formatada = data_admissao.strftime("%d/%m/%Y")  
 
         return jsonify({
             "message": f"User identified: {user_name} (ID: {id_biometrico})",

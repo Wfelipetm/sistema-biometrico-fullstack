@@ -5,7 +5,7 @@ import comtypes.client
 NBioBSP = comtypes.client.CreateObject("NBioBSPCOM.NBioBSP")
 Device = NBioBSP.Device
 Extraction = NBioBSP.Extraction
-IndexSearch = NBioBSP.IndexSearch  # Já está criado, apenas exporte
+IndexSearch = NBioBSP.IndexSearch 
 
 def enroll_user(id_biometrico):
     Device.Open(255)

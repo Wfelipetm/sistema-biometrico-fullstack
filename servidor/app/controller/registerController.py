@@ -16,16 +16,13 @@ def register_user():
     cargo = data.get('cargo', '')
     matricula = data['matricula']
     unidade_id = data['unidade_id']
-    # foto = data.get('foto', None)
-
-    # Gerar o id_biometrico usando a função enroll_user e passando o valor necessário (por exemplo, matricula)
+   
     try:
-        # Passando matricula ou outro identificador necessário para enroll_user
-        id_biometrico = enroll_user(matricula)  # Passando a matrícula ou outro parâmetro que a função espera
+        
+        id_biometrico = enroll_user(matricula)  
     except Exception as e:
-        return jsonify({"message": f"Error during biometric enrollment: {str(e)}"}), 500
+        return jsonify({"message": f"Erro durante o registro biométrico: {str(e)}"}), 500
 
-    # Verificar se o CPF ou ID biométrico já existe no banco de dados
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -36,31 +33,30 @@ def register_user():
     if existing_user:
         return jsonify({"message": "User ID or CPF already exists"}), 400
 
-    # Verificar se a matrícula já existe
+    
     cursor.execute("SELECT * FROM funcionarios WHERE matricula = %s", (matricula,))
     existing_matricula = cursor.fetchone()
 
     if existing_matricula:
         return jsonify({"message": "Matrícula already exists"}), 400
 
-    # Pegar a hora atual para data_admissao
+    
     current_time = datetime.now()
 
-    # Salvar no banco de dados
+    
     cursor.execute(""" 
         INSERT INTO funcionarios (nome, cpf, cargo, id_biometrico, unidade_id, matricula,  data_admissao, created_at, updated_at)
         VALUES (%s, %s, %s, %s, %s, %s, %s, CURRENT_DATE, CURRENT_DATE)
     """, (user_name, cpf, cargo, id_biometrico, unidade_id, matricula,  current_time))
     conn.commit()
 
-    # Buscar o usuário recém registrado para retornar os dados
     cursor.execute("SELECT * FROM funcionarios WHERE matricula = %s", (matricula,))
     registered_user = cursor.fetchone()
 
     cursor.close()
     conn.close()
 
-    # Retornar todos os dados cadastrados, mas sem o token
+   
     return jsonify({
         "message": "User registered successfully",
         "user": {
