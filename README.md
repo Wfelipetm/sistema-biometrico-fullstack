@@ -1,4 +1,4 @@
-# eNBioBSPcom.PY
+# Biometria.py
 
 ## Visão Geral
 Este projeto oferece uma interface gráfica e de linha de comando para registro e identificação de impressões digitais usando a biblioteca NBioBSP COM.
