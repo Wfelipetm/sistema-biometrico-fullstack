@@ -95,7 +95,7 @@ def register_ponto():
                         <p><strong>✅ Registro de entrada efetuado.</strong></p>
                         <p><strong>👤 Profissional:</strong> {user_name}<br><br>
                         <strong>📅 Data/Hora:</strong> {data_hora.strftime('%d/%m/%Y %H:%M:%S')}</p><br><br>
-                        <p>Atenciosamente,<br><strong>Secretaria de Saúde</strong></p>
+                        <p>Atenciosamente,<br><strong>Prefeitura de Itaguaí</strong></p>
                     </body>
                 </html>
                 """
@@ -125,7 +125,7 @@ def register_ponto():
                         <p><strong>✅ Registro de saída efetuado.</strong></p>
                         <p><strong>👤 Profissional:</strong> {user_name}<br><br>
                         <strong>📅 Data/Hora:</strong> {data_hora.strftime('%d/%m/%Y %H:%M:%S')}</p><br><br>
-                        <p>Atenciosamente,<br><strong>Secretaria de Saúde</strong></p>
+                        <p>Atenciosamente,<br><strong>Prefeitura de Itaguaí</strong></p>
                     </body>
                 </html>
                 """

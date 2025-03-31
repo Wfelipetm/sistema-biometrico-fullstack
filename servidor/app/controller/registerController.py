@@ -36,12 +36,12 @@ def register_user():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM funcionarios WHERE id_biometrico = %s OR cpf = %s OR email = %s", (id_biometrico, cpf, email))
+    cursor.execute("SELECT * FROM funcionarios WHERE id_biometrico = %s OR cpf = %s OR email = %s OR matricula = %s OR nome = %s", (id_biometrico, cpf, email, matricula, user_name))
 
     existing_user = cursor.fetchone()
 
     if existing_user:
-        return jsonify({"message": "User ID, CPF ou Email já existe"}), 400
+        return jsonify({"message": "User ID, CPF, Email, Matrícula ou Nome já existe"}), 400
 
     cursor.execute("SELECT * FROM funcionarios WHERE matricula = %s", (matricula,))
     existing_matricula = cursor.fetchone()
