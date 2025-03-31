@@ -17,10 +17,9 @@ def send_email(subject, recipient, body):
 
 
 def register_ponto():
-    # Limpa o banco de dados de indexação
+    
     IndexSearch.ClearDB()
 
-    # Conectar ao banco de dados
     conn = get_db_connection()
     cursor = conn.cursor()
 

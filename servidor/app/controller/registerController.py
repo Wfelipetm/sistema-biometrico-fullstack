@@ -3,7 +3,7 @@ from app.services.biometric import enroll_user
 from app.db.database import get_db_connection
 from datetime import datetime
 
-# Definindo os valores válidos do ENUM tipo_escala
+
 TIPO_ESCALA_VALIDOS = ['8h', '12h', '16h', '24h', '12x36', '24x72', '32h', '20h']
 
 # Função para registrar o usuário
