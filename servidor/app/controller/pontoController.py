@@ -1,10 +1,9 @@
+from datetime import datetime
 from flask import jsonify
 from app.db.database import get_db_connection
-from datetime import datetime
 from app.services.biometric import IndexSearch, identify_user
 from flask_mail import Message
-from app import mail  
-
+from app import mail
 
 # Função para enviar e-mail
 def send_email(subject, recipient, body):
@@ -17,7 +16,7 @@ def send_email(subject, recipient, body):
 
 
 def register_ponto():
-    
+
     IndexSearch.ClearDB()
 
     conn = get_db_connection()
@@ -61,6 +60,16 @@ def register_ponto():
         id_biometrico = user_data[6]
         email = user_data[7]  
         data_atual = datetime.now().date()
+
+        # Verificar se o funcionário está de férias
+        cursor.execute("""
+            SELECT data_inicio, data_fim FROM ferias 
+            WHERE funcionario_id = %s AND data_inicio <= %s AND data_fim >= %s
+        """, (funcionario_id, data_atual, data_atual))
+        ferias_data = cursor.fetchone()
+
+        if ferias_data:  # Se o funcionário está de férias
+            return jsonify({"message": "Funcionario de férias, você não pode registrar o ponto!"}), 400
 
         # Verificar se já há um registro de ponto no mesmo dia
         cursor.execute("""
