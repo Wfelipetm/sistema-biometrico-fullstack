@@ -2,27 +2,27 @@ from datetime import datetime
 from flask import jsonify
 from app.db.database import get_db_connection
 from app.services.biometric import IndexSearch, identify_user
-from flask_mail import Message
-from app import mail
+import requests
 
-# Função para enviar e-mail
+# Função para enviar e-mail via backend Node.js
 def send_email(subject, recipient, body):
-    msg = Message(subject=subject, recipients=[recipient], html=body)
     try:
-        mail.send(msg)
-        print(f"E-mail enviado para {recipient} com o assunto: {subject}")
-    except Exception as e:
-        print(f"Erro ao enviar e-mail: {e}")
-
+        response = requests.post("http://biometrico.itaguai.rj.gov.br:3001/api/enviar-email", json={
+            "subject": subject,
+            "recipient": recipient,
+            "body": body
+        })
+        response.raise_for_status()
+        print(f"✅ E-mail enviado para {recipient}")
+    except requests.RequestException as e:
+        print(f"❌ Erro ao enviar e-mail: {e}")
 
 def register_ponto():
-
     IndexSearch.ClearDB()
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Buscar todos os usuários no banco de dados e adicionar FIR à indexação
     cursor.execute("SELECT id_biometrico, id FROM funcionarios")
     for row in cursor.fetchall():
         IndexSearch.AddFIR(row[0], int(row[1]))
@@ -31,10 +31,9 @@ def register_ponto():
 
     fir_data = identify_user()
 
-    if not fir_data:  
+    if not fir_data:
         return jsonify({"message": "Nenhuma impressão digital capturada. Por favor, tente novamente."}), 400
 
-    # Identificação do usuário
     IndexSearch.IdentifyUser(fir_data, 5)
 
     if IndexSearch.UserID != 0:
@@ -51,27 +50,18 @@ def register_ponto():
         if not user_data:
             return jsonify({"message": "Usuário não encontrado no banco de dados."}), 404
 
-        funcionario_id = user_data[0]
-        user_name = user_data[1]
-        cpf = user_data[2]
-        unidade_id = user_data[3]
-        matricula = user_data[4]
-        cargo = user_data[5]
-        id_biometrico = user_data[6]
-        email = user_data[7]  
+        funcionario_id, user_name, cpf, unidade_id, matricula, cargo, id_biometrico, email = user_data
         data_atual = datetime.now().date()
 
-        # Verificar se o funcionário está de férias
         cursor.execute("""
             SELECT data_inicio, data_fim FROM ferias 
             WHERE funcionario_id = %s AND data_inicio <= %s AND data_fim >= %s
         """, (funcionario_id, data_atual, data_atual))
         ferias_data = cursor.fetchone()
 
-        if ferias_data:  # Se o funcionário está de férias
+        if ferias_data:
             return jsonify({"message": "Funcionario de férias, você não pode registrar o ponto!"}), 400
 
-        # Verificar se já há um registro de ponto no mesmo dia
         cursor.execute("""
             SELECT id, hora_entrada, hora_saida FROM registros_ponto 
             WHERE funcionario_id = %s AND DATE(data_hora) = %s 
@@ -83,21 +73,19 @@ def register_ponto():
         hora_entrada = None
         hora_saida = None
 
-        if not ultimo_ponto:  # Se não há registro no dia, cria um novo com hora de entrada
+        if not ultimo_ponto:
             hora_entrada = data_hora.strftime("%H:%M:%S")
             cursor.execute("""
                 INSERT INTO registros_ponto (funcionario_id, unidade_id, data_hora, hora_entrada, hora_saida, id_biometrico)
                 VALUES (%s, %s, %s, %s, %s, %s)
             """, (funcionario_id, unidade_id, data_hora, hora_entrada, hora_saida, id_biometrico))
 
-            # Enviar e-mail de entrada
             send_email(
                 subject="Registro de Entrada - Ponto Registrado",
                 recipient=email,
                 body=f"""
                 <html>
                     <body style="font-family: Arial, sans-serif; color: #333;">
-                        
                         <p>Olá <strong>{user_name}</strong>,</p><br><br>
                         <p>Você está recebendo o comprovante de registro de ponto conforme informações a seguir.</p>
                         <p><strong>✅ Registro de entrada efetuado.</strong></p>
@@ -109,25 +97,20 @@ def register_ponto():
                 """
             )
 
-        elif ultimo_ponto[1] is not None and ultimo_ponto[2] is None:  # Se já tem entrada e ainda não tem saída, registra saída
+        elif ultimo_ponto[1] is not None and ultimo_ponto[2] is None:
             hora_saida = data_hora.strftime("%H:%M:%S")
-            cursor.execute(
-                """
+            cursor.execute("""
                 UPDATE registros_ponto
                 SET hora_saida = %s
                 WHERE id = %s
-                """,
-                (hora_saida, ultimo_ponto[0])
-            )
+            """, (hora_saida, ultimo_ponto[0]))
 
-            # Enviar e-mail de saída
             send_email(
                 subject="Registro de Saída - Ponto Registrado",
                 recipient=email,
                 body=f"""
                 <html>
                     <body style="font-family: Arial, sans-serif; color: #333;">
-                        
                         <p>Olá <strong>{user_name}</strong>,</p><br><br>
                         <p>Você está recebendo o comprovante de registro de ponto conforme informações a seguir.</p>
                         <p><strong>✅ Registro de saída efetuado.</strong></p>
@@ -139,7 +122,7 @@ def register_ponto():
                 """
             )
 
-        else:  # Se já tem saída registrada para o dia, não permite um novo registro
+        else:
             return jsonify({"message": f"Você já bateu seu ponto de saída hoje ({data_atual.strftime('%d/%m/%Y')})."}), 400
 
         conn.commit()
@@ -159,5 +142,6 @@ def register_ponto():
                 "id_biometrico": id_biometrico
             }
         }), 200
+
     else:
         return jsonify({"message": "Usuário não identificado"}), 404
