@@ -14,6 +14,7 @@ def register_user():
     cargo = data.get('cargo', '')
     matricula = data['matricula']
     unidade_id = data['unidade_id']
+    data_admissao = data['data_admissao']
     
     # Verificação e log de tipo_escala
     tipo_escala = data.get('tipo_escala')
@@ -49,7 +50,7 @@ def register_user():
     if existing_matricula:
         return jsonify({"message": "Matrícula already exists"}), 400
 
-    current_time = datetime.now()
+    # current_time = datetime.now()
 
     # Verificação do valor de tipo_escala antes de inserir
     print(f"tipo_escala: {tipo_escala}")  # Log para depuração
@@ -57,7 +58,7 @@ def register_user():
     cursor.execute(""" 
         INSERT INTO funcionarios (nome, cpf, cargo, id_biometrico, unidade_id, matricula, tipo_escala, telefone, email, data_admissao, created_at, updated_at)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, CURRENT_DATE, CURRENT_DATE)
-    """, (user_name, cpf, cargo, id_biometrico, unidade_id, matricula, tipo_escala, telefone, email, current_time))
+    """, (user_name, cpf, cargo, id_biometrico, unidade_id, matricula, tipo_escala, telefone, email, data_admissao))
     conn.commit()
 
     cursor.execute("SELECT * FROM funcionarios WHERE matricula = %s", (matricula,))
