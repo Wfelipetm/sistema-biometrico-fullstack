@@ -83,18 +83,22 @@ def register_ponto():
             send_email(
                 subject="Registro de Entrada - Ponto Registrado",
                 recipient=email,
-                body=f"""
-                <html>
-                    <body style="font-family: Arial, sans-serif; color: #333;">
-                        <p>Olá <strong>{user_name}</strong>,</p><br><br>
-                        <p>Você está recebendo o comprovante de registro de ponto conforme informações a seguir.</p>
-                        <p><strong>✅ Registro de entrada efetuado.</strong></p>
-                        <p><strong>👤 Profissional:</strong> {user_name}<br><br>
-                        <strong>📅 Data/Hora:</strong> {data_hora.strftime('%d/%m/%Y %H:%M:%S')}</p><br><br>
-                        <p>Atenciosamente,<br><strong>Prefeitura de Itaguaí</strong></p>
-                    </body>
-                </html>
-                """
+                body = f"""
+                        Prezado(a) {user_name},
+
+                        Este e-mail confirma o registro de seu ponto conforme as informações abaixo:
+
+                        Entrada registrada com sucesso.
+
+                        Profissional: {user_name}
+                        Data/Hora: {data_hora.strftime('%d/%m/%Y %H:%M:%S')}
+
+                        Se precisar de suporte ou tiver dúvidas, entre em contato com a Prefeitura de Itaguaí.
+
+                        Atenciosamente,
+                        Prefeitura de Itaguaí
+                        """
+
             )
 
         elif ultimo_ponto[1] is not None and ultimo_ponto[2] is None:
@@ -108,18 +112,22 @@ def register_ponto():
             send_email(
                 subject="Registro de Saída - Ponto Registrado",
                 recipient=email,
-                body=f"""
-                <html>
-                    <body style="font-family: Arial, sans-serif; color: #333;">
-                        <p>Olá <strong>{user_name}</strong>,</p><br><br>
-                        <p>Você está recebendo o comprovante de registro de ponto conforme informações a seguir.</p>
-                        <p><strong>✅ Registro de saída efetuado.</strong></p>
-                        <p><strong>👤 Profissional:</strong> {user_name}<br><br>
-                        <strong>📅 Data/Hora:</strong> {data_hora.strftime('%d/%m/%Y %H:%M:%S')}</p><br><br>
-                        <p>Atenciosamente,<br><strong>Prefeitura de Itaguaí</strong></p>
-                    </body>
-                </html>
-                """
+                body = f"""
+                        Prezado(a) {user_name},
+
+                        Este e-mail confirma o registro de sua saída conforme as informações abaixo:
+
+                        Saída registrada com sucesso.
+
+                        Profissional: {user_name}
+                        Data/Hora: {data_hora.strftime('%d/%m/%Y %H:%M:%S')}
+
+                        Se precisar de suporte ou tiver dúvidas, entre em contato com a Prefeitura de Itaguaí.
+
+                        Atenciosamente,
+                        Prefeitura de Itaguaí
+                        """
+
             )
 
         else:
