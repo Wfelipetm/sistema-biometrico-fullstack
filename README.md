@@ -35,40 +35,42 @@ A aplicação é dividida em quatro partes independentes:
 
 ## Clonar o Repositório
 
-
+```bash
 git clone https://github.com/Wfelipetm/sistema-biometrico-fullstack.git
+```
 
 ---
 
-## Clonar o Repositório
 
+```
 cd backend-python
 pip install -r requirements.txt
 python server.py  
 
+```
 
-
----
+```
 Backend Node.js
 cd backend-node
 npm install
 npm start
+```
 
-----
-
+```
 Frontend
 cd frontend
 npm install
 npm run dev
-
-----
+```
+```
 
 Banco de Dados
 Execute os scripts .sql na pasta database/ em seu PostgreSQL local ou servidor.
 
-----
-
+```
+------
 Funcionalidades
+-----
 Registro de funcionário com biometria
 
 Identificação por impressão digital (NBioBSP)
