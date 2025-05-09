@@ -35,32 +35,33 @@ A aplicação é dividida em quatro partes independentes:
 
 ## Clonar o Repositório
 
-
+```bash
 git clone https://github.com/Wfelipetm/sistema-biometrico-fullstack.git
+```
 
 ---
 
 
-
+```
 cd backend-python
 pip install -r requirements.txt
 python server.py  
 
+```
 
-
----
+```
 Backend Node.js
 cd backend-node
 npm install
 npm start
-
+```
 ----
-
+```
 Frontend
 cd frontend
 npm install
 npm run dev
-
+```
 ----
 
 Banco de Dados
