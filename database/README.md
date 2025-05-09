@@ -77,7 +77,5 @@ O banco de dados inclui várias funções que automatizam cálculos e padroniza�
 - Existem índices para otimizar consultas frequentes
 - Constraints garantem a integridade dos dados
 - Relacionamentos são gerenciados por chaves estrangeiras com regras de cascata
-```
 
-Este README resume a estrutura e funcionalidade do banco de dados PostgreSQL que você compartilhou. O sistema parece ser um controle de ponto biométrico completo, com funcionalidades para gerenciar funcionários, registros de ponto, cálculo de horas trabalhadas e estrutura organizacional.
 
