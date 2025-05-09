@@ -6,13 +6,19 @@ Este projeto é um sistema completo para cadastro e autenticação de funcionár
 
 A aplicação é dividida em quatro partes independentes:
 
+
+
 - `backend-python/`: Interface gráfica e de linha de comando em Python para **registro e identificação de digitais** usando a biblioteca **NBioBSP COM**.
+  
 - `backend-node/`: API REST em Node.js responsável por toda a comunicação com o banco de dados, incluindo:
+  
   - Cadastro de **funcionários**, **secretarias** e **unidades**, com suporte a upload de fotos via `Multer`.
   - Geração e envio de **comprovantes por e-mail** ao bater o ponto, com suporte a SMTP.
   - Endpoints RESTful organizados para facilitar a integração com o frontend.
 
+
 - `frontend/`: Interface web de cadastro, autenticação e registro de ponto.
+
 - `database/`: Scripts SQL e estrutura de banco de dados PostgreSQL.
 
 ---
