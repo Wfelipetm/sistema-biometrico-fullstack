@@ -3,9 +3,9 @@
 ## Visão Geral
 
 Este projeto é um sistema completo para cadastro e autenticação de funcionários utilizando **biometria digital** e com interface web, múltiplos serviços e banco de dados PostgreSQL. 
-------
-A aplicação é dividida em quatro partes independentes:
-------
+
+### A aplicação é dividida em quatro partes independentes:
+
 
 
 - `backend-python/`: Interface gráfica e de linha de comando em Python para **registro e identificação de digitais** usando a biblioteca **NBioBSP COM**.
