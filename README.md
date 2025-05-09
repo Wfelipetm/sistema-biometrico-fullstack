@@ -40,7 +40,7 @@ git clone https://github.com/Wfelipetm/sistema-biometrico-fullstack.git
 
 ---
 
-## Clonar o Repositório
+
 
 cd backend-python
 pip install -r requirements.txt
