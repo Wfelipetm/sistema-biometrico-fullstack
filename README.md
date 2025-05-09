@@ -84,11 +84,7 @@ Comunicação entre backends via API REST
 
 
 
-Logs e Tratamento de Erros
-Todos os módulos exibem mensagens de erro e status em tempo real no console. Os serviços estão preparados para lidar com falhas de dispositivos, conexão e autenticação.
 
-
-------
 
 
 
