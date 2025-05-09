@@ -62,13 +62,13 @@ cd frontend
 npm install
 npm run dev
 ```
-----
+```
 
 Banco de Dados
 Execute os scripts .sql na pasta database/ em seu PostgreSQL local ou servidor.
 
-----
-
+```
+------
 Funcionalidades
 Registro de funcionário com biometria
 
