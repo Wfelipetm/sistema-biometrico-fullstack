@@ -1,91 +1,75 @@
 # Sistema de Cadastro e Autenticação Biométrica
 
-## Visão Geral
+Um sistema completo para cadastro e autenticação de funcionários utilizando biometria digital, com interface web, múltiplos serviços e banco de dados PostgreSQL.
 
-Este projeto é um sistema completo para cadastro e autenticação de funcionários utilizando **biometria digital** e com interface web, múltiplos serviços e banco de dados PostgreSQL. 
+## 📋 Índice
 
-#### A aplicação é dividida em quatro partes independentes:
+- [Visão Geral](#visão-geral)
+- [Arquitetura](#arquitetura)
+- [Funcionalidades](#funcionalidades)
+- [Pré-requisitos](#pré-requisitos)
+- [Instalação](#instalação)
+- [Configuração](#configuração)
+- [Uso](#uso)
+- [Troubleshooting](#troubleshooting)
+- [Contribuição](#contribuição)
+- [Licença](#licença)
 
-- `backend-python/`: Interface gráfica e de linha de comando em Python para **registro e identificação de digitais** usando a biblioteca **NBioBSP COM**.
-  
-- `backend-node/`: API REST em Node.js responsável por toda a comunicação com o banco de dados, incluindo:
-  
-  - Cadastro de **funcionários**, **secretarias** e **unidades**, com suporte a upload de fotos via `Multer`.
-  - Geração e envio de **comprovantes por e-mail** ao bater o ponto, com suporte a SMTP.
-  - Endpoints RESTful organizados para facilitar a integração com o frontend.
+## 🔍 Visão Geral
 
+Este sistema oferece uma solução completa para gerenciamento de ponto eletrônico com autenticação biométrica. Ideal para empresas, instituições educacionais e órgãos públicos que necessitam de controle de acesso seguro e registro de presença confiável.
 
-- `frontend/`: Interface web de cadastro, autenticação e registro de ponto.
+## 🏗️ Arquitetura
 
-- `database/`: Scripts SQL e estrutura de banco de dados PostgreSQL.
+O sistema é dividido em quatro componentes independentes que se comunicam entre si:
 
----
+### 1. Backend Python (`backend-python/`)
+- Interface gráfica e CLI para registro e identificação de digitais
+- Utiliza a biblioteca **NBioBSP COM** para comunicação com o leitor biométrico
+- Responsável pela captura, processamento e verificação das impressões digitais
 
-## Pré-requisitos
+### 2. Backend Node.js (`backend-node/`)
+- API REST para comunicação com o banco de dados
+- Gerenciamento de funcionários, secretarias e unidades
+- Geração e envio de comprovantes por e-mail
+- Upload de fotos via Multer
+- Autenticação e autorização de usuários
 
-- Python 3.x e `pip`
-- Node.js e `npm`
-- PostgreSQL
-- Biblioteca `NBioBSP COM` 
+### 3. Frontend (`frontend/`)
+- Interface web responsiva para cadastro e autenticação
+- Painel administrativo para gestão de usuários
+- Dashboard para visualização de registros de ponto
+- Desenvolvido com tecnologias web modernas
+
+### 4. Banco de Dados (`database/`)
+- Estrutura relacional em PostgreSQL
+- Scripts de criação e população inicial
+- Armazenamento seguro de templates biométricos
+
+## ✨ Funcionalidades
+
+- **Registro biométrico**: Cadastro de impressões digitais de funcionários
+- **Autenticação segura**: Verificação de identidade por biometria
+- **Registro de ponto**: Controle de entrada e saída com timestamp
+- **Gestão de usuários**: Cadastro, edição e exclusão de funcionários
+- **Relatórios**: Geração de relatórios de presença e ausência
+- **Notificações**: Envio de comprovantes por e-mail
+- **Múltiplos níveis de acesso**: Administrador, gestor e funcionário
+- **Interface intuitiva**: Design simples e direto para facilitar o uso
+
+## 🔧 Pré-requisitos
+
+- Python 3.8+ e `pip`
+- Node.js 14+ e `npm`
+- PostgreSQL 12+
+- Biblioteca `NBioBSP COM` (fornecida pelo fabricante)
 - Leitor biométrico Hamster DX FINGERTECH NITGEN
+- Navegador web moderno (Chrome, Firefox, Edge)
 
----
+## 📥 Instalação
 
-## Clonar o Repositório
+### 1. Clonar o Repositório
 
 ```bash
 git clone https://github.com/Wfelipetm/sistema-biometrico-fullstack.git
-```
-
----
-
-
-```
-cd backend-python
-pip install -r requirements.txt
-python server.py  
-
-```
-
-```
-Backend Node.js
-cd backend-node
-npm install
-npm start
-```
-
-```
-Frontend
-cd frontend
-npm install
-npm run dev
-```
-```
-
-Banco de Dados
-Execute os scripts full-schema.sql na pasta database/ em seu PostgreSQL local ou servidor.
-
-```
-------
-Funcionalidades
------
-Registro de funcionário com biometria
-
-Identificação por impressão digital (NBioBSP)
-
-Registro de ponto com verificação biométrica
-
-Interface web simples e direta
-
-Comunicação entre backends via API REST
-
-
-------
-
-
-
-
-
-
-
-
+cd sistema-biometrico-fullstack
