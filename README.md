@@ -60,7 +60,7 @@ O sistema é dividido em quatro componentes independentes que se comunicam entre
 - PostgreSQL 12+
 - Biblioteca `NBioBSP COM` (fornecida pelo fabricante)
 - Leitor biométrico Hamster DX FINGERTECH NITGEN
-- Navegador web moderno (Chrome, Firefox, Edge)
+- Navegador web (Chrome, Firefox, Edge)
 
 ## 📥 Instalação <a name="instalacao"></a>
 
