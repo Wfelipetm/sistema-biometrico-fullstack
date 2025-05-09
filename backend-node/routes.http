@@ -1,0 +1,35 @@
+### GET todos os funcionarios 
+GET http://biometrico.itaguai.rj.gov.br:3000/funci/funcionarios/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwicGFwZWwiOiJnZXN0b3IiLCJpYXQiOjE3Mzc0NzE4NzcsImV4cCI6MTczODQ3MTg3Nn0.ZnaoLKCgmcay9CvTCkDy3U64dvfoiUeR_MP7i6ajmi0
+
+
+
+
+
+
+
+
+
+GET http://biometrico.itaguai.rj.gov.br:3000/reg/registros-ponto
+
+### FAZER TEST POST
+
+http://biometrico.itaguai.rj.gov.br:5000/funci/unidade/7f97c59d-daa8-402d-b37b-7ed63e69ec35/funcionarios
+
+
+
+###
+GET http://biometrico.itaguai.rj.gov.br:3000/api/unidades/Unidade C/funcionarios
+
+
+###
+
+
+GET http://biometrico.itaguai.rj.gov.br:3000/reg/levantamento-horas?funcionario_id=c859a802-c5c9-4d77-8970-0dbbc9e1bb98&ano=2025&mes=01
+
+### 
+GET http://biometrico.itaguai.rj.gov.br:3000/reg/levantamento-horas/0f93ebf3-599a-42ef-bed6-8f08bfdb25b3?ano=2025&mes=01
+
+
+###
+http://biometrico.itaguai.rj.gov.br:3000/reg/registros-ponto

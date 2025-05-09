@@ -1,0 +1,68 @@
+// Rota para criar teste do registro de pontp
+router.post('/registros-ponto-fake', registroPontoController.criarRegistroPontoFake);
+
+
+
+
+
+
+
+
+// POST
+// Teste! Esse endpoint é para criar registro de pontos fake.
+async criarRegistroPontoFake(req, res) {
+    const { funcionario_id, unidade_id, hora_entrada, hora_saida, id_biometrico, data_hora } = req.body;
+
+    // Validação para garantir que todos os campos necessários estão presentes
+    if (!funcionario_id || !unidade_id || !hora_entrada || !hora_saida || !id_biometrico || !data_hora) {
+        return res.status(400).json({ error: 'Todos os campos são obrigatórios (funcionario_id, unidade_id, hora_entrada, hora_saida, id_biometrico, data_hora)' });
+    }
+
+    try {
+        // 1. Obter o funcionário para validar se existe
+        const funcionarioResult = await db.query(
+            `SELECT id FROM funcionarios WHERE id = $1`,
+            [funcionario_id]
+        );
+
+        if (funcionarioResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Funcionário não encontrado' });
+        }
+
+        // 2. Obter a unidade para validar se existe
+        const unidadeResult = await db.query(
+            `SELECT id FROM unidades WHERE id = $1`,
+            [unidade_id]
+        );
+
+        if (unidadeResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Unidade não encontrada' });
+        }
+
+        // 3. Validar e formatar a data_hora para "YYYY-MM-DD"
+        const dataHoraValida = new Date(data_hora);
+        if (isNaN(dataHoraValida)) {
+            return res.status(400).json({ error: 'A data informada é inválida.' });
+        }
+
+        // Formatar para YYYY-MM-DD
+        const ano = dataHoraValida.getFullYear();
+        const mes = String(dataHoraValida.getMonth() + 1).padStart(2, '0'); // Mes começa do 0
+        const dia = String(dataHoraValida.getDate()).padStart(2, '0');
+        const dataFormatada = `${ano}-${mes}-${dia}`;
+
+        // 4. Criar o registro de ponto com a data formatada
+        const result = await db.query(
+            `
+            INSERT INTO Registros_Ponto (funcionario_id, unidade_id, data_hora, hora_entrada, hora_saida, id_biometrico)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING *
+            `,
+            [funcionario_id, unidade_id, dataFormatada, hora_entrada, hora_saida, id_biometrico]
+        );
+
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+},
