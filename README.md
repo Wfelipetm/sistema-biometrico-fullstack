@@ -9,11 +9,7 @@ Um sistema completo para cadastro e autenticação de funcionários utilizando b
 - [Funcionalidades](#funcionalidades)
 - [Pré-requisitos](#pre-requisitos)
 - [Instalação](#instalacao)
-- [Configuração](#configuracao)
-- [Uso](#uso)
-- [Troubleshooting](#troubleshooting)
-- [Contribuição](#contribuicao)
-- [Licença](#licenca)
+
 
 ## 🔍 Visão Geral <a name="visao-geral"></a>
 
