@@ -63,7 +63,7 @@ npm run dev
 ```
 
 Banco de Dados
-Execute os scripts .sql na pasta database/ em seu PostgreSQL local ou servidor.
+Execute os scripts full-schema.sql na pasta database/ em seu PostgreSQL local ou servidor.
 
 ```
 ------
