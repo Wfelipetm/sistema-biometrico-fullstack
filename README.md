@@ -4,22 +4,22 @@ Um sistema completo para cadastro e autenticação de funcionários utilizando b
 
 ## 📋 Índice
 
-- [Visão Geral](#visão-geral)
+- [Visão Geral](#visao-geral)
 - [Arquitetura](#arquitetura)
 - [Funcionalidades](#funcionalidades)
-- [Pré-requisitos](#pré-requisitos)
-- [Instalação](#instalação)
-- [Configuração](#configuração)
+- [Pré-requisitos](#pre-requisitos)
+- [Instalação](#instalacao)
+- [Configuração](#configuracao)
 - [Uso](#uso)
 - [Troubleshooting](#troubleshooting)
-- [Contribuição](#contribuição)
-- [Licença](#licença)
+- [Contribuição](#contribuicao)
+- [Licença](#licenca)
 
-## 🔍 Visão Geral
+## 🔍 Visão Geral <a name="visao-geral"></a>
 
 Este sistema oferece uma solução completa para gerenciamento de ponto eletrônico com autenticação biométrica. Ideal para empresas, instituições educacionais e órgãos públicos que necessitam de controle de acesso seguro e registro de presença confiável.
 
-## 🏗️ Arquitetura
+## 🏗️ Arquitetura <a name="arquitetura"></a>
 
 O sistema é dividido em quatro componentes independentes que se comunicam entre si:
 
@@ -46,7 +46,7 @@ O sistema é dividido em quatro componentes independentes que se comunicam entre
 - Scripts de criação e população inicial
 - Armazenamento seguro de templates biométricos
 
-## ✨ Funcionalidades
+## ✨ Funcionalidades <a name="funcionalidades"></a>
 
 - **Registro biométrico**: Cadastro de impressões digitais de funcionários
 - **Autenticação segura**: Verificação de identidade por biometria
@@ -57,7 +57,7 @@ O sistema é dividido em quatro componentes independentes que se comunicam entre
 - **Múltiplos níveis de acesso**: Administrador, gestor e funcionário
 - **Interface intuitiva**: Design simples e direto para facilitar o uso
 
-## 🔧 Pré-requisitos
+## 🔧 Pré-requisitos <a name="pre-requisitos"></a>
 
 - Python 3.8+ e `pip`
 - Node.js 14+ e `npm`
@@ -66,7 +66,7 @@ O sistema é dividido em quatro componentes independentes que se comunicam entre
 - Leitor biométrico Hamster DX FINGERTECH NITGEN
 - Navegador web moderno (Chrome, Firefox, Edge)
 
-## 📥 Instalação
+## 📥 Instalação <a name="instalacao"></a>
 
 ### 1. Clonar o Repositório
 
