@@ -41,7 +41,6 @@ pip install -r requirements.txt
 python server.py  
 
 
----
 
 ---
 Backend Node.js
