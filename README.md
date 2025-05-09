@@ -27,7 +27,7 @@ Este projeto é um sistema completo para cadastro e autenticação de funcionár
 
 ## Clonar o Repositório
 
-```bash
+
 git clone https://github.com/Wfelipetm/sistema-biometrico-fullstack.git
 
 ---
@@ -81,7 +81,7 @@ Logs e Tratamento de Erros
 Todos os módulos exibem mensagens de erro e status em tempo real no console. Os serviços estão preparados para lidar com falhas de dispositivos, conexão e autenticação.
 
 
-------
+```bash
 
 
 
