@@ -13,9 +13,9 @@ def send_email(subject, recipient, body):
             "body": body
         })
         response.raise_for_status()
-        print(f"✅ E-mail enviado para {recipient}")
+        print(f"E-mail enviado para {recipient}")
     except requests.RequestException as e:
-        print(f"❌ Erro ao enviar e-mail: {e}")
+        print(f"Erro ao enviar e-mail: {e}")
 
 def register_ponto():
     IndexSearch.ClearDB()
