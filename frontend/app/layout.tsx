@@ -9,9 +9,9 @@ import PrivateRoute from "@/components/PrivateRoute";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-	title: "Sistema de Biometria e Controle de Ponto",
+	title: "Sistema de Biometria",
 	description: "Sistema de gerenciamento de ponto biométrico para funcionários",
-	generator: "v0.dev",
+	generator: "codecity",
 };
 
 export default function RootLayout({
