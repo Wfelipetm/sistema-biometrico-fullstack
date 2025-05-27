@@ -65,12 +65,17 @@ export default function Sidebar({ className }: SidebarProps) {
 			href: "/dashboard/relatorios",
 			active: pathname.startsWith("/dashboard/relatorios"),
 		},
-		{
-			label: "Modo Quiosque",
-			icon: Monitor,
-			href: "/dashboard/quiosque",
-			active: pathname.startsWith("/dashboard/quiosque"),
-		},
+		// Apenas para usuários com papel "quiosque"
+		...(user?.papel === "quiosque"
+			? [
+					{
+						label: "Modo Quiosque",
+						icon: Monitor,
+						href: "/dashboard/quiosque",
+						active: pathname.startsWith("/dashboard/quiosque"),
+					},
+				]
+			: []),
 	];
 
 	// Rota de secretarias para administradores

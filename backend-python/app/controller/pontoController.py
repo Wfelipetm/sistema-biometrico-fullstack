@@ -50,9 +50,16 @@ def register_ponto():
         if not user_data:
             return jsonify({"message": "Usuário não encontrado no banco de dados."}), 404
 
+       # ...
         funcionario_id, user_name, cpf, unidade_id, matricula, cargo, id_biometrico, email = user_data
         data_atual = datetime.now().date()
 
+        # Buscando o nome da unidade
+        cursor.execute("SELECT nome FROM unidades WHERE id = %s", (unidade_id,))
+        unidade_row = cursor.fetchone()
+        unidade_nome = unidade_row[0] if unidade_row else "Unidade Desconhecida"
+
+        # Verifica se está de férias
         cursor.execute("""
             SELECT data_inicio, data_fim FROM ferias 
             WHERE funcionario_id = %s AND data_inicio <= %s AND data_fim >= %s
@@ -62,6 +69,7 @@ def register_ponto():
         if ferias_data:
             return jsonify({"message": "Funcionario de férias, você não pode registrar o ponto!"}), 400
 
+        # Último ponto do dia
         cursor.execute("""
             SELECT id, hora_entrada, hora_saida FROM registros_ponto 
             WHERE funcionario_id = %s AND DATE(data_hora) = %s 
@@ -72,13 +80,21 @@ def register_ponto():
         data_hora = datetime.now()
         hora_entrada = None
         hora_saida = None
+        mensagem = ""
 
         if not ultimo_ponto:
+            # Registro de entrada
             hora_entrada = data_hora.strftime("%H:%M:%S")
             cursor.execute("""
                 INSERT INTO registros_ponto (funcionario_id, unidade_id, data_hora, hora_entrada, hora_saida, id_biometrico)
                 VALUES (%s, %s, %s, %s, %s, %s)
             """, (funcionario_id, unidade_id, data_hora, hora_entrada, hora_saida, id_biometrico))
+
+            mensagem = (
+                        f"Registro de entrada realizado com sucesso na unidade: {unidade_nome}\n"
+                        f"Comprovante enviado para o e-mail {email}"
+                    )
+
 
             send_email(
                 subject="Registro de Entrada - Ponto Registrado",
@@ -98,17 +114,20 @@ def register_ponto():
                         Atenciosamente,
                         Prefeitura de Itaguaí
                         """
-
             )
 
         elif ultimo_ponto[1] is not None and ultimo_ponto[2] is None:
+            # Registro de saída
             hora_saida = data_hora.strftime("%H:%M:%S")
             cursor.execute("""
                 UPDATE registros_ponto
                 SET hora_saida = %s
                 WHERE id = %s
             """, (hora_saida, ultimo_ponto[0]))
-
+            mensagem = (
+                        f"Registro de saida realizado com sucesso na unidade: {unidade_nome}\n"
+                        f"Comprovante enviado para o e-mail {email}"
+                    )
             send_email(
                 subject="Registro de Saída - Ponto Registrado",
                 recipient=email,
@@ -127,9 +146,7 @@ def register_ponto():
                         Atenciosamente,
                         Prefeitura de Itaguaí
                         """
-
             )
-
         else:
             return jsonify({"message": f"Você já bateu seu ponto de saída hoje ({data_atual.strftime('%d/%m/%Y')})."}), 400
 
@@ -138,7 +155,7 @@ def register_ponto():
         conn.close()
 
         return jsonify({
-            "message": f"User identified: {user_name} (ID: {id_biometrico})",
+            "message": mensagem,
             "cpf": cpf,
             "cargo": cargo,
             "unidade_id": unidade_id,
@@ -150,6 +167,3 @@ def register_ponto():
                 "id_biometrico": id_biometrico
             }
         }), 200
-
-    else:
-        return jsonify({"message": "Usuário não identificado"}), 404

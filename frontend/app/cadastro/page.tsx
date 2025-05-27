@@ -123,7 +123,7 @@ export default function CadastroPage() {
 			senha,
 			secretaria_id: secretariaId,
 			unidade_id: unidadeId,
-			papel: "gestor",
+			papel: "quiosque",
 		};
 
 		console.log("Dados enviados:", payload);
