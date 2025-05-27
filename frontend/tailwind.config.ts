@@ -20,6 +20,17 @@ const config = {
     },
     extend: {
       colors: {
+        '10': '#349FED',
+				'30': '#E8E9EC',
+				'60': '#F4F4F5',
+				hover: '#349FED',
+				second10: '#0266AF',
+				TitleText: '#375582',
+				Description: '#707D91',
+				iconColor: '#0266AF',
+				bg60: '#E2E4EE',
+				primary10: '#0266AF',
+				primary30: '#375582',
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

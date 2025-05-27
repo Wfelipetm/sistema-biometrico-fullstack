@@ -7,14 +7,16 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, User, Eye, EyeOff, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { api } from "@/lib/api";
 import { registrarLog } from "@/utils/logger"; // ajuste o caminho conforme sua estrutura
 import type { AxiosError } from "axios";
+import Image from "next/image";
 
 export default function LoginPage() {
 	const [email, setEmail] = useState("");
+	const [showPassword, setShowPassword] = useState(false);
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
@@ -42,7 +44,7 @@ export default function LoginPage() {
 				try {
 					const user = JSON.parse(decodeURIComponent(userCookie.split("=")[1]));
 					papel = user.papel;
-				} catch {}
+				} catch { }
 			}
 			if (papel === "gestor") {
 				window.location.href = "/dashboard/unidades";
@@ -128,18 +130,10 @@ export default function LoginPage() {
 	}
 
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
+		<div className="min-h-screen flex items-center justify-center bg-bg60 dark:bg-gray-900 px-4">
 			<div className="w-full max-w-sm space-y-8">
-				<div className="text-center">
-					<h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-						Sistema de Biometria
-					</h1>
-					<p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-						Faça login para acessar o sistema
-					</p>
-				</div>
 
-				<div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+				<div className=" p-6 rounded-lg shadow-sm bg-white/50  border-2 border-white py-10">
 					<form onSubmit={handleSubmit} className="space-y-5">
 						{error && (
 							<Alert variant="destructive" className="py-2">
@@ -147,6 +141,21 @@ export default function LoginPage() {
 								<AlertDescription>{error}</AlertDescription>
 							</Alert>
 						)}
+						<Image
+							width={300}
+							height={300}
+							alt="Logo Prefeitura Municipal de Itaguaí"
+							src={"/images/smctic.png"}
+							className="mx-auto"
+						/>
+						<div className="text-center">
+							{/* <h1 className="font-bold text-2xl text-primary30 dark:text-white">
+								Biometria
+							</h1> */}
+							{/* <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+								Faça login para acessar o sistema
+							</p> */}
+						</div>
 
 						<div className="space-y-2">
 							<Label htmlFor="email">Email</Label>
@@ -161,7 +170,7 @@ export default function LoginPage() {
 							/>
 						</div>
 
-						<div className="space-y-2">
+						<div className="space-y-2 relative w-full">
 							<div className="flex items-center justify-between">
 								<Label htmlFor="password">Senha</Label>
 								<Link
@@ -173,16 +182,32 @@ export default function LoginPage() {
 							</div>
 							<Input
 								id="password"
-								type="password"
+								type={showPassword ? "text" : "password"}
 								value={password}
 								onChange={(e) => setPassword(e.target.value)}
 								required
 								className="h-10"
 							/>
+							<button
+								type="button"
+								onClick={() => setShowPassword(!showPassword)}
+								className="absolute right-4 top-9 -translate-y-1/2 text-gray-500 focus:outline-none"
+							>
+								{showPassword ? (
+									<EyeOff className="w-5 h-5" />
+								) : (
+									<Eye className="w-5 h-5" />
+								)}
+							</button>
 						</div>
 
-						<Button type="submit" className="w-full h-10" disabled={loading}>
-							{loading ? "Entrando..." : "Entrar"}
+						<Button
+							type="submit"
+							size="lg"
+							className={`w-full my-5 mt-20 ${loading ? "bg-green-500" : ""}`}
+							disabled={loading}
+						>
+							{loading ? <Loader2 className="animate-spin w-5 h-5" /> : "Entrar"}
 						</Button>
 
 						<div className="text-center text-sm">
@@ -210,7 +235,7 @@ export default function LoginPage() {
 				</div>
 
 				<div className="text-center text-xs text-gray-500 dark:text-gray-400">
-					© 2025 Sistema de Biometria
+					© {new Date().getFullYear()} Sistema de Biometria
 				</div>
 			</div>
 		</div>
