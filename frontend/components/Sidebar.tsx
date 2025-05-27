@@ -74,24 +74,24 @@ export default function Sidebar({ className }: SidebarProps) {
 	];
 
 	// Rota de secretarias para administradores
-	if (isAdmin) {
-		routes.splice(1, 0, {
-			label: "Secretarias",
-			icon: FileText,
-			href: "/dashboard/secretarias",
-			active: pathname.startsWith("/dashboard/secretarias"),
-		});
-	}
+	// if (isAdmin) {
+	// 	routes.splice(1, 0, {
+	// 		label: "Secretarias",
+	// 		icon: FileText,
+	// 		href: "/dashboard/secretarias",
+	// 		active: pathname.startsWith("/dashboard/secretarias"),
+	// 	});
+	// }
 
-	// Rota de usuários apenas para administradores
-	if (isAdmin) {
-		routes.push({
-			label: "Usuários",
-			icon: UserCog,
-			href: "/dashboard/usuarios",
-			active: pathname.startsWith("/dashboard/usuarios"),
-		});
-	}
+	// // Rota de usuários apenas para administradores
+	// if (isAdmin) {
+	// 	routes.push({
+	// 		label: "Usuários",
+	// 		icon: UserCog,
+	// 		href: "/dashboard/usuarios",
+	// 		active: pathname.startsWith("/dashboard/usuarios"),
+	// 	});
+	// }
 
 	return (
 		<div

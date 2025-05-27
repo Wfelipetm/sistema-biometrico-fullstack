@@ -34,6 +34,7 @@ import {
 	YAxis,
 } from "recharts";
 import type { TooltipProps } from "recharts";
+import { withAuth } from "@/components/com-autenticacao-dashboard";
 
 type Unidade = {
 	id: string;
@@ -136,7 +137,7 @@ const TooltipPersonalizado = ({
 	return null;
 };
 
-export default function DashboardPage() {
+function DashboardPage() {
 	const { user } = useAuth();
 	const [stats, setStats] = useState<SecretariaStats>({
 		unidades: [],
@@ -490,3 +491,4 @@ export default function DashboardPage() {
 		</div>
 	);
 }
+export default withAuth(DashboardPage, ["admin"]); // exemplo com papéis permitidos
