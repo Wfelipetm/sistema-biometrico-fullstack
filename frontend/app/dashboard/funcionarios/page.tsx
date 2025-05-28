@@ -163,8 +163,10 @@ export default function FuncionariosPage() {
 						Gerencie os funcionários da {user?.secretaria_nome || "secretaria"}
 					</p>
 				</div>
-				<Button onClick={() => setShowCadastroModal(true)}>
-					<Plus className="mr-2 h-4 w-4" /> Novo Funcionário
+				<Button
+				className="text-white dark:bg-white dark:text-black"
+				onClick={() => setShowCadastroModal(true)}>
+					<Plus className="mr-2 h-4 w-4 " /> Novo Funcionário
 				</Button>
 			</div>
 

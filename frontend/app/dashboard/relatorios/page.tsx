@@ -137,7 +137,7 @@ export default function RelatoriosPage() {
 
 				<CardContent className="space-y-6">
 					{/* Form */}
-					<div className="grid gap-4 md:grid-cols-4">
+					<div className="grid gap-5 items-center md:grid-cols-4">
 						<FuncionarioSearch
 							funcionarios={funcionariosParaPesquisa}
 							selectedFuncionario={selectedFuncionario}
@@ -154,11 +154,11 @@ export default function RelatoriosPage() {
 							onAnoChange={setAno}
 						/>
 
-						<div className="flex items-end">
+						<div className="flex justify-center md:justify-end mt-5">
 							<Button
 								onClick={handleGerarRelatorio}
 								disabled={!isFormValid || loadingPDF}
-								className="w-full"
+								className="w-80 text-white dark:bg-white dark:text-black"
 								size="default"
 							>
 								{loadingPDF ? (

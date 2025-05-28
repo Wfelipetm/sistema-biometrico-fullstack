@@ -263,7 +263,9 @@ export default function RegistrosPage() {
 					{/* <Button variant="outline" onClick={() => {}}>
 						<FileDown className="mr-2 h-4 w-4" /> Exportar
 					</Button> */}
-					<Button onClick={handleEscolhaRegistro}>
+					<Button
+					className="text-white dark:bg-white dark:text-black"
+					onClick={handleEscolhaRegistro}>
 						<Plus className="mr-2 h-4 w-4" /> Novo Registro
 					</Button>
 				</div>

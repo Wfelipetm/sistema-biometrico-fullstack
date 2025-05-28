@@ -18,13 +18,14 @@ import {
 	Monitor,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useState } from "react";
 
-interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export default function Sidebar({ className }: SidebarProps) {
 	const pathname = usePathname();
 	const { user } = useAuth();
-
+	const [secretariaNome, setSecretariaNome] = useState<string>("");
 	const isAdmin = user?.papel === "admin";
 	const isGestor = user?.papel === "gestor";
 	const isQuiosque = pathname.startsWith("/dashboard/quiosque");
@@ -33,13 +34,13 @@ export default function Sidebar({ className }: SidebarProps) {
 		// Só mostra "Secretaria" se NÃO for gestor
 		...(!isGestor
 			? [
-					{
-						label: "Secretaria",
-						icon: LayoutDashboard,
-						href: "/dashboard",
-						active: pathname === "/dashboard",
-					},
-				]
+				{
+					label: "Secretaria",
+					icon: LayoutDashboard,
+					href: "/dashboard",
+					active: pathname === "/dashboard",
+				},
+			]
 			: []),
 		{
 			label: "Unidade",
@@ -68,13 +69,13 @@ export default function Sidebar({ className }: SidebarProps) {
 		// Apenas para usuários com papel "quiosque"
 		...(user?.papel === "quiosque"
 			? [
-					{
-						label: "Modo Quiosque",
-						icon: Monitor,
-						href: "/dashboard/quiosque",
-						active: pathname.startsWith("/dashboard/quiosque"),
-					},
-				]
+				{
+					label: "Modo Quiosque",
+					icon: Monitor,
+					href: "/dashboard/quiosque",
+					active: pathname.startsWith("/dashboard/quiosque"),
+				},
+			]
 			: []),
 	];
 
@@ -108,13 +109,13 @@ export default function Sidebar({ className }: SidebarProps) {
 		>
 			{!isQuiosque && (
 				<>
-					<div className="py-4 px-3 flex items-center border-b h-16">
+					<div className="py-4 px-3 flex items-center border-b h-24">
 						<Link
 							href={isGestor ? "/dashboard/unidades" : "/dashboard"}
-							className="flex items-center gap-2 font-semibold"
+							className="flex items-center gap-1 font-semibold"
 						>
-							<Home className="h-5 w-5" />
-							<span>Biometria Saúde</span>
+							<Home className="h-5 w-9" />
+							<span>Sistema de Biometria</span>
 						</Link>
 					</div>
 					<ScrollArea className="flex-1 py-2">
@@ -137,8 +138,9 @@ export default function Sidebar({ className }: SidebarProps) {
 						</nav>
 					</ScrollArea>
 					<div className="mt-auto p-4 border-t">
-						<p className="text-xs text-muted-foreground">
-							© 2025 Sistema de Biometria
+						<p className="text-xs text-muted-foreground text-center">
+							© 2025 Sistema de Biometria.
+							Desenvolvido por SMCTIC.
 						</p>
 					</div>
 				</>

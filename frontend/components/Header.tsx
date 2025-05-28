@@ -17,6 +17,9 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Sidebar from "./Sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import ModalSenhaAdmin from "@/components/modal-senha-quiosque";
+import logoDark from '../public/images/regua-logo-itaguai_dark.png';
+import logoLight from '../public/images/regua-logo-itaguai_light.png';
+import Image from "next/image";
 
 export default function Header() {
 	const { user, logout } = useAuth();
@@ -46,25 +49,35 @@ export default function Header() {
 	};
 
 	return (
-		<header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-			<Sheet>
-				<SheetTrigger asChild>
-					<Button variant="outline" size="icon" className="md:hidden">
-						<Menu className="h-5 w-5" />
-						<span className="sr-only">Toggle Menu</span>
-					</Button>
-				</SheetTrigger>
-				<SheetContent side="left" className="p-0">
-					<Sidebar />
-				</SheetContent>
-			</Sheet>
-
-			<div className="flex-1">
-				<h1 className="text-lg font-semibold md:text-xl">
-					Sistema de Biometria
-				</h1>
+		<header className="sticky top-0 z-10 flex h-24 items-center border-b bg-background px-4 md:px-6">
+			{/* Esquerda: menu */}
+			<div className="flex items-center md:hidden">
+				<Sheet>
+					<SheetTrigger asChild>
+						<Button variant="outline" size="icon" className="md:hidden">
+							<Menu className="h-5 w-5" />
+							<span className="sr-only">Toggle Menu</span>
+						</Button>
+					</SheetTrigger>
+					<SheetContent side="left" className="p-0">
+						<Sidebar />
+					</SheetContent>
+				</Sheet>
 			</div>
 
+			{/* Centro: logo */}
+			<div className="flex flex-1 justify-center">
+				<Image
+					src={theme === "light" ? logoLight : logoDark}
+					alt="Logo Prefeitura Itaguaí"
+					width={550}
+					height={40}
+					className="object-contain"
+					priority
+				/>
+			</div>
+
+			{/* Direita: botões e avatar */}
 			<div className="flex items-center gap-2">
 				<Button
 					variant="outline"
@@ -126,5 +139,6 @@ export default function Header() {
 				/>
 			</div>
 		</header>
+
 	);
 }
