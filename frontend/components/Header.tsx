@@ -47,17 +47,19 @@ export default function Header() {
 
 	return (
 		<header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-			<Sheet>
-				<SheetTrigger asChild>
-					<Button variant="outline" size="icon" className="md:hidden">
-						<Menu className="h-5 w-5" />
-						<span className="sr-only">Toggle Menu</span>
-					</Button>
-				</SheetTrigger>
-				<SheetContent side="left" className="p-0">
-					<Sidebar />
-				</SheetContent>
-			</Sheet>
+			{user.papel !== "quiosque" && (
+				<Sheet>
+					<SheetTrigger asChild>
+						<Button variant="outline" size="icon" className="md:hidden">
+							<Menu className="h-5 w-5" />
+							<span className="sr-only">Toggle Menu</span>
+						</Button>
+					</SheetTrigger>
+					<SheetContent side="left" className="p-0">
+						<Sidebar />
+					</SheetContent>
+				</Sheet>
+			)}
 
 			<div className="flex-1">
 				<h1 className="text-lg font-semibold md:text-xl">
@@ -92,10 +94,10 @@ export default function Header() {
 						<DropdownMenuContent align="end">
 							<DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
 							<DropdownMenuSeparator />
-							<DropdownMenuItem>
+							{/* <DropdownMenuItem>
 								<User className="mr-2 h-4 w-4" />
 								<span>Perfil</span>
-							</DropdownMenuItem>
+							</DropdownMenuItem> */}
 							<DropdownMenuSeparator />
 							<DropdownMenuItem onClick={logout}>
 								<LogOut className="mr-2 h-4 w-4" />
