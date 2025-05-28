@@ -118,13 +118,15 @@ export default function ModalEditarUnidade({
 							className="hidden"
 							onChange={handleFileChange}
 						/>
-						{previewUrl && (
-							<img
-								src={previewUrl}
-								alt="Preview"
-								className="mt-2 h-32 rounded object-cover border shadow"
-							/>
-						)}
+						<img
+							src={
+								unidade.foto
+									? `http://biometrico.itaguai.rj.gov.br:3001/uploads/${unidade.foto}?t=${Date.now()}`
+									: "/placeholder-image.png"
+							}
+							alt={unidade.nome}
+							className="w-full h-48 rounded-md object-cover border shadow"
+						/>
 					</div>
 
 					<div className="flex justify-end">

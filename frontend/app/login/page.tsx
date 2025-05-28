@@ -184,9 +184,9 @@ export default function LoginPage() {
 								<Label htmlFor="password">Senha</Label>
 								<Link
 									href="/recuperar-senha"
-									className="text-xs text-white hover:underline"
+									className="text-xs text-white underline hover:font-bold"
 								>
-									Esqueceu?
+									Esqueceu a senha?
 								</Link>
 							</div>
 							<Input
