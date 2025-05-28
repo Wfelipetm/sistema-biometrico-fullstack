@@ -329,7 +329,9 @@ export default function RegistrosPage() {
 											<TableHead>Data</TableHead>
 											<TableHead>Entrada</TableHead>
 											<TableHead>Saída</TableHead>
-											<TableHead className="text-right">Ações</TableHead>
+											{user?.papel !== "gestor" && (
+												<TableHead className="text-right">Ações</TableHead>
+											)}
 										</TableRow>
 									</TableHeader>
 									<TableBody>
@@ -345,35 +347,40 @@ export default function RegistrosPage() {
 													</TableCell>
 													<TableCell>{registro.hora_entrada || "-"}</TableCell>
 													<TableCell>{registro.hora_saida || "-"}</TableCell>
-													<TableCell className="text-right">
-														<div className="flex justify-end gap-2">
-															<Button
-																variant="ghost"
-																size="icon"
-																onClick={() =>
-																	router.push(
-																		`/dashboard/registros/editar/${registro.id}`,
-																	)
-																}
-															>
-																<Edit className="h-4 w-4" />
-																<span className="sr-only">Editar</span>
-															</Button>
-															<Button
-																variant="ghost"
-																size="icon"
-																onClick={() => handleDelete(registro.id)}
-															>
-																<Trash2 className="h-4 w-4" />
-																<span className="sr-only">Excluir</span>
-															</Button>
-														</div>
-													</TableCell>
+													{user?.papel !== "gestor" && (
+														<TableCell className="text-right">
+															<div className="flex justify-end gap-2">
+																<Button
+																	variant="ghost"
+																	size="icon"
+																	onClick={() =>
+																		router.push(
+																			`/dashboard/registros/editar/${registro.id}`,
+																		)
+																	}
+																>
+																	<Edit className="h-4 w-4" />
+																	<span className="sr-only">Editar</span>
+																</Button>
+																<Button
+																	variant="ghost"
+																	size="icon"
+																	onClick={() => handleDelete(registro.id)}
+																>
+																	<Trash2 className="h-4 w-4" />
+																	<span className="sr-only">Excluir</span>
+																</Button>
+															</div>
+														</TableCell>
+													)}
 												</TableRow>
 											))
 										) : (
 											<TableRow>
-												<TableCell colSpan={6} className="h-24 text-center">
+												<TableCell
+													colSpan={user?.papel !== "gestor" ? 6 : 5}
+													className="h-24 text-center"
+												>
 													Nenhum registro encontrado.
 												</TableCell>
 											</TableRow>
