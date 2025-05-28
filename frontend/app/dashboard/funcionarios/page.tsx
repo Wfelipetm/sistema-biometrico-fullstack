@@ -30,7 +30,8 @@ import {
 	ChevronRight,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import CadastroFuncionarioModal from "@/components/CadastroFuncionarioModal"; // ajuste o caminho se necessário
+import ModalEditarFuncionario from "@/components/modal-editar-funcionario";
+import CadastroFuncionarioModal from "@/components/CadastroFuncionarioModal";
 
 type Funcionario = {
 	id: string;
@@ -49,52 +50,56 @@ export default function FuncionariosPage() {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [currentPage, setCurrentPage] = useState(1);
 	const [showCadastroModal, setShowCadastroModal] = useState(false);
+	const [showEditarModal, setShowEditarModal] = useState(false);
+	const [funcionarioSelecionado, setFuncionarioSelecionado] =
+		useState<Funcionario | null>(null);
 	const itemsPerPage = 10;
 	const router = useRouter();
 	const { user } = useAuth();
 
-	useEffect(() => {
-		const fetchFuncionarios = async () => {
-			try {
-				if (!user) {
-					setLoading(false);
-					return;
-				}
-
-				let url = "";
-
-				if (user.papel === "gestor" && user.unidade_id) {
-					url = `http://biometrico.itaguai.rj.gov.br:3001/unid/${user.unidade_id}/funcionarios`;
-				} else if (user.secretaria_id) {
-					url = `http://biometrico.itaguai.rj.gov.br:3001/secre/${user.secretaria_id}/funcionarios`;
-				} else {
-					setLoading(false);
-					return;
-				}
-
-				const response = await fetch(url);
-				if (!response.ok) throw new Error("Falha ao buscar funcionários");
-
-				let data: Funcionario[] = await response.json();
-
-				// Busca o nome da unidade pelo id e preenche para gestor
-				if (user.papel === "gestor" && user.unidade_id) {
-					const unidadeResp = await api.get(`/unid/unidade/${user.unidade_id}`);
-					const unidadeNome = unidadeResp.data?.nome || "";
-					data = data.map((func) => ({
-						...func,
-						unidade_nome: unidadeNome,
-					}));
-				}
-
-				setFuncionarios(data);
-			} catch (error) {
-				console.error("Erro ao buscar funcionários:", error);
-			} finally {
+	const fetchFuncionarios = async () => {
+		setLoading(true);
+		try {
+			if (!user) {
 				setLoading(false);
+				return;
 			}
-		};
 
+			let url = "";
+
+			if (user.papel === "gestor" && user.unidade_id) {
+				url = `http://biometrico.itaguai.rj.gov.br:3001/unid/${user.unidade_id}/funcionarios`;
+			} else if (user.secretaria_id) {
+				url = `http://biometrico.itaguai.rj.gov.br:3001/secre/${user.secretaria_id}/funcionarios`;
+			} else {
+				setLoading(false);
+				return;
+			}
+
+			const response = await fetch(url);
+			if (!response.ok) throw new Error("Falha ao buscar funcionários");
+
+			let data: Funcionario[] = await response.json();
+
+			if (user.papel === "gestor" && user.unidade_id) {
+				const unidadeResp = await api.get(`/unid/unidade/${user.unidade_id}`);
+				const unidadeNome = unidadeResp.data?.nome || "";
+				data = data.map((func) => ({
+					...func,
+					unidade_nome: unidadeNome,
+				}));
+			}
+
+			setFuncionarios(data);
+		} catch (error) {
+			console.error("Erro ao buscar funcionários:", error);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	useEffect(() => {
 		fetchFuncionarios();
 	}, [user]);
 
@@ -107,6 +112,21 @@ export default function FuncionariosPage() {
 				console.error("Erro ao excluir funcionário:", error);
 			}
 		}
+	};
+
+	const abrirModalEditar = (funcionario: Funcionario) => {
+		setFuncionarioSelecionado(funcionario);
+		setShowEditarModal(true);
+	};
+
+	const fecharModalEditar = () => {
+		setShowEditarModal(false);
+		setFuncionarioSelecionado(null);
+	};
+
+	const handleAtualizarSucesso = () => {
+		// Recarrega a lista após editar
+		fetchFuncionarios();
 	};
 
 	const filteredFuncionarios = funcionarios.filter(
@@ -236,16 +256,13 @@ export default function FuncionariosPage() {
 													</TableCell>
 
 													<TableCell>{funcionario.matricula || "-"}</TableCell>
+
 													<TableCell className="text-right">
 														<div className="flex justify-end gap-2">
 															<Button
 																variant="ghost"
 																size="icon"
-																onClick={() =>
-																	router.push(
-																		`/dashboard/funcionarios/editar/${funcionario.id}`,
-																	)
-																}
+																onClick={() => abrirModalEditar(funcionario)}
 															>
 																<Edit className="h-4 w-4" />
 																<span className="sr-only">Editar</span>
@@ -265,7 +282,10 @@ export default function FuncionariosPage() {
 										})
 									) : (
 										<TableRow>
-											<TableCell colSpan={6} className="h-24 text-center">
+											<TableCell
+												colSpan={7}
+												className="text-center font-medium text-muted-foreground"
+											>
 												Nenhum funcionário encontrado.
 											</TableCell>
 										</TableRow>
@@ -275,48 +295,66 @@ export default function FuncionariosPage() {
 						</div>
 					)}
 				</CardContent>
+				<CardFooter>
+					<div className="flex items-center justify-between">
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => changePage(currentPage - 1)}
+							disabled={currentPage === 1}
+						>
+							<ChevronLeft className="mr-2 h-4 w-4" /> Anterior
+						</Button>
 
-				{!loading && filteredFuncionarios.length > 0 && (
-					<CardFooter className="flex justify-between items-center border-t px-6 py-4">
-						<div className="text-sm text-muted-foreground">
-							Mostrando {startIndex + 1}-
-							{Math.min(endIndex, filteredFuncionarios.length)} de{" "}
-							{filteredFuncionarios.length} funcionários
-						</div>
-						<div className="flex items-center space-x-2">
-							<Button
-								variant="outline"
-								size="icon"
-								onClick={() => changePage(currentPage - 1)}
-								disabled={currentPage === 1}
-							>
-								<ChevronLeft className="h-4 w-4" />
-							</Button>
-							{generatePaginationButtons().map((page) => (
+						<div className="flex gap-2">
+							{generatePaginationButtons().map((pageNumber) => (
 								<Button
-									key={page}
-									variant={currentPage === page ? "default" : "outline"}
+									key={pageNumber}
+									variant={pageNumber === currentPage ? "default" : "outline"}
 									size="sm"
-									onClick={() => changePage(page)}
-									className="w-8 h-8 p-0"
+									onClick={() => changePage(pageNumber)}
 								>
-									{page}
+									{pageNumber}
 								</Button>
 							))}
-							<Button
-								variant="outline"
-								size="icon"
-								onClick={() => changePage(currentPage + 1)}
-								disabled={currentPage === totalPages}
-							>
-								<ChevronRight className="h-4 w-4" />
-							</Button>
 						</div>
-					</CardFooter>
-				)}
+
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => changePage(currentPage + 1)}
+							disabled={currentPage === totalPages}
+						>
+							Próximo <ChevronRight className="ml-2 h-4 w-4" />
+						</Button>
+					</div>
+				</CardFooter>
 			</Card>
 
-			{/* MODAL DE CADASTRO */}
+			{/* Modal Editar Funcionário */}
+			{funcionarioSelecionado && (
+				<ModalEditarFuncionario
+					open={showEditarModal}
+					onOpenChange={setShowEditarModal}
+					funcionario={{
+						id: funcionarioSelecionado.id,
+						nome: funcionarioSelecionado.nome,
+						cpf: funcionarioSelecionado.cpf,
+						cargo: funcionarioSelecionado.cargo,
+						data_admissao: funcionarioSelecionado.data_admissao || "",
+						unidade_id: "", // ajuste aqui se tiver unidade_id
+						matricula: funcionarioSelecionado.matricula
+							? funcionarioSelecionado.matricula.toString()
+							: "",
+						tipo_escala: "", // ajuste se tiver
+						telefone: "", // ajuste se tiver
+					}}
+					onSuccess={() => {
+						fecharModalEditar();
+						handleAtualizarSucesso();
+					}}
+				/>
+			)}
 			{showCadastroModal && (
 				<CadastroFuncionarioModal
 					open={showCadastroModal}
