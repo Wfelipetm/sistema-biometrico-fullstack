@@ -226,7 +226,9 @@ export default function FuncionariosPage() {
 										<TableHead>Cargo</TableHead>
 										<TableHead>Unidade</TableHead>
 										<TableHead>Matrícula</TableHead>
-										<TableHead className="text-right">Ações</TableHead>
+										{user?.papel !== "gestor" && (
+											<TableHead className="text-right">Ações</TableHead>
+										)}
 									</TableRow>
 								</TableHeader>
 
@@ -248,42 +250,42 @@ export default function FuncionariosPage() {
 													<TableCell className="font-medium">
 														{nome} {sobrenome}
 													</TableCell>
-
 													<TableCell>{funcionario.cpf || "-"}</TableCell>
 													<TableCell>{funcionario.cargo}</TableCell>
 													<TableCell>
 														{funcionario.unidade_nome || "-"}
 													</TableCell>
-
 													<TableCell>{funcionario.matricula || "-"}</TableCell>
 
-													<TableCell className="text-right">
-														<div className="flex justify-end gap-2">
-															<Button
-																variant="ghost"
-																size="icon"
-																onClick={() => abrirModalEditar(funcionario)}
-															>
-																<Edit className="h-4 w-4" />
-																<span className="sr-only">Editar</span>
-															</Button>
-															<Button
-																variant="ghost"
-																size="icon"
-																onClick={() => handleDelete(funcionario.id)}
-															>
-																<Trash2 className="h-4 w-4" />
-																<span className="sr-only">Excluir</span>
-															</Button>
-														</div>
-													</TableCell>
+													{user?.papel !== "gestor" && (
+														<TableCell className="text-right">
+															<div className="flex justify-end gap-2">
+																<Button
+																	variant="ghost"
+																	size="icon"
+																	onClick={() => abrirModalEditar(funcionario)}
+																>
+																	<Edit className="h-4 w-4" />
+																	<span className="sr-only">Editar</span>
+																</Button>
+																<Button
+																	variant="ghost"
+																	size="icon"
+																	onClick={() => handleDelete(funcionario.id)}
+																>
+																	<Trash2 className="h-4 w-4" />
+																	<span className="sr-only">Excluir</span>
+																</Button>
+															</div>
+														</TableCell>
+													)}
 												</TableRow>
 											);
 										})
 									) : (
 										<TableRow>
 											<TableCell
-												colSpan={7}
+												colSpan={user?.papel !== "gestor" ? 7 : 6}
 												className="text-center font-medium text-muted-foreground"
 											>
 												Nenhum funcionário encontrado.
@@ -295,40 +297,44 @@ export default function FuncionariosPage() {
 						</div>
 					)}
 				</CardContent>
-				<CardFooter>
-					<div className="flex items-center justify-between">
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => changePage(currentPage - 1)}
-							disabled={currentPage === 1}
-						>
-							<ChevronLeft className="mr-2 h-4 w-4" /> Anterior
-						</Button>
-
-						<div className="flex gap-2">
-							{generatePaginationButtons().map((pageNumber) => (
+				{!loading && filteredFuncionarios.length > 0 && (
+					<CardFooter className="flex justify-between items-center border-t px-6 py-4">
+						<div className="text-sm text-muted-foreground">
+							Mostrando {startIndex + 1}-
+							{Math.min(endIndex, filteredFuncionarios.length)} de{" "}
+							{filteredFuncionarios.length} funcionários
+						</div>
+						<div className="flex items-center space-x-2">
+							<Button
+								variant="outline"
+								size="icon"
+								onClick={() => changePage(currentPage - 1)}
+								disabled={currentPage === 1}
+							>
+								<ChevronLeft className="h-4 w-4" />
+							</Button>
+							{generatePaginationButtons().map((page) => (
 								<Button
-									key={pageNumber}
-									variant={pageNumber === currentPage ? "default" : "outline"}
+									key={page}
+									variant={currentPage === page ? "default" : "outline"}
 									size="sm"
-									onClick={() => changePage(pageNumber)}
+									onClick={() => changePage(page)}
+									className="w-8 h-8 p-0"
 								>
-									{pageNumber}
+									{page}
 								</Button>
 							))}
+							<Button
+								variant="outline"
+								size="icon"
+								onClick={() => changePage(currentPage + 1)}
+								disabled={currentPage === totalPages}
+							>
+								<ChevronRight className="h-4 w-4" />
+							</Button>
 						</div>
-
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => changePage(currentPage + 1)}
-							disabled={currentPage === totalPages}
-						>
-							Próximo <ChevronRight className="ml-2 h-4 w-4" />
-						</Button>
-					</div>
-				</CardFooter>
+					</CardFooter>
+				)}
 			</Card>
 
 			{/* Modal Editar Funcionário */}
