@@ -144,9 +144,16 @@ export default function LoginPage() {
 						<Image
 							width={300}
 							height={300}
-							alt="Logo Prefeitura Municipal de Itaguaí"
-							src={"/images/smctic.png"}
-							className="mx-auto"
+							alt="Logo Prefeitura Municipal de Itaguaí - Light"
+							src="/images/smctic_light_mode.png"
+							className="mx-auto block dark:hidden"
+						/>
+						<Image
+							width={300}
+							height={300}
+							alt="Logo Prefeitura Municipal de Itaguaí - Dark"
+							src="/images/smctic_dark_mode.png"
+							className="mx-auto hidden dark:block"
 						/>
 						<div className="text-center">
 							{/* <h1 className="font-bold text-2xl text-primary30 dark:text-white">
@@ -166,8 +173,10 @@ export default function LoginPage() {
 								value={email}
 								onChange={(e) => setEmail(e.target.value)}
 								required
-								className="h-10"
+								className="h-10 bg-white dark:bg-white/50 dark:border dark:border-white text-black dark:text-black placeholder-gray-500 dark:placeholder-white"
 							/>
+
+
 						</div>
 
 						<div className="space-y-2 relative w-full">
@@ -175,7 +184,7 @@ export default function LoginPage() {
 								<Label htmlFor="password">Senha</Label>
 								<Link
 									href="/recuperar-senha"
-									className="text-xs text-primary hover:underline"
+									className="text-xs text-white hover:underline"
 								>
 									Esqueceu?
 								</Link>
@@ -186,8 +195,9 @@ export default function LoginPage() {
 								value={password}
 								onChange={(e) => setPassword(e.target.value)}
 								required
-								className="h-10"
+								className="h-10 bg-white dark:bg-white/50 dark:border dark:border-white text-black dark:text-black placeholder-gray-500"
 							/>
+
 							<button
 								type="button"
 								onClick={() => setShowPassword(!showPassword)}
@@ -204,13 +214,17 @@ export default function LoginPage() {
 						<Button
 							type="submit"
 							size="lg"
-							className={`w-full my-5 mt-20 ${loading ? "bg-green-500" : ""}`}
+							className={`w-full my-5 mt-20 ${loading ? "bg-green-500 text-white"
+								:
+								"bg-primary10 text-white dark:bg-gray-900 dark:text-white"}`}
 							disabled={loading}
 						>
 							{loading ? <Loader2 className="animate-spin w-5 h-5" /> : "Entrar"}
 						</Button>
 
-						<div className="text-center text-sm">
+
+
+						{/* <div className="text-center text-sm">
 							<span className="text-gray-500 dark:text-gray-400">
 								Não tem uma conta?{" "}
 							</span>
@@ -220,11 +234,11 @@ export default function LoginPage() {
 							>
 								Cadastre-se
 							</Link>
-						</div>
+						</div> */}
 					</form>
 				</div>
 
-				<div className="text-center">
+				{/* <div className="text-center">
 					<Button
 						variant="ghost"
 						onClick={handleVisitanteClick}
@@ -232,10 +246,13 @@ export default function LoginPage() {
 					>
 						Acessar como visitante
 					</Button>
-				</div>
+				</div> */}
 
-				<div className="text-center text-xs text-gray-500 dark:text-gray-400">
-					© {new Date().getFullYear()} Sistema de Biometria
+				<div className="text-center text-base text-gray-500 dark:text-white">
+					© {new Date().getFullYear()} Sistema de Biometria.
+					<p>
+						Desenvolvido por SMCTIC.
+					</p>
 				</div>
 			</div>
 		</div>
