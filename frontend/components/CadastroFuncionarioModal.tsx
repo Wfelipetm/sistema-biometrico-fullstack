@@ -38,11 +38,14 @@ type ModalCadastroFuncionariosProps = {
 };
 
 const ESCALAS = [
+	{ value: "8h", label: "8h" },
+	{ value: "12h", label: "12h" },
+	{ value: "16h", label: "16h" },
+	{ value: "24h", label: "24h" },
 	{ value: "12x36", label: "12x36" },
-	{ value: "24x48", label: "24x48" },
-	{ value: "5x2", label: "5x2" },
-	{ value: "6x1", label: "6x1" },
-	{ value: "Comercial", label: "Comercial" },
+	{ value: "24x72", label: "24x72" },
+	{ value: "32h", label: "32h" },
+	{ value: "20h", label: "20h" },
 ];
 
 export default function ModalCadastroFuncionarios({
@@ -198,12 +201,6 @@ export default function ModalCadastroFuncionarios({
 						</Alert>
 					)}
 
-					<LabelInput
-						label="Nome Completo"
-						value={nome}
-						onChange={setNome}
-						required
-					/>
 					<LabelInput label="CPF" value={cpf} onChange={setCpf} required />
 					<LabelInput
 						label="Cargo"
@@ -215,6 +212,11 @@ export default function ModalCadastroFuncionarios({
 						label="Matrícula"
 						value={matricula}
 						onChange={setMatricula}
+					/>
+					<LabelInput
+						label="Telefone"
+						value={telefone}
+						onChange={setTelefone}
 					/>
 
 					{/* Escala como dropdown */}
