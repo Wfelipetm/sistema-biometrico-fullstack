@@ -221,17 +221,17 @@ export default function ModalCadastroFuncionarios({
 
 					{/* Escala como dropdown */}
 					<div className="grid gap-2">
-						<Label>Tipo de Escala</Label>
+						<Label className="text-black dark:text-white">Tipo de Escala</Label>
 						<Select value={tipoEscala} onValueChange={setTipoEscala} required>
-							<SelectTrigger>
+							<SelectTrigger className="text-black dark:text-white dark:border dark:border-white placeholder-gray-500 dark:placeholder-white">
 								<SelectValue placeholder="Selecione a escala" />
 							</SelectTrigger>
-							<SelectContent>
+							<SelectContent className="bg-white dark:bg-gray-900 text-black dark:text-white border dark:border-white">
 								{ESCALAS.map((escala) => (
 									<SelectItem
 										key={escala.value}
 										value={escala.value}
-										className="text-white"
+										className="hover:bg-gray-100 dark:hover:bg-white/10"
 									>
 										{escala.label}
 									</SelectItem>
@@ -240,44 +240,40 @@ export default function ModalCadastroFuncionarios({
 						</Select>
 					</div>
 
+
 					{/* Unidade como dropdown */}
 					<div className="grid gap-2">
-						<Label>Unidade</Label>
+						<Label className="text-black dark:text-white">Unidade</Label>
 						<Select value={unidadeId} onValueChange={setUnidadeId} required>
-							<SelectTrigger className="text-white">
-								<SelectValue
-									placeholder="Selecione uma unidade"
-									className="text-white"
-								/>
+							<SelectTrigger className="text-black dark:text-white dark:border dark:border-white">
+								<SelectValue placeholder="Selecione uma unidade" />
 							</SelectTrigger>
-							<SelectContent>
+							<SelectContent className="bg-white text-black dark:bg-gray-900 dark:text-white dark:border dark:border-white">
 								{user?.papel === "gestor" && user.unidade_id
 									? unidades
-											.filter(
-												(unidade) =>
-													String(unidade.id) === String(user.unidade_id),
-											)
-											.map((unidade) => (
-												<SelectItem
-													key={unidade.id}
-													value={unidade.id}
-													className="text-white"
-												>
-													{unidade.nome}
-												</SelectItem>
-											))
-									: unidades.map((unidade) => (
+										.filter((unidade) => String(unidade.id) === String(user.unidade_id))
+										.map((unidade) => (
 											<SelectItem
 												key={unidade.id}
 												value={unidade.id}
-												className="text-white"
+												className="hover:bg-gray-100 dark:hover:bg-white/10"
 											>
 												{unidade.nome}
 											</SelectItem>
-										))}
+										))
+									: unidades.map((unidade) => (
+										<SelectItem
+											key={unidade.id}
+											value={unidade.id}
+											className="hover:bg-gray-100 dark:hover:bg-white/10"
+										>
+											{unidade.nome}
+										</SelectItem>
+									))}
 							</SelectContent>
 						</Select>
 					</div>
+
 					<div className="grid gap-2">
 						<Label>Data de Admissão</Label>
 						<Input
