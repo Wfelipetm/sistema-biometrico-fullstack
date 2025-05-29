@@ -32,6 +32,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import ModalCadastroUnidade from "@/components/ModalCadastroUnidade";
 import ModalEditarUnidade from "@/components/ModalEditarUnidade";
+import { toast } from "sonner";
 
 type Unidade = {
 	id: string;
@@ -142,7 +143,6 @@ export default function UnidadesPage() {
 					>
 						<Plus className="mr-2 h-4 w-4" /> Nova Unidade
 					</Button>
-
 				)}
 			</div>
 

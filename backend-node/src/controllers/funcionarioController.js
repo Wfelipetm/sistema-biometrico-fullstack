@@ -199,6 +199,10 @@ module.exports = {
     }
   },
 
+
+
+
+
   async excluirFuncionario(req, res) {
     const { id } = req.params;
     try {

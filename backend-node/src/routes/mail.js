@@ -37,10 +37,19 @@ router.post('/enviar-email', async (req, res) => {
 
         await transporter.sendMail(mailOptions);
 
-        console.log(`E-mail enviado para ${recipient}`);
+        const dataHora = new Date().toLocaleString('pt-BR', {
+            timeZone: 'America/Sao_Paulo'
+        });
+
+        console.log(`[${dataHora}] E-mail enviado com sucesso para ${recipient}`);
         res.status(200).json({ message: 'E-mail enviado com sucesso!' });
+
     } catch (error) {
-        console.error(`Erro ao enviar e-mail: ${error.message}`);
+        const dataHora = new Date().toLocaleString('pt-BR', {
+            timeZone: 'America/Sao_Paulo'
+        });
+
+        console.error(`[${dataHora}] Erro ao enviar e-mail: ${error.message}`);
         res.status(500).json({ message: 'Erro ao enviar e-mail', error: error.message });
     }
 });
