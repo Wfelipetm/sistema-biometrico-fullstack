@@ -2,7 +2,7 @@ const { Pool } = require('pg');
 
 // Configuração da conexão com o PostgreSQL
 const pool = new Pool({
-  host: 'localhost',
+  host: '10.200.200.22',
   port: 5432,
   database: 'biometrico',
   user: 'postgres',
