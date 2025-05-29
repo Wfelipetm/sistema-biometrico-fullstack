@@ -296,6 +296,7 @@ export default function UnidadesPage() {
 								size="icon"
 								onClick={() => changePage(currentPage - 1)}
 								disabled={currentPage === 1}
+								className="border-gray-300 text-black dark:text-white dark:border-white hover:bg-gray-100 dark:hover:bg-gray-700"
 							>
 								<ChevronLeft className="h-4 w-4" />
 							</Button>
@@ -306,7 +307,10 @@ export default function UnidadesPage() {
 									variant={currentPage === page ? "default" : "outline"}
 									size="sm"
 									onClick={() => changePage(page)}
-									className="w-8 h-8 p-0"
+									className={`w-8 h-8 p-0 ${currentPage === page
+											? "bg-blue-600 text-white dark:bg-white dark:text-black"
+											: "border-gray-300 text-black dark:text-white dark:border-white hover:bg-gray-100 dark:hover:bg-gray-700"
+										}`}
 								>
 									{page}
 								</Button>
@@ -317,10 +321,12 @@ export default function UnidadesPage() {
 								size="icon"
 								onClick={() => changePage(currentPage + 1)}
 								disabled={currentPage === totalPages}
+								className="border-gray-300 text-black dark:text-white dark:border-white hover:bg-gray-100 dark:hover:bg-gray-700"
 							>
 								<ChevronRight className="h-4 w-4" />
 							</Button>
 						</div>
+
 					</CardFooter>
 				)}
 			</Card>

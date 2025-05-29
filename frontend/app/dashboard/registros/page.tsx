@@ -392,51 +392,54 @@ export default function RegistrosPage() {
 							</div>
 
 							{totalPages > 1 && (
-								<div className="flex items-center justify-end space-x-2 space-y-4">
-									<Button
-										variant="outline"
-										size="sm"
-										disabled={currentPage === 1}
-										onClick={() => setCurrentPage(currentPage - 1)}
-										className="mt-4"
-									>
-										<ChevronLeft className="h-4 w-4" />
-									</Button>
+  <div className="flex items-center justify-end space-x-2 space-y-4">
+    <Button
+      variant="outline"
+      size="sm"
+      disabled={currentPage === 1}
+      onClick={() => setCurrentPage(currentPage - 1)}
+      className="mt-4 border-gray-300 text-black dark:text-white dark:border-white"
+    >
+      <ChevronLeft className="h-4 w-4" />
+    </Button>
 
-									{Array.from({ length: Math.min(5, totalPages) }).map(
-										(_, index) => {
-											const pageNumber =
-												currentPage <= totalPages - 4
-													? currentPage + index
-													: totalPages - 4 + index;
+    {Array.from({ length: Math.min(5, totalPages) }).map((_, index) => {
+      const pageNumber =
+        currentPage <= totalPages - 4
+          ? currentPage + index
+          : totalPages - 4 + index;
 
-											if (pageNumber > totalPages) return null;
+      if (pageNumber > totalPages) return null;
 
-											return (
-												<Button
-													key={pageNumber}
-													variant={
-														pageNumber === currentPage ? "default" : "outline"
-													}
-													size="sm"
-													onClick={() => setCurrentPage(pageNumber)}
-												>
-													{pageNumber}
-												</Button>
-											);
-										},
-									)}
+      return (
+        <Button
+          key={pageNumber}
+          variant={pageNumber === currentPage ? "default" : "outline"}
+          size="sm"
+          onClick={() => setCurrentPage(pageNumber)}
+          className={`${
+            pageNumber === currentPage
+              ? "bg-blue-600 text-white dark:bg-white dark:text-black"
+              : "border-gray-300 text-black dark:text-white dark:border-white"
+          }`}
+        >
+          {pageNumber}
+        </Button>
+      );
+    })}
 
-									<Button
-										variant="outline"
-										size="sm"
-										disabled={currentPage === totalPages}
-										onClick={() => setCurrentPage(currentPage + 1)}
-									>
-										<ChevronRight className="h-4 w-4" />
-									</Button>
-								</div>
-							)}
+    <Button
+      variant="outline"
+      size="sm"
+      disabled={currentPage === totalPages}
+      onClick={() => setCurrentPage(currentPage + 1)}
+      className="border-gray-300 text-black dark:text-white dark:border-white"
+    >
+      <ChevronRight className="h-4 w-4" />
+    </Button>
+  </div>
+)}
+
 						</>
 					)}
 				</CardContent>

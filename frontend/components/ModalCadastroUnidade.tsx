@@ -151,13 +151,20 @@ export default function ModalCadastroUnidade({
 								onOpenChange(false);
 							}}
 							disabled={loading}
+							className="border-gray-300 text-black dark:text-white dark:border-white hover:bg-gray-100 dark:hover:bg-gray-700"
 						>
 							Cancelar
 						</Button>
-						<Button type="submit" disabled={loading}>
+
+						<Button
+							type="submit"
+							disabled={loading}
+							className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+						>
 							{loading ? "Salvando..." : "Salvar"}
 						</Button>
 					</div>
+
 				</form>
 			</DialogContent>
 		</Dialog>

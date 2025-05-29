@@ -184,8 +184,8 @@ export default function FuncionariosPage() {
 					</p>
 				</div>
 				<Button
-				className="text-white dark:bg-white dark:text-black"
-				onClick={() => setShowCadastroModal(true)}>
+					className="text-white dark:bg-white dark:text-black"
+					onClick={() => setShowCadastroModal(true)}>
 					<Plus className="mr-2 h-4 w-4 " /> Novo Funcionário
 				</Button>
 			</div>
@@ -243,9 +243,10 @@ export default function FuncionariosPage() {
 											return (
 												<TableRow key={funcionario.id}>
 													<TableCell>
-														<div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">
+														<div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white dark:bg-white dark:text-black">
 															{`${nome.charAt(0)}${sobrenome.charAt(0)}`.toUpperCase()}
 														</div>
+
 													</TableCell>
 													<TableCell className="font-medium">
 														{nome} {sobrenome}
@@ -310,29 +311,40 @@ export default function FuncionariosPage() {
 								size="icon"
 								onClick={() => changePage(currentPage - 1)}
 								disabled={currentPage === 1}
+								className="border-gray-300 text-black dark:text-white dark:border-white"
 							>
 								<ChevronLeft className="h-4 w-4" />
 							</Button>
+
 							{generatePaginationButtons().map((page) => (
 								<Button
 									key={page}
 									variant={currentPage === page ? "default" : "outline"}
 									size="sm"
 									onClick={() => changePage(page)}
-									className="w-8 h-8 p-0"
+									className={`
+									w-8 h-8 p-0
+									${currentPage === page
+											? 'bg-blue-600 text-white dark:bg-white dark:text-black'
+											: 'border-gray-300 text-black dark:text-white dark:border-white'
+										}
+									`}
 								>
 									{page}
 								</Button>
 							))}
+
 							<Button
 								variant="outline"
 								size="icon"
 								onClick={() => changePage(currentPage + 1)}
 								disabled={currentPage === totalPages}
+								className="border-gray-300 text-black dark:text-white dark:border-white"
 							>
 								<ChevronRight className="h-4 w-4" />
 							</Button>
 						</div>
+
 					</CardFooter>
 				)}
 			</Card>
