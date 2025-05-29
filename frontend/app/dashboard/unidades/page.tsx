@@ -88,14 +88,29 @@ export default function UnidadesPage() {
 	}, [fetchUnidades]);
 
 	const handleDelete = async (id: string) => {
-		if (window.confirm("Tem certeza que deseja excluir esta unidade?")) {
-			try {
-				await api.delete(`/unid/unidade/${id}`);
-				setUnidades((prev) => prev.filter((unidade) => unidade.id !== id));
-			} catch (error) {
-				console.error("Erro ao excluir unidade:", error);
-			}
-		}
+		toast(
+			"Tem certeza que deseja excluir esta unidade?",
+			{
+				description: "Essa ação é irreversível.",
+				cancel: {
+					label: "Cancelar",
+					onClick: () => { },
+				},
+				action: {
+					label: "Excluir",
+					onClick: async () => {
+						try {
+							await api.delete(`/unid/unidade/${id}`);
+							setUnidades((prev) => prev.filter((unidade) => unidade.id !== id));
+							toast.success("Unidade excluída com sucesso!");
+						} catch (error) {
+							console.error("Erro ao excluir unidade:", error);
+							toast.error("Erro ao excluir unidade.");
+						}
+					},
+				},
+			},
+		);
 	};
 
 	const filteredUnidades = unidades.filter(
