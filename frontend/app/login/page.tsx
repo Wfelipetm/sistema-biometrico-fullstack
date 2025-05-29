@@ -152,7 +152,7 @@ export default function LoginPage() {
 							width={300}
 							height={300}
 							alt="Logo Prefeitura Municipal de Itaguaí - Dark"
-							src="/images/smctic_dark_mode.png"
+							src="/images/smctic_dark_mode2.png"
 							className="mx-auto hidden dark:block"
 						/>
 						<div className="text-center">
