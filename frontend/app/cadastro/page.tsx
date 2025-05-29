@@ -18,6 +18,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import type { AxiosError } from "axios";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type Secretaria = {
 	id: number;
@@ -54,7 +55,7 @@ export default function CadastroPage() {
 		const fetchSecretarias = async () => {
 			try {
 				const response = await fetch(
-					"http://biometrico.itaguai.rj.gov.br:3001/secre",
+					`${API_URL}/secre`,
 				);
 				if (!response.ok) throw new Error("Falha ao buscar secretarias");
 				const data = await response.json();
@@ -79,7 +80,7 @@ export default function CadastroPage() {
 		const fetchUnidades = async () => {
 			try {
 				const response = await fetch(
-					`http://biometrico.itaguai.rj.gov.br:3001/secre/${secretariaId}/unidades`,
+					`${API_URL}/secre/${secretariaId}/unidades`,
 				);
 				if (!response.ok) throw new Error("Falha ao buscar unidades");
 				const data = await response.json();

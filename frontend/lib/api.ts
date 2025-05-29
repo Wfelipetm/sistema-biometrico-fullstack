@@ -1,7 +1,10 @@
 import axios from "axios"
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+
 
 export const api = axios.create({
-  baseURL: "http://biometrico.itaguai.rj.gov.br:3001",
+  baseURL: `${API_URL}`,
 })
 
 // Interceptor para adicionar o token em todas as requisições

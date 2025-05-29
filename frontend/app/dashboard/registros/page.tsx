@@ -34,6 +34,10 @@ import { ptBR } from "date-fns/locale";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import RegistroManualModal from "@/components/ModalRegistroManual";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+
+
 
 type Registro = {
 	id: number;
@@ -72,7 +76,7 @@ export default function RegistrosPage() {
 		setLoading(true);
 		try {
 			const unidadesResponse = await fetch(
-				`http://biometrico.itaguai.rj.gov.br:3001/secre/${user.secretaria_id}/unidades`,
+				`${API_URL}/secre/${user.secretaria_id}/unidades`,
 			);
 
 			if (!unidadesResponse.ok) {

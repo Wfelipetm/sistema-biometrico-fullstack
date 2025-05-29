@@ -25,6 +25,9 @@ import {
 } from "@/components/ui/select";
 import { AlertCircle, ArrowLeft } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+
 
 type Secretaria = {
 	id: string;
@@ -49,7 +52,7 @@ export default function NovoUsuarioPage() {
 			try {
 				// Usando a URL correta para buscar secretarias
 				const response = await fetch(
-					"http://biometrico.itaguai.rj.gov.br:3001/secre",
+					`${API_URL}/secre`,
 				);
 				if (!response.ok) {
 					throw new Error("Falha ao buscar secretarias");

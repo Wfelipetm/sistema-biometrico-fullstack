@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { differenceInDays } from "date-fns";
 import axios from "axios";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type Funcionario = {
 	id: number;
@@ -56,7 +57,7 @@ export default function CadastrarFeriasModal({
 	const carregarFerias = useCallback(async () => {
 		try {
 			const response = await axios.get<{ dados: FeriasItem[] }>(
-				`http://biometrico.itaguai.rj.gov.br:3001/ferias/ferias-por-unidade/${unidadeId}`,
+				`${API_URL}/ferias/ferias-por-unidade/${unidadeId}`,
 			);
 
 			const dadosFerias = response.data.dados ?? [];

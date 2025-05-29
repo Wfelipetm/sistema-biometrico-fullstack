@@ -1,5 +1,4 @@
-// utils/logger.tsx
-
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 export interface LogData {
 	usuario_id?: number | null;
 	acao: string;
@@ -15,7 +14,7 @@ export interface LogData {
 
 export async function registrarLog(logData: LogData): Promise<void> {
 	try {
-		await fetch("http://biometrico.itaguai.rj.gov.br:3001/log/logs", {
+				await fetch(`${API_URL}/log/logs`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
