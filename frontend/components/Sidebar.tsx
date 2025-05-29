@@ -19,11 +19,16 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
+import { useTheme } from "next-themes";
+import logoDark from '../public/images/logo_biometrico_dark4.png';
+import logoLight from '../public/images/logo_biometrico_light4.png';
+import Image from "next/image";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export default function Sidebar({ className }: SidebarProps) {
 	const pathname = usePathname();
+	const { theme, setTheme } = useTheme();
 	const { user } = useAuth();
 	const [secretariaNome, setSecretariaNome] = useState<string>("");
 	const isAdmin = user?.papel === "admin";
@@ -109,13 +114,23 @@ export default function Sidebar({ className }: SidebarProps) {
 		>
 			{!isQuiosque && (
 				<>
-					<div className="py-4 px-3 flex items-center border-b h-24">
+					<div className="py-4 justify-center flex items-center border-b h-24">
 						<Link
 							href={isGestor ? "/dashboard/unidades" : "/dashboard"}
 							className="flex items-center gap-1 font-semibold"
 						>
-							<Home className="h-5 w-9" />
-							<span>Sistema de Biometria</span>
+							<div className="flex flex-1 justify-center">
+								<Image
+									src={theme === "light" ? logoLight : logoDark}
+									alt="Logo Prefeitura Itaguaí"
+									width={200}
+									height={40}
+									className="object-contain"
+									priority
+								/>
+							</div>
+							{/* <Home className="h-5 w-9" />
+							<span>Sistema de Biometria</span> */}
 						</Link>
 					</div>
 					<ScrollArea className="flex-1 py-2">
