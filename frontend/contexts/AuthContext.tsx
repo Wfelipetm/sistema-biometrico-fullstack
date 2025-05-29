@@ -9,6 +9,10 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+
+
 
 type User = {
 	id: number;
@@ -67,9 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 			if (usuario.secretaria_id) {
 				try {
-					const secretariaRes = await fetch(
-						`http://biometrico.itaguai.rj.gov.br:3001/secre/${usuario.secretaria_id}`,
-					);
+					const secretariaRes = await fetch(`${API_URL}/secre/${usuario.secretaria_id}`);
 					if (secretariaRes.ok) {
 						const secretariaData = await secretariaRes.json();
 						usuario.secretaria_nome = secretariaData.nome;

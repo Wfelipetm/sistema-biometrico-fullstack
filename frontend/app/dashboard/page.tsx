@@ -35,6 +35,10 @@ import {
 } from "recharts";
 import type { TooltipProps } from "recharts";
 import { withAuth } from "@/components/com-autenticacao-dashboard";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+
+
 
 type Unidade = {
 	id: string;
@@ -155,12 +159,12 @@ function DashboardPage() {
 		if (!user?.secretaria_id || !user?.unidade_id) return;
 
 		const urls = {
-			unidades: `http://biometrico.itaguai.rj.gov.br:3001/secre/${user.secretaria_id}/unidades`,
-			funcionarios: `http://biometrico.itaguai.rj.gov.br:3001/secre/${user.secretaria_id}/total-funcionarios`,
-			funcionariosRecentes: `http://biometrico.itaguai.rj.gov.br:3001/unid/${user.unidade_id}/funcionarios`,
-			registrosHoje: `http://biometrico.itaguai.rj.gov.br:3001/secre/reg-hoje-por-secre/${user.secretaria_id}`,
-			registrosMes: `http://biometrico.itaguai.rj.gov.br:3001/secre/${user.secretaria_id}/registros-mensais`,
-			registrosDiarios: `http://biometrico.itaguai.rj.gov.br:3001/secre/grafico-reg-secre-mes-todo/${user.secretaria_id}`,
+			unidades: `${API_URL}/secre/${user.secretaria_id}/unidades`,
+			funcionarios: `${API_URL}/secre/${user.secretaria_id}/total-funcionarios`,
+			funcionariosRecentes: `${API_URL}/unid/${user.unidade_id}/funcionarios`,
+			registrosHoje: `${API_URL}/secre/reg-hoje-por-secre/${user.secretaria_id}`,
+			registrosMes: `${API_URL}/secre/${user.secretaria_id}/registros-mensais`,
+			registrosDiarios: `${API_URL}/secre/grafico-reg-secre-mes-todo/${user.secretaria_id}`,
 		};
 		const fetchAll = async () => {
 			setLoading(true);

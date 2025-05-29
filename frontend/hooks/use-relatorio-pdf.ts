@@ -6,6 +6,8 @@ import autoTable from "jspdf-autotable"
 import { toast } from "sonner"
 import { getDay, format as formatDateFns, parse } from "date-fns"
 import { ptBR } from "date-fns/locale"
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 
 type RegistroRelatorio = {
   data: string
@@ -34,7 +36,7 @@ type RelatorioData = {
   }
 }
 
-const API_BASE_URL = "http://biometrico.itaguai.rj.gov.br:3001"
+const API_BASE_URL = `${API_URL}`
 function decimalToHHMMSS(decimalStr: string): string {
   const decimal = parseFloat(decimalStr)
   if (isNaN(decimal)) return "--"

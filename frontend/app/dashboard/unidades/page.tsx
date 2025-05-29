@@ -33,6 +33,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import ModalCadastroUnidade from "@/components/ModalCadastroUnidade";
 import ModalEditarUnidade from "@/components/ModalEditarUnidade";
 import { toast } from "sonner";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+
 
 type Unidade = {
 	id: string;
@@ -227,7 +230,7 @@ export default function UnidadesPage() {
 													<img
 														src={
 															unidade.foto
-																? `http://biometrico.itaguai.rj.gov.br:3001/uploads/${unidade.foto}?t=${Date.now()}`
+																? `${API_URL}/uploads/${unidade.foto}?t=${Date.now()}`
 																: "/placeholder-image.png"
 														}
 														alt={unidade.nome}

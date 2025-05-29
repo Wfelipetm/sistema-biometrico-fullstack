@@ -29,6 +29,9 @@ type Secretaria = {
 	created_at?: string;
 	updated_at?: string;
 };
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+
 
 export default function SecretariasPage() {
 	const [secretarias, setSecretarias] = useState<Secretaria[]>([]);
@@ -41,7 +44,7 @@ export default function SecretariasPage() {
 			try {
 				// Usando a URL correta para buscar secretarias
 				const response = await fetch(
-					"http://biometrico.itaguai.rj.gov.br:3001/secre",
+					`${API_URL}/secre`,
 				);
 				if (!response.ok) {
 					throw new Error("Falha ao buscar secretarias");

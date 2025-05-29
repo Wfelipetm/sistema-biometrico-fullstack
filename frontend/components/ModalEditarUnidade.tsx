@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
-
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 interface ModalEditarUnidadeProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
@@ -121,7 +121,7 @@ export default function ModalEditarUnidade({
 						<img
 							src={
 								unidade.foto
-									? `http://biometrico.itaguai.rj.gov.br:3001/uploads/${unidade.foto}?t=${Date.now()}`
+									? `${API_URL}/uploads/${unidade.foto}?t=${Date.now()}`
 									: "/placeholder-image.png"
 							}
 							alt={unidade.nome}

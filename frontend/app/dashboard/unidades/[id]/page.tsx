@@ -19,6 +19,10 @@ import type { NameType } from "recharts/types/component/DefaultTooltipContent";
 import type { ValueType } from "tailwindcss/types/config";
 import { Button } from "@/components/ui/button";
 import CadastrarFeriasModal from "@/components/CadastrarFeriasModal";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+
+
 
 type Unidade = {
 	id: string;
@@ -259,7 +263,7 @@ export default function UnidadeDetalhesPage() {
 						{/* Imagem da unidade */}
 						<div className="flex-shrink-0">
 							<img
-								src={`http://biometrico.itaguai.rj.gov.br:3001/uploads/${unidade.foto}`}
+								src={`${API_URL}/uploads/${unidade.foto}`}
 								alt={unidade.nome}
 								className="w-full h-[400px] rounded-md object-contain border shadow"
 							/>

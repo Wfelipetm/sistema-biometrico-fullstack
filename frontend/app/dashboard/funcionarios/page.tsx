@@ -32,6 +32,9 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import ModalEditarFuncionario from "@/components/modal-editar-funcionario";
 import CadastroFuncionarioModal from "@/components/CadastroFuncionarioModal";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+
 
 type Funcionario = {
 	id: string;
@@ -68,9 +71,9 @@ export default function FuncionariosPage() {
 			let url = "";
 
 			if (user.papel === "gestor" && user.unidade_id) {
-				url = `http://biometrico.itaguai.rj.gov.br:3001/unid/${user.unidade_id}/funcionarios`;
+				url = `${API_URL}/unid/${user.unidade_id}/funcionarios`;
 			} else if (user.secretaria_id) {
-				url = `http://biometrico.itaguai.rj.gov.br:3001/secre/${user.secretaria_id}/funcionarios`;
+				url = `${API_URL}/secre/${user.secretaria_id}/funcionarios`;
 			} else {
 				setLoading(false);
 				return;
