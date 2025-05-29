@@ -15,7 +15,7 @@ const jwt = require('./src/middleware/authMiddleware');
 //const cleanUpServiceFuncionarios = require('./src/service/limpezaFotos/servicodeLimpezaImg');
 const cleanUpServiceUnidades = require('./src/service/limpezaFotos/servicodeLimpezaImgUnidade');
 const cors = require('cors')
-const path = require('path');
+const path = require('node:path');
 
 
 dotenv.config()
