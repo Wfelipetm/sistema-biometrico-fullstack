@@ -204,14 +204,16 @@ export default function ModalCadastroManual({
 							}}
 							autoComplete="off"
 							required
+							className="text-black dark:text-white bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
 						/>
+
 						{showDropdown && filteredFuncionarios.length > 0 && (
-							<ul className="absolute z-50 bg-white border border-gray-300 max-h-60 overflow-auto w-full rounded-md mt-1 shadow-lg">
+							<ul className="absolute z-50 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 max-h-60 overflow-auto w-full rounded-md mt-1 shadow-lg">
 								{filteredFuncionarios.map((f) => (
 									<li key={f.id}>
 										<button
 											type="button"
-											className="w-full text-left px-4 py-2 hover:bg-blue-500 hover:text-white cursor-pointer"
+											className="w-full text-left px-4 py-2 text-black dark:text-white hover:bg-blue-500 hover:text-white dark:hover:bg-gray-700 cursor-pointer"
 											onClick={() => handleFuncionarioSelect(f)}
 										>
 											{f.nome}
@@ -221,6 +223,7 @@ export default function ModalCadastroManual({
 							</ul>
 						)}
 					</div>
+
 
 					<div className="grid gap-2">
 						<Label htmlFor="data">Data</Label>
@@ -264,13 +267,20 @@ export default function ModalCadastroManual({
 								onOpenChange(false);
 							}}
 							disabled={loading}
+							className="border-gray-300 text-black dark:text-white dark:border-white"
 						>
 							Cancelar
 						</Button>
-						<Button type="submit" disabled={loading || !funcionarioId}>
+
+						<Button
+							type="submit"
+							disabled={loading || !funcionarioId}
+							className="bg-blue-600 text-white dark:bg-white dark:text-black"
+						>
 							{loading ? "Salvando..." : "Salvar"}
 						</Button>
 					</div>
+
 				</form>
 			</DialogContent>
 		</Dialog>

@@ -158,7 +158,7 @@ export default function RelatoriosPage() {
 							<Button
 								onClick={handleGerarRelatorio}
 								disabled={!isFormValid || loadingPDF}
-								className="w-80 text-white dark:bg-white dark:text-black"
+								className="w-80 text-white dark:bg-white dark:text-black hover:bg-blue-500 dark:hover:bg-gray-700"
 								size="default"
 							>
 								{loadingPDF ? (
@@ -207,9 +207,11 @@ export default function RelatoriosPage() {
 												variant="outline"
 												size="sm"
 												onClick={() => handleLimparFuncionario(func.id)}
+												className="bg-blue-600 border-gray-300 text-white dark:text-black dark:bg-white dark:border-white hover:bg-gray-100 dark:hover:bg-gray-700"
 											>
 												Limpar
 											</Button>
+
 										</div>
 									</CardContent>
 								</Card>

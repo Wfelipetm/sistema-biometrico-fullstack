@@ -239,12 +239,16 @@ export default function UnidadeDetalhesPage() {
 		<div className="space-y-6">
 			<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 				<div>
-					<h1 className="text-3xl font-bold tracking-tight">....</h1>
+					<h1 className="text-3xl font-bold tracking-tight text-black dark:text-white">Dashboard da Unidade</h1>
 				</div>
-				<Button onClick={() => setShowCadastroFeriasModal(true)}>
+				<Button
+					onClick={() => setShowCadastroFeriasModal(true)}
+					className="bg-blue-600 text-white dark:bg-white dark:text-black hover:bg-blue-700 dark:hover:bg-gray-200"
+				>
 					+ Cadastrar Férias
 				</Button>
 			</div>
+
 			<Card>
 				<CardHeader>
 					<CardTitle>{unidade.nome}</CardTitle>
@@ -305,7 +309,7 @@ export default function UnidadeDetalhesPage() {
 
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 				<Card>
-					<CardHeader className="flex justify-between items-center pb-2">
+					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="text-sm font-medium">
 							Total de Funcionários
 						</CardTitle>
@@ -318,7 +322,7 @@ export default function UnidadeDetalhesPage() {
 				</Card>
 
 				<Card>
-					<CardHeader className="flex justify-between items-center pb-2">
+					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="text-sm font-medium">Presença Hoje</CardTitle>
 						<Calendar className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
@@ -327,8 +331,8 @@ export default function UnidadeDetalhesPage() {
 						<p className="text-xs text-muted-foreground">
 							{stats.totalFuncionarios > 0
 								? Math.round(
-										(stats.presencaHoje / stats.totalFuncionarios) * 100,
-									)
+									(stats.presencaHoje / stats.totalFuncionarios) * 100,
+								)
 								: 0}
 							% de presença
 						</p>
@@ -336,7 +340,7 @@ export default function UnidadeDetalhesPage() {
 				</Card>
 
 				<Card>
-					<CardHeader className="flex justify-between items-center pb-2">
+					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="text-sm font-medium">
 							Férias Agendadas
 						</CardTitle>
@@ -349,7 +353,7 @@ export default function UnidadeDetalhesPage() {
 				</Card>
 
 				<Card>
-					<CardHeader className="flex justify-between items-center pb-2">
+					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="text-sm font-medium">
 							Horas Faltantes
 						</CardTitle>

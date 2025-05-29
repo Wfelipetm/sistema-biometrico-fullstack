@@ -162,10 +162,15 @@ export default function ModalEditarFuncionario({
 					/>
 
 					<div className="flex justify-end">
-						<Button onClick={handleSubmit} disabled={loading}>
-							{loading ? "Salvando..." : "Salvar"}
-						</Button>
-					</div>
+  <Button
+    onClick={handleSubmit}
+    disabled={loading}
+    className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+  >
+    {loading ? "Salvando..." : "Salvar"}
+  </Button>
+</div>
+
 				</div>
 			</DialogContent>
 		</Dialog>

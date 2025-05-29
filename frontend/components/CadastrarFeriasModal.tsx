@@ -188,7 +188,7 @@ export default function CadastrarFeriasModal({
 								id="funcionario-select"
 								value={funcionarioId}
 								onChange={(e) => setFuncionarioId(e.target.value)}
-								className="w-full p-2 border rounded"
+								className="w-full p-2 border border-gray-300 rounded text-black dark:text-white dark:bg-gray-800 dark:border-white focus:outline-none focus:ring-2 focus:ring-blue-500"
 								disabled={isSalvando}
 							>
 								<option value="">Selecione um funcionário</option>
@@ -198,6 +198,7 @@ export default function CadastrarFeriasModal({
 									</option>
 								))}
 							</select>
+
 						</div>
 
 						<div>
@@ -224,11 +225,12 @@ export default function CadastrarFeriasModal({
 
 						<Button
 							onClick={cadastrarFerias}
-							className="bg-blue-600 hover:bg-blue-700 text-white w-full"
+							className="w-full bg-blue-600 text-white hover:bg-blue-700 dark:bg-white dark:text-black dark:hover:bg-gray-200"
 							disabled={isSalvando}
 						>
 							{isSalvando ? "Salvando..." : "Salvar"}
 						</Button>
+
 					</div>
 
 					{/* Lista de Férias Cadastradas */}

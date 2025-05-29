@@ -245,7 +245,7 @@ export default function ModalCadastroFuncionarios({
 					<div className="grid gap-2">
 						<Label className="text-black dark:text-white">Unidade</Label>
 						<Select value={unidadeId} onValueChange={setUnidadeId} required>
-							<SelectTrigger className="text-black dark:text-white dark:border dark:border-white">
+							<SelectTrigger className="text-black dark:text-white dark:border dark:border-white placeholder-gray-500 dark:placeholder-white">
 								<SelectValue placeholder="Selecione uma unidade" />
 							</SelectTrigger>
 							<SelectContent className="bg-white text-black dark:bg-gray-900 dark:text-white dark:border dark:border-white">
@@ -264,11 +264,12 @@ export default function ModalCadastroFuncionarios({
 									: unidades.map((unidade) => (
 										<SelectItem
 											key={unidade.id}
-											value={unidade.id}
+											value={String(unidade.id)} // <-- Garanta que seja string
 											className="hover:bg-gray-100 dark:hover:bg-white/10"
 										>
 											{unidade.nome}
 										</SelectItem>
+
 									))}
 							</SelectContent>
 						</Select>
@@ -290,13 +291,19 @@ export default function ModalCadastroFuncionarios({
 							type="button"
 							onClick={() => onOpenChange(false)}
 							disabled={loading}
+							className="border-gray-300 text-black dark:text-white dark:border-white"
 						>
 							Cancelar
 						</Button>
-						<Button type="submit" disabled={loading}>
+						<Button
+							type="submit"
+							disabled={loading}
+							className="bg-blue-600 text-white dark:bg-white dark:text-black"
+						>
 							{loading ? "Cadastrando..." : "Cadastrar"}
 						</Button>
 					</div>
+
 				</form>
 			</DialogContent>
 		</Dialog>

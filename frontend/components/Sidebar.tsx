@@ -138,10 +138,10 @@ export default function Sidebar({ className }: SidebarProps) {
 						</nav>
 					</ScrollArea>
 					<div className="mt-auto p-4 border-t">
-						<p className="text-xs text-muted-foreground text-center">
-							© 2025 Sistema de Biometria.
-							Desenvolvido por SMCTIC.
+						<p className="text-xs text-center text-gray-500 dark:text-white">
+							© 2025 Sistema de Biometria. Desenvolvido por SMCTIC.
 						</p>
+
 					</div>
 				</>
 			)}
