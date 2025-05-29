@@ -17,8 +17,8 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Sidebar from "./Sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import ModalSenhaAdmin from "@/components/modal-senha-quiosque";
-import logoDark from '../public/images/regua-logo-itaguai_dark.png';
-import logoLight from '../public/images/regua-logo-itaguai_light.png';
+import logoDark from '../public/images/regua-logo-itaguai_dark3.png';
+import logoLight from '../public/images/regua-logo-itaguai_light3.png';
 import Image from "next/image";
 
 export default function Header() {
