@@ -10,7 +10,6 @@ router.get('/registros-ponto', registroPontoController.listarRegistrosPonto);
 
 
 // Rota para levantar horas mensais de um funcionário
-// http://biometrico.itaguai.rj.gov.br:3001/reg/levantamento-horas?funcionario_id=42&ano=2025&mes=03
 router.get('/levantamento-horas', registroPontoController.levantarHorasMensais);
 
 
@@ -23,6 +22,11 @@ router.get('/pontos', registroPontoController.lerPontoUsuario);//só retorna um 
 //Listar registros de ponto (entrada e saída) dos funcionários de uma unidade para um mês e ano específicos. 
 //Ela também inclui funcionários que não possuem registros de ponto para o mês especificado.
 router.get('/pontos-unidade', registroPontoController.listarPontosMesUnidade);
+
+
+
+router.get('/:unidade_id/dia', registroPontoController.getRegistrosDoDia);
+
 
 
 

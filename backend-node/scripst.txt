@@ -81,9 +81,12 @@ http://biometrico.itaguai.rj.gov.br:3000/unid/unidade
 
 EXEMPLO:
 {
-  "nome": "CLINICA DA FAMILIA IBIRAPITANGA",
-  "localizacao": "Av. Visc. de Mauá, S/N - Vila Ibirapitanga, Itaguaí - RJ,"
+  "nome": "Hospital São Francisco Xavier",
+  "localizacao": "Coreto, Itaguaí",
+  "secretaria_id": 1,
+  "foto": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD..."
 }
+
 
 
 

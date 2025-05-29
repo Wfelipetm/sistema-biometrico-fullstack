@@ -8,7 +8,7 @@ const gerarRelatorioPontoRoutes = require('./src/routes/gerarRelatorioPontoRoute
 const feriasRoutes = require('./src/routes/feriasRoutes')
 const mailRoutes = require('./src/routes/mail');
 const secretariasRoutes = require('./src/routes/secretariasRoutes');
-
+const logsRouter = require('./src/routes/logsRoutes')
 
 const dotenv = require("dotenv")
 const jwt = require('./src/middleware/authMiddleware');
@@ -26,8 +26,19 @@ const app = express();
 app.use(cors())
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(bodyParser.json());
+
+// Aplica bodyParser.json() só em métodos com corpo (POST, PUT, PATCH)
+app.use((req, res, next) => {
+  if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
+    bodyParser.json()(req, res, next);
+  } else {
+    next();
+  }
+});
+
+
+
+//rotas
 app.use('/funci', funcionarioRoutes);
 app.use('/reg', registroPontoRoutes);
 // app.use('/reg', jwt.validarToken, registroPontoRoutes);
@@ -35,18 +46,14 @@ app.use('/unid', unidadeRoutes)
 app.use('/auth', authRoutes);
 app.use('/relat', gerarRelatorioPontoRoutes);
 app.use('/relex', feriasRoutes);
-
 // Servindo imagens do diretório como arquivos estáticos
 // app.use('/uploads', express.static(path.join(__dirname, 'upload', 'upFuncionario')));
 app.use('/uploads', express.static(path.join(__dirname, 'upload', 'upUnidade')));
-
-
 app.use('/api', mailRoutes);
-
-
 app.use('/secre', secretariasRoutes);
+app.use('/ferias', feriasRoutes);
 
-
+app.use('/log', logsRouter);
 
 
 

@@ -306,90 +306,78 @@ module.exports = {
                 return res.status(400).json({ error: 'Os parâmetros funcionario_id, ano e mes são obrigatórios.' });
             }
 
-            // Verifica se o funcionário teve férias no mês consultado
-            const feriasQuery = await db.query(
-                `SELECT COUNT(*) AS total
-                 FROM public.ferias
-                 WHERE funcionario_id = $1
-                   AND (
-                       (EXTRACT(YEAR FROM data_inicio) = $2 AND TO_CHAR(data_inicio, 'MM') = $3) OR
-                       (EXTRACT(YEAR FROM data_fim) = $2 AND TO_CHAR(data_fim, 'MM') = $3) OR
-                       (data_inicio <= TO_DATE($2 || '-' || $3 || '-01', 'YYYY-MM-DD') 
-                        AND data_fim >= TO_DATE($2 || '-' || $3 || '-01', 'YYYY-MM-DD'))
-                   );`,
-                [funcionario_id, ano, mes]
-            );
-
-            const estaDeFerias = parseInt(feriasQuery.rows[0].total) > 0;
-
-            // Consulta os registros de ponto do funcionário
             const result = await db.query(
                 `SELECT 
-                    rp.id,
-                    rp.funcionario_id,
-                    f.nome,
-                    f.unidade_id,
-                    f.matricula,
-                    f.tipo_escala,
-                    f.telefone,
-                    f.data_admissao,
-                    f.cargo,
-                    f.cpf,
-                    rp.data_hora,
-                    rp.hora_entrada,
-                    rp.hora_saida,
-                    rp.id_biometrico,
-                    rp.created_at,
-                    rp.updated_at,
-                    rp.horas_normais,
-                    rp.hora_extra,
-                    rp.hora_desconto,
-                    rp.total_trabalhado,
-                    rp.hora_saida_ajustada,
-                    (SELECT SUM(total_trabalhado) 
-                     FROM public.registros_ponto 
-                     WHERE funcionario_id = $1 
-                       AND EXTRACT(YEAR FROM data_hora) = $2 
-                       AND TO_CHAR(data_hora, 'MM') = $3) AS total_trabalhado_mes,
-                    (SELECT SUM(hora_extra) 
-                     FROM public.registros_ponto 
-                     WHERE funcionario_id = $1 
-                       AND EXTRACT(YEAR FROM data_hora) = $2 
-                       AND TO_CHAR(data_hora, 'MM') = $3) AS total_hora_extra_mes,
-                    (SELECT SUM(hora_desconto) 
-                     FROM public.registros_ponto 
-                     WHERE funcionario_id = $1 
-                       AND EXTRACT(YEAR FROM data_hora) = $2 
-                       AND TO_CHAR(data_hora, 'MM') = $3) AS total_hora_desconto_mes
-                FROM public.registros_ponto rp
-                INNER JOIN public.funcionarios f ON rp.funcionario_id = f.id
-                WHERE rp.funcionario_id = $1
-                  AND EXTRACT(YEAR FROM rp.data_hora) = $2
-                  AND TO_CHAR(rp.data_hora, 'MM') = $3 
-                ORDER BY rp.data_hora;`,
+                rp.id,
+                rp.funcionario_id,
+                f.nome,
+                f.unidade_id,
+                f.matricula,
+                f.tipo_escala,
+                f.telefone,
+                f.data_admissao,
+                f.cargo,
+                f.cpf,
+                rp.data_hora,
+                rp.hora_entrada,
+                rp.hora_saida,
+                rp.id_biometrico,
+                rp.created_at,
+                rp.updated_at,
+                rp.horas_normais,
+                rp.hora_extra,
+                rp.hora_desconto,
+                rp.total_trabalhado,
+                rp.hora_saida_ajustada
+            FROM public.registros_ponto rp
+            INNER JOIN public.funcionarios f ON rp.funcionario_id = f.id
+            WHERE rp.funcionario_id = $1
+              AND EXTRACT(YEAR FROM rp.data_hora) = $2
+              AND TO_CHAR(rp.data_hora, 'MM') = $3 
+            ORDER BY rp.data_hora;`,
                 [funcionario_id, ano, mes]
             );
 
             if (result.rows.length === 0) {
-                return res.status(404).json({ message: 'Nenhum registro encontrado para esse período.', status_ferias: estaDeFerias });
+                return res.status(404).json({
+                    message: 'Nenhum registro encontrado para esse período.'
+                });
             }
 
-            // Adiciona a informação de férias ao retorno
-            const response = {
-                status_ferias: estaDeFerias,
-                registros: result.rows,
-                total_trabalhado_mes: result.rows[0].total_trabalhado_mes,
-                total_hora_extra_mes: result.rows[0].total_hora_extra_mes,
-                total_hora_desconto_mes: result.rows[0].total_hora_desconto_mes
-            };
-
-            res.status(200).json(response);
+            res.status(200).json({
+                registros: result.rows
+            });
         } catch (error) {
             res.status(500).json({ error: error.message });
         }
-    }
+    },
 
-    ,
+    // listar registro de ponto do dia por id de unidade 
+    async getRegistrosDoDia(req, res) {
+        const { unidade_id } = req.params;
+
+        if (!unidade_id) {
+            return res.status(400).json({ error: 'unidade_id é obrigatório' });
+        }
+
+        try {
+            const query = `
+          SELECT unidade_id, data_hora
+          FROM registros_ponto
+          WHERE unidade_id = $1
+            AND data_hora >= date_trunc('day', now() AT TIME ZONE 'America/Sao_Paulo')
+            AND data_hora < date_trunc('day', now() AT TIME ZONE 'America/Sao_Paulo') + INTERVAL '1 day'
+          ORDER BY data_hora DESC;
+        `;
+
+            const { rows } = await db.query(query, [unidade_id]);
+
+            return res.status(200).json(rows);
+        } catch (error) {
+            console.error('Erro ao buscar registros:', error);
+            return res.status(500).json({ error: 'Erro interno do servidor' });
+        }
+    },
 
 
 
@@ -424,39 +412,28 @@ module.exports = {
 
 
 
-    //DELETE
-    // Excluir registros de ponto existentes por Mês (DATA).
     async excluirRegistroPonto(req, res) {
-        const { funcionario_id, unidade_id, data } = req.body;
-        if (!data) {
-            return res.status(400).json({ error: 'O campo "data" é obrigatório para excluir registros.' });
+        const { id } = req.params;
+
+        if (!id) {
+            return res.status(400).json({ error: 'ID é obrigatório para exclusão.' });
         }
 
         try {
-            let query = `
-            DELETE FROM Registros_Ponto
-            WHERE DATE(data_hora) = $1
-        `;
-            const params = [data];
-
-            if (funcionario_id) {
-                query += ` AND funcionario_id = $2`;
-                params.push(funcionario_id);
-            }
-            if (unidade_id) {
-                query += ` AND unidade_id = $3`;
-                params.push(unidade_id);
-            }
-            const result = await db.query(query, params);
+            const result = await db.query(
+                `DELETE FROM Registros_Ponto WHERE id = $1`,
+                [id]
+            );
 
             if (result.rowCount === 0) {
-                return res.status(404).json({ error: 'Nenhum registro de ponto encontrado para a data especificada.' });
+                return res.status(404).json({ error: 'Registro não encontrado.' });
             }
 
-            res.status(200).json({ message: 'Registros de ponto excluídos com sucesso' });
+            res.status(200).json({ message: 'Registro excluído com sucesso' });
         } catch (error) {
             res.status(500).json({ error: error.message });
         }
     },
+
 
 };

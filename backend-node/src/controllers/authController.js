@@ -6,8 +6,19 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 // Cadastro de usuário
+
 async function cadastrarUsuario(req, res) {
-    const { nome, email, senha, papel } = req.body;
+    const { nome, email, senha, papel, secretaria_id, unidade_id } = req.body;
+
+    // Verificação se o secretaria_id é válido
+    if (!secretaria_id || isNaN(secretaria_id)) {
+        return res.status(400).json({ error: "Secretaria inválida" });
+    }
+
+    // Verificação se o unidade_id é válido
+    if (!unidade_id || isNaN(unidade_id)) {
+        return res.status(400).json({ error: "Unidade inválida" });
+    }
 
     try {
         const emailCheckQuery = 'SELECT * FROM usuarios WHERE email = $1';
@@ -20,18 +31,29 @@ async function cadastrarUsuario(req, res) {
         const senhaHash = await bcrypt.hash(senha, 10);
 
         const insertQuery = `
-            INSERT INTO usuarios (nome, email, senha, papel)
-            VALUES ($1, $2, $3, $4)
-            RETURNING id, nome, email, papel
+            INSERT INTO usuarios (nome, email, senha, papel, secretaria_id, unidade_id)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING id, nome, email, papel, secretaria_id, unidade_id
         `;
-        const result = await db.query(insertQuery, [nome, email, senhaHash, papel]);
+        const result = await db.query(insertQuery, [nome, email, senhaHash, papel, secretaria_id, unidade_id]);
         const novoUsuario = result.rows[0];
 
-        const token = jwt.sign({ id: novoUsuario.id, papel: novoUsuario.papel }, process.env.SECRET_KEY, { expiresIn: 999999 });
+        const token = jwt.sign(
+            { id: novoUsuario.id, papel: novoUsuario.papel },
+            process.env.SECRET_KEY,
+            { expiresIn: 999999 }
+        );
 
         res.status(201).json({
             token,
-            usuario: { id: novoUsuario.id, nome: novoUsuario.nome, email: novoUsuario.email, papel: novoUsuario.papel },
+            usuario: {
+                id: novoUsuario.id,
+                nome: novoUsuario.nome,
+                email: novoUsuario.email,
+                papel: novoUsuario.papel,
+                secretaria_id: novoUsuario.secretaria_id,
+                unidade_id: novoUsuario.unidade_id
+            },
         });
     } catch (error) {
         console.error('Erro ao cadastrar usuário:', error);
@@ -39,36 +61,50 @@ async function cadastrarUsuario(req, res) {
     }
 }
 
+
 // Login de usuário
 async function loginUsuario(req, res) {
     const { email, senha } = req.body;
 
     try {
-        const userQuery = 'SELECT * FROM usuarios WHERE email = $1';
+        const userQuery = "SELECT * FROM usuarios WHERE email = $1";
         const userResult = await db.query(userQuery, [email]);
 
         if (userResult.rows.length === 0) {
-            return res.status(401).json({ error: 'Credenciais inválidas' });
+            return res.status(401).json({ error: "Credenciais inválidas" });
         }
 
         const usuario = userResult.rows[0];
 
         const senhaCorreta = await bcrypt.compare(senha, usuario.senha);
         if (!senhaCorreta) {
-            return res.status(401).json({ error: 'Credenciais inválidas' });
+            return res.status(401).json({ error: "Credenciais inválidas" });
         }
 
-        const token = jwt.sign({ id: usuario.id, papel: usuario.papel }, process.env.SECRET_KEY, { expiresIn: '1h' });
+        const token = jwt.sign(
+            { id: usuario.id, papel: usuario.papel },
+            process.env.SECRET_KEY,
+            { expiresIn: "1h" },
+        );
 
         res.status(200).json({
             token,
-            usuario: { id: usuario.id, nome: usuario.nome, email: usuario.email, papel: usuario.papel },
+            usuario: {
+                id: usuario.id,
+                nome: usuario.nome,
+                email: usuario.email,
+                papel: usuario.papel,
+                secretaria_id: usuario.secretaria_id || null,
+                unidade_id: usuario.unidade_id || null,
+            },
         });
     } catch (error) {
-        console.error('Erro ao realizar login:', error);
-        res.status(500).json({ error: 'Erro interno do servidor' });
+        console.error("Erro ao realizar login:", error);
+        res.status(500).json({ error: "Erro interno do servidor" });
     }
 }
+
+
 
 
 // Buscar todos os usuários
@@ -143,10 +179,10 @@ async function deletarUsuario(req, res) {
     }
 }
 
-module.exports = { 
-    cadastrarUsuario, 
-    loginUsuario, 
-    atualizarUsuario, 
+module.exports = {
+    cadastrarUsuario,
+    loginUsuario,
+    atualizarUsuario,
     deletarUsuario,
     buscarUsuarios
 };
