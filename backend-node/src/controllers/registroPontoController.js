@@ -384,24 +384,32 @@ module.exports = {
     //PUT
     // Atualizar um registro de ponto existente (hora de entrada ou saída) baseado em data.
     async atualizarRegistroPonto(req, res) {
-        const { funcionario_id, unidade_id, data } = req.body;
+        const { id } = req.params;
         const { hora_entrada, hora_saida } = req.body;
-        if (!funcionario_id || !unidade_id || !data || !hora_entrada || !hora_saida) {
-            return res.status(400).json({ error: 'Todos os campos são obrigatórios (funcionario_id, unidade_id, data, hora_entrada, hora_saida)' });
+
+        if (!id || !hora_entrada || !hora_saida) {
+            return res.status(400).json({ error: 'Campos obrigatórios: id, hora_entrada, hora_saida' });
         }
+
+        // Validação simples para formato HH:mm
+        const horaRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+        if (!horaRegex.test(hora_entrada) || !horaRegex.test(hora_saida)) {
+            return res.status(400).json({ error: 'Formato de hora inválido. Use HH:mm (ex: 09:00)' });
+        }
+
         try {
             const result = await db.query(
                 `
             UPDATE Registros_Ponto
             SET hora_entrada = $1, hora_saida = $2, updated_at = CURRENT_TIMESTAMP
-            WHERE funcionario_id = $3 AND unidade_id = $4 AND DATE(data_hora) = $5
+            WHERE id = $3
             RETURNING *
             `,
-                [hora_entrada, hora_saida, funcionario_id, unidade_id, data]
+                [hora_entrada, hora_saida, id]
             );
 
             if (result.rowCount === 0) {
-                return res.status(404).json({ error: 'Registro de ponto não encontrado' });
+                return res.status(404).json({ error: 'Registro não encontrado' });
             }
 
             res.status(200).json(result.rows[0]);

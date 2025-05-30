@@ -34,6 +34,7 @@ import { ptBR } from "date-fns/locale";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import RegistroManualModal from "@/components/ModalRegistroManual";
+import ModalEditarRegistroPonto from "@/components/modal-editar-registro";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 
@@ -70,6 +71,11 @@ export default function RegistrosPage() {
 	const [currentPage, setCurrentPage] = useState(1);
 	const itemsPerPage = 10;
 	const [showManualModal, setShowManualModal] = useState(false);
+	const [showEditarModal, setShowEditarModal] = useState(false);
+    const [registroParaEditar, setRegistroParaEditar] = useState<Registro | null>(null);
+
+
+
 
 	const fetchRegistros = useCallback(async () => {
 		if (!user?.secretaria_id) return;
@@ -202,6 +208,15 @@ export default function RegistrosPage() {
 		);
 	};
 
+	
+   // Função para abrir o modal de edição
+    const handleEditarRegistro = (registro: Registro) => {
+        setRegistroParaEditar(registro);
+        setShowEditarModal(true);
+    };
+
+	
+	// Função para atualizar a lista de registros após edição
 	const funcionarios = Array.from(
 		new Set(registros.map((r) => r.funcionario_nome)),
 	).filter(Boolean);
@@ -365,17 +380,13 @@ export default function RegistrosPage() {
 														<TableCell className="text-right">
 															<div className="flex justify-end gap-2">
 																<Button
-																	variant="ghost"
-																	size="icon"
-																	onClick={() =>
-																		router.push(
-																			`/dashboard/registros/editar/${registro.id}`,
-																		)
-																	}
-																>
-																	<Edit className="h-4 w-4" />
-																	<span className="sr-only">Editar</span>
-																</Button>
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => handleEditarRegistro(registro)}
+                                                    >
+                                                        <Edit className="h-4 w-4" />
+                                                        <span className="sr-only">Editar</span>
+                                                    </Button>
 																<Button
 																	variant="ghost"
 																	size="icon"
@@ -460,6 +471,20 @@ export default function RegistrosPage() {
 				open={showManualModal}
 				onOpenChange={setShowManualModal}
 			/>
-		</div>
+		 {/* ...existing modals... */}
+            <ModalEditarRegistroPonto
+                open={showEditarModal}
+                onOpenChange={(open) => {
+                    setShowEditarModal(open);
+                    if (!open) setRegistroParaEditar(null);
+                }}
+                registro={registroParaEditar}
+                onAtualizado={() => {
+                    setShowEditarModal(false);
+                    setRegistroParaEditar(null);
+                    fetchRegistros();
+                }}
+            />
+        </div>
 	);
 }

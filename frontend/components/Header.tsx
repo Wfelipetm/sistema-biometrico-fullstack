@@ -69,8 +69,8 @@ export default function Header() {
 				<Image
 					src={theme === "light" ? logoLight : logoDark}
 					alt="Logo Prefeitura Itaguaí"
-					width={550}
-					height={40}
+					
+					style={{ height: 40, width: 550 }} 
 					className="object-contain"
 					priority
 				/>
