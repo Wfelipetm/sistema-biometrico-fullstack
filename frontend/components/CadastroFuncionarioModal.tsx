@@ -226,7 +226,7 @@ export default function ModalCadastroFuncionarios({
 							<SelectTrigger className="text-black dark:text-white dark:border dark:border-white placeholder-gray-500 dark:placeholder-white">
 								<SelectValue placeholder="Selecione a escala" />
 							</SelectTrigger>
-							<SelectContent className="bg-white dark:bg-gray-900 text-black dark:text-white border dark:border-white">
+							<SelectContent className="bg-white dark:bg-gray-900 text-black dark:text-white border ">
 								{ESCALAS.map((escala) => (
 									<SelectItem
 										key={escala.value}
@@ -248,7 +248,7 @@ export default function ModalCadastroFuncionarios({
 							<SelectTrigger className="text-black dark:text-white dark:border dark:border-white placeholder-gray-500 dark:placeholder-white">
 								<SelectValue placeholder="Selecione uma unidade" />
 							</SelectTrigger>
-							<SelectContent className="bg-white text-black dark:bg-gray-900 dark:text-white dark:border dark:border-white">
+							<SelectContent className="bg-white text-black dark:bg-gray-900 dark:text-white dark:border">
 								{user?.papel === "gestor" && user.unidade_id
 									? unidades
 										.filter((unidade) => String(unidade.id) === String(user.unidade_id))
