@@ -122,8 +122,7 @@ export default function Sidebar({ className }: SidebarProps) {
 							<div className="flex flex-1 justify-center">
 								<Image
 									src={theme === "light" ? logoLight : logoDark}
-									alt="Logo Prefeitura Itaguaí"
-									
+									alt="Logo Prefeitura Itaguaí"								
 									style={{ height: 40, width: 200 }}
 									className="object-contain"
 									priority
