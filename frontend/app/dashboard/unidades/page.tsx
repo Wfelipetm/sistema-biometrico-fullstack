@@ -88,14 +88,29 @@ export default function UnidadesPage() {
 	}, [fetchUnidades]);
 
 	const handleDelete = async (id: string) => {
-		if (window.confirm("Tem certeza que deseja excluir esta unidade?")) {
-			try {
-				await api.delete(`/unid/unidade/${id}`);
-				setUnidades((prev) => prev.filter((unidade) => unidade.id !== id));
-			} catch (error) {
-				console.error("Erro ao excluir unidade:", error);
-			}
-		}
+		toast(
+			"Tem certeza que deseja excluir esta unidade?",
+			{
+				description: "Essa ação é irreversível.",
+				cancel: {
+					label: "Cancelar",
+					onClick: () => { },
+				},
+				action: {
+					label: "Excluir",
+					onClick: async () => {
+						try {
+							await api.delete(`/unid/unidade/${id}`);
+							setUnidades((prev) => prev.filter((unidade) => unidade.id !== id));
+							toast.success("Unidade excluída com sucesso!");
+						} catch (error) {
+							console.error("Erro ao excluir unidade:", error);
+							toast.error("Erro ao excluir unidade.");
+						}
+					},
+				},
+			},
+		);
 	};
 
 	const filteredUnidades = unidades.filter(
@@ -200,11 +215,15 @@ export default function UnidadesPage() {
 					) : (
 						<div className="rounded-md border overflow-x-auto">
 							<Table>
+								
 								<TableHeader>
 									<TableRow>
 										<TableHead>Imagem</TableHead>
 										<TableHead>Informações</TableHead>
-										<TableHead className="text-right">Ações</TableHead>
+										{/* Só mostra o cabeçalho de ações se NÃO for gestor */}
+										{user?.papel !== "gestor" && (
+											<TableHead className="text-right">Ações</TableHead>
+										)}
 									</TableRow>
 								</TableHeader>
 								<TableBody>
@@ -212,7 +231,6 @@ export default function UnidadesPage() {
 										currentUnidades.map((unidade) => (
 											<TableRow
 												key={unidade.id}
-												// biome-ignore lint/a11y/useSemanticElements: <explanation>
 												role="button"
 												tabIndex={0}
 												className="cursor-pointer hover:bg-muted transition-colors"
@@ -237,51 +255,53 @@ export default function UnidadesPage() {
 														className="w-60 h-32 rounded-md object-cover border shadow"
 													/>
 												</TableCell>
-
 												<TableCell className="flex flex-col justify-center gap-1 text-base">
 													<span className="font-semibold">{unidade.nome}</span>
 													<span className="text-muted-foreground">
 														{unidade.localizacao}
 													</span>
 												</TableCell>
-
-												<TableCell className="text-right">
-													<div
-														className="flex justify-end gap-2"
-														onClick={(e) => e.stopPropagation()}
-														onKeyDown={(e) => e.stopPropagation()}
-													>
-														<Button
-															variant="ghost"
-															size="icon"
-															onClick={() => {
-																setUnidadeParaEditar(unidade);
-																setIsEditModalOpen(true);
-															}}
+												{/* Só mostra os botões se NÃO for gestor */}
+												{user?.papel !== "gestor" && (
+													<TableCell className="text-right">
+														<div
+															className="flex justify-end gap-2"
+															onClick={(e) => e.stopPropagation()}
+															onKeyDown={(e) => e.stopPropagation()}
 														>
-															<Edit className="h-4 w-4" />
-															<span className="sr-only">Editar</span>
-														</Button>
-														<Button
-															variant="ghost"
-															size="icon"
-															onClick={() => handleDelete(unidade.id)}
-														>
-															<Trash2 className="h-4 w-4" />
-															<span className="sr-only">Excluir</span>
-														</Button>
-													</div>
-												</TableCell>
+															<Button
+																variant="ghost"
+																size="icon"
+																onClick={() => {
+																	setUnidadeParaEditar(unidade);
+																	setIsEditModalOpen(true);
+																}}
+															>
+																<Edit className="h-4 w-4" />
+																<span className="sr-only">Editar</span>
+															</Button>
+															<Button
+																variant="ghost"
+																size="icon"
+																onClick={() => handleDelete(unidade.id)}
+															>
+																<Trash2 className="h-4 w-4" />
+																<span className="sr-only">Excluir</span>
+															</Button>
+														</div>
+													</TableCell>
+												)}
 											</TableRow>
 										))
 									) : (
 										<TableRow>
-											<TableCell colSpan={3} className="h-24 text-center">
+											<TableCell colSpan={user?.papel !== "gestor" ? 3 : 2} className="h-24 text-center">
 												Nenhuma unidade encontrada.
 											</TableCell>
 										</TableRow>
 									)}
 								</TableBody>
+
 							</Table>
 						</div>
 					)}

@@ -176,22 +176,30 @@ export default function RegistrosPage() {
 	};
 
 	const handleDelete = async (id: number) => {
-		toast("Tem certeza que deseja excluir este registro?", {
-			action: {
-				label: "Excluir",
-				onClick: async () => {
-					try {
-						await api.delete(`/reg/registros-ponto/${id}`);
-						setRegistros((old) => old.filter((registro) => registro.id !== id));
-						toast.success("Registro excluído com sucesso!");
-						await fetchRegistros();
-					} catch (error) {
-						console.error("Erro ao excluir registro:", error);
-						toast.error("Erro ao excluir registro.");
-					}
+		toast(
+			"Tem certeza que deseja excluir este registro?",
+			{
+				description: "Essa ação é irreversível.",
+				cancel: {
+					label: "Cancelar",
+					onClick: () => { },
+				},
+				action: {
+					label: "Excluir",
+					onClick: async () => {
+						try {
+							await api.delete(`/reg/registros-ponto/${id}`);
+							setRegistros((old) => old.filter((registro) => registro.id !== id));
+							toast.success("Registro excluído com sucesso!");
+							await fetchRegistros();
+						} catch (error) {
+							console.error("Erro ao excluir registro:", error);
+							toast.error("Erro ao excluir registro.");
+						}
+					},
 				},
 			},
-		});
+		);
 	};
 
 	const funcionarios = Array.from(
@@ -235,8 +243,8 @@ export default function RegistrosPage() {
 	const startPage = Math.floor((currentPage - 1) / pageLimit) * pageLimit + 1;
 	const endPage = Math.min(startPage + pageLimit - 1, totalPages);
 	const registrosOrdenados = [...filteredRegistros].sort(
-		(a, b) => new Date(a.data_hora).getTime() - new Date(b.data_hora).getTime(),
-	);
+    (a, b) => new Date(b.data_hora).getTime() - new Date(a.data_hora).getTime(),
+);
 
 	const pagedRegistros = registrosOrdenados.slice(
 		(currentPage - 1) * itemsPerPage,

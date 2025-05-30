@@ -32,6 +32,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import ModalEditarFuncionario from "@/components/modal-editar-funcionario";
 import CadastroFuncionarioModal from "@/components/CadastroFuncionarioModal";
+import { toast } from "sonner";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 
@@ -45,6 +46,7 @@ type Funcionario = {
 	matricula?: number;
 	data_admissao?: string;
 	secretaria_id?: number;
+	unidade_id?: number;
 };
 
 export default function FuncionariosPage() {
@@ -106,16 +108,31 @@ export default function FuncionariosPage() {
 		fetchFuncionarios();
 	}, [user]);
 
-	const handleDelete = async (id: string) => {
-		if (window.confirm("Tem certeza que deseja excluir este funcionário?")) {
-			try {
-				await api.delete(`/funci/funcionario/${id}`);
-				setFuncionarios(funcionarios.filter((func) => func.id !== id));
-			} catch (error) {
-				console.error("Erro ao excluir funcionário:", error);
-			}
-		}
-	};
+		const handleDelete = async (id: string) => {
+			toast(
+				"Tem certeza que deseja excluir este funcionário?",
+				{
+					description: "Essa ação é irreversível.",
+					cancel: {
+						label: "Cancelar",
+						onClick: () => { },
+					},
+					action: {
+						label: "Excluir",
+						onClick: async () => {
+							try {
+								await api.delete(`/funci/funcionario/${id}`);
+								setFuncionarios((prev) => prev.filter((func) => func.id !== id));
+								toast.success("Funcionário excluído com sucesso!");
+							} catch (error) {
+								console.error("Erro ao excluir funcionário:", error);
+								toast.error("Erro ao excluir funcionário.");
+							}
+						},
+					},
+				},
+			);
+		};
 
 	const abrirModalEditar = (funcionario: Funcionario) => {
 		setFuncionarioSelecionado(funcionario);
@@ -363,7 +380,7 @@ export default function FuncionariosPage() {
 						cpf: funcionarioSelecionado.cpf,
 						cargo: funcionarioSelecionado.cargo,
 						data_admissao: funcionarioSelecionado.data_admissao || "",
-						unidade_id: "", // ajuste aqui se tiver unidade_id
+						unidade_id: funcionarioSelecionado.unidade_id || 0, // ajuste aqui se tiver unidade_id
 						matricula: funcionarioSelecionado.matricula
 							? funcionarioSelecionado.matricula.toString()
 							: "",
