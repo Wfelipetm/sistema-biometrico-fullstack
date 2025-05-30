@@ -123,8 +123,8 @@ export default function Sidebar({ className }: SidebarProps) {
 								<Image
 									src={theme === "light" ? logoLight : logoDark}
 									alt="Logo Prefeitura Itaguaí"
-									width={200}
-									height={40}
+									
+									style={{ height: 40, width: 200 }}
 									className="object-contain"
 									priority
 								/>
