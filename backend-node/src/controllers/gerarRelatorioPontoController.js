@@ -126,9 +126,21 @@ module.exports = {
         try {
             const query = `
             SELECT 
-                rp.data_hora::DATE AS data, rp.hora_entrada, rp.hora_saida, f.nome AS funcionario_nome,
-                f.data_admissao, f.cargo, f.matricula, f.tipo_escala, f.cpf, f.email,
-                u.nome AS unidade_nome, rp.total_trabalhado
+                rp.data_hora::DATE AS data, 
+                rp.hora_entrada, 
+                rp.hora_saida, 
+                rp.horas_normais, 
+                rp.hora_extra, 
+                rp.hora_desconto,
+                rp.total_trabalhado,
+                f.nome AS funcionario_nome, 
+                f.data_admissao, 
+                f.cargo, 
+                f.matricula, 
+                f.tipo_escala,
+                f.cpf,
+                f.email,
+                u.nome AS unidade_nome
             FROM Registros_Ponto rp
             INNER JOIN funcionarios f ON rp.funcionario_id = f.id
             INNER JOIN unidades u ON rp.unidade_id = u.id
@@ -149,45 +161,18 @@ module.exports = {
             let totalHorasDesconto = 0;
 
             const registros = result.rows.map(row => {
-                const baseDate = '1970-01-01';
-                const horaEntrada = new Date(`${baseDate}T${row.hora_entrada}Z`);
-                const horaSaida = new Date(`${baseDate}T${row.hora_saida}Z`);
-                let horasExtras = 0, horasDesconto = 0;
-                let justificativa = '';
-
-                // Jornada esperada com base na escala
-                let jornadaFim = new Date(horaEntrada);
-                const jornadas = {
-                    '8h': 17, '12h': 19, '16h': 22, '24h': 24,
-                    '12x36': 19, '24x72': 31, '32h': 16, '20h': 16
-                };
-                const fimHora = jornadas[row.tipo_escala];
-                if (fimHora) jornadaFim.setHours(fimHora, 0, 0);
-
-                // Comparação para horas extras ou desconto
-                if (horaSaida > jornadaFim) {
-                    horasExtras = differenceInMinutes(horaSaida, jornadaFim) / 60;
-                    justificativa = 'Horas extras';
-                } else if (horaSaida < jornadaFim) {
-                    horasDesconto = differenceInMinutes(jornadaFim, horaSaida) / 60;
-                    justificativa = 'Saída antecipada';
-                }
-
-                const horasNormais = parseFloat(row.total_trabalhado || '0.00');
-                totalHorasNormais += horasNormais;
-                totalHorasExtras += horasExtras;
-                totalHorasDesconto += horasDesconto;
+                totalHorasNormais += timeToDecimal(row.total_trabalhado);
+                totalHorasExtras += timeToDecimal(row.hora_extra);
+                totalHorasDesconto += timeToDecimal(row.hora_desconto);
 
                 return {
                     data: format(new Date(row.data), 'dd/MM/yyyy'),
-                    hora_entrada: (row.hora_entrada && row.hora_entrada !== '00:00:00') ? formatarHora(row.hora_entrada) : '--',
-                    hora_saida: (row.hora_saida && row.hora_saida !== '00:00:00') ? formatarHora(row.hora_saida) : '--',
-                    horas_normais: formatarDecimalParaHoraOuTracos(horasNormais),
-                    horas_extras: formatarDecimalParaHoraOuTracos(horasExtras),
-                    horas_desconto: formatarDecimalParaHoraOuTracos(horasDesconto),
-
-
-                    justificativa: justificativa || '--',
+                    hora_entrada: row.hora_entrada || '--',
+                    hora_saida: row.hora_saida || '--',
+                    horas_normais: row.total_trabalhado || '--',
+                    horas_extras: row.hora_extra || '--',
+                    horas_desconto: row.hora_desconto || '--',
+                    justificativa: ' ',
                 };
             });
 
@@ -201,9 +186,9 @@ module.exports = {
                     mes_ano: `${mes}/${ano}`,
                 },
                 totais: {
-                    total_total_trabalhado: totalHorasNormais.toFixed(2),
-                    total_horas_extras: totalHorasExtras.toFixed(2),
-                    total_horas_desconto: totalHorasDesconto.toFixed(2),
+                    total_total_trabalhado: decimalToHora(totalHorasNormais),
+                    total_horas_extras: decimalToHora(totalHorasExtras),
+                    total_horas_desconto: decimalToHora(totalHorasDesconto),
                 },
                 registros,
             });
@@ -212,25 +197,21 @@ module.exports = {
             return res.status(500).json({ error: 'Erro interno no servidor.' });
         }
     }
+}
 
+// Converte "HH:mm:ss" para decimal de horas
+function timeToDecimal(timeStr) {
+    if (!timeStr || timeStr === '00:00:00') return 0;
+    const [h, m, s] = timeStr.split(':').map(Number);
+    return h + m / 60 + s / 3600;
+}
 
-
-
-};
-
-// Formatar horas decimais para "HH:mm:ss" ou retorna "--" 
-
-function formatarDecimalParaHoraOuTracos(valorDecimal) {
-    if (!valorDecimal || isNaN(valorDecimal)) return '--';
-
-    const totalSegundos = Math.floor(valorDecimal * 3600);
-    const horas = Math.floor(totalSegundos / 3600);
-    const minutos = Math.floor((totalSegundos % 3600) / 60);
-    const segundos = totalSegundos % 60;
-
-    const horaFormatada = `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
-
-    // Se for igual a 00:00:00, retorna '--'
-    return horaFormatada === '00:00:00' ? '--' : horaFormatada;
+// Converte decimal de horas para "HH:mm:ss"
+function decimalToHora(decimal) {
+    if (!decimal) return '--';
+    const horas = Math.floor(decimal);
+    const minutos = Math.floor((decimal - horas) * 60);
+    const segundos = Math.round((((decimal - horas) * 60) - minutos) * 60);
+    return `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
 }
 

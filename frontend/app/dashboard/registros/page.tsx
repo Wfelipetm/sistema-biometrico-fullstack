@@ -352,58 +352,58 @@ export default function RegistrosPage() {
 							<div className="rounded-md border">
 								<Table>
 									<TableHeader>
-										<TableRow>
-											<TableHead>Funcionário</TableHead>
-											<TableHead>Unidade</TableHead>
-											<TableHead>Data</TableHead>
-											<TableHead>Entrada</TableHead>
-											<TableHead>Saída</TableHead>
-											{user?.papel !== "gestor" && (
-												<TableHead className="text-right">Ações</TableHead>
-											)}
-										</TableRow>
-									</TableHeader>
+  <TableRow>
+    <TableHead>Funcionário</TableHead>
+    <TableHead>Unidade</TableHead>
+    <TableHead>Data</TableHead>
+    <TableHead>Entrada</TableHead>
+    <TableHead>Saída</TableHead>
+    <TableHead>Hora Extra</TableHead>        
+    <TableHead>Hora Desconto</TableHead>      
+    {user?.papel !== "gestor" && (
+      <TableHead className="text-right">Ações</TableHead>
+    )}
+  </TableRow>
+</TableHeader>
 									<TableBody>
 										{pagedRegistros.length > 0 ? (
 											pagedRegistros.map((registro) => (
 												<TableRow key={registro.id}>
-													<TableCell className="font-medium">
-														{registro.funcionario_nome}
-													</TableCell>
-													<TableCell>{registro.unidade_nome}</TableCell>
-													<TableCell>
-														{formatDate(registro.data_hora)}
-													</TableCell>
-													<TableCell>{registro.hora_entrada || "-"}</TableCell>
-													<TableCell>{registro.hora_saida || "-"}</TableCell>
-													{user?.papel !== "gestor" && (
-														<TableCell className="text-right">
-															<div className="flex justify-end gap-2">
-																<Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        onClick={() => handleEditarRegistro(registro)}
-                                                    >
-                                                        <Edit className="h-4 w-4" />
-                                                        <span className="sr-only">Editar</span>
-                                                    </Button>
-																<Button
-																	variant="ghost"
-																	size="icon"
-																	onClick={() => handleDelete(registro.id)}
-																>
-																	<Trash2 className="h-4 w-4" />
-																	<span className="sr-only">Excluir</span>
-																</Button>
-															</div>
-														</TableCell>
-													)}
-												</TableRow>
+  <TableCell className="font-medium">{registro.funcionario_nome}</TableCell>
+  <TableCell>{registro.unidade_nome}</TableCell>
+  <TableCell>{formatDate(registro.data_hora)}</TableCell>
+  <TableCell>{registro.hora_entrada || "-"}</TableCell>
+  <TableCell>{registro.hora_saida || "-"}</TableCell>
+  <TableCell>{registro.hora_extra || "-"}</TableCell>
+  <TableCell>{registro.hora_desconto || "-"}</TableCell>
+  {user?.papel !== "gestor" && (
+    <TableCell className="text-right">
+      <div className="flex justify-end gap-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => handleEditarRegistro(registro)}
+        >
+          <Edit className="h-4 w-4" />
+          <span className="sr-only">Editar</span>
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => handleDelete(registro.id)}
+        >
+          <Trash2 className="h-4 w-4" />
+          <span className="sr-only">Excluir</span>
+        </Button>
+      </div>
+    </TableCell>
+  )}
+</TableRow>
 											))
 										) : (
 											<TableRow>
 												<TableCell
-													colSpan={user?.papel !== "gestor" ? 6 : 5}
+													colSpan={user?.papel !== "gestor" ? 8 : 7}
 													className="h-24 text-center"
 												>
 													Nenhum registro encontrado.
