@@ -1,120 +1,342 @@
-import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import axios from "axios";
-import { format } from "date-fns";
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+"use client"
 
+import { useState, useEffect } from "react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Progress } from "@/components/ui/progress"
+import { AlertCircle, Clock, Calendar, LogIn, LogOut, Check, Loader2, Save } from "lucide-react"
+import axios from "axios"
+import { format } from "date-fns"
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 interface ModalEditarRegistroPontoProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  registro: any;
-  onAtualizado: (data: any) => void;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  registro: any
+  onAtualizado: (data: any) => void
 }
 
 function padHora(hora: string) {
   // Garante formato HH:mm com zero à esquerda
-  if (!hora) return "00:00";
-  const [h, m] = hora.split(":");
-  return `${h?.padStart(2, "0") || "00"}:${m?.padStart(2, "0") || "00"}`;
+  if (!hora) return "00:00"
+  const [h, m] = hora.split(":")
+  return `${h?.padStart(2, "0") || "00"}:${m?.padStart(2, "0") || "00"}`
 }
 
-export default function ModalEditarRegistroPonto({ open, onOpenChange, registro, onAtualizado }: ModalEditarRegistroPontoProps) {
-  const [horaEntrada, setHoraEntrada] = useState("00:00");
-  const [horaSaida, setHoraSaida] = useState("00:00");
-  const [loading, setLoading] = useState(false);
+export default function ModalEditarRegistroPonto({
+  open,
+  onOpenChange,
+  registro,
+  onAtualizado,
+}: ModalEditarRegistroPontoProps) {
+  const [horaEntrada, setHoraEntrada] = useState("00:00")
+  const [horaSaida, setHoraSaida] = useState("00:00")
+  const [loading, setLoading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState("")
+  const [validationErrors, setValidationErrors] = useState<{
+    horaEntrada?: string
+    horaSaida?: string
+  }>({})
+
+  // Validação em tempo real
+  useEffect(() => {
+    const errors: typeof validationErrors = {}
+
+    if (horaEntrada && !/^\d{2}:\d{2}$/.test(horaEntrada)) {
+      errors.horaEntrada = "Formato de hora inválido"
+    }
+
+    if (horaSaida && !/^\d{2}:\d{2}$/.test(horaSaida)) {
+      errors.horaSaida = "Formato de hora inválido"
+    }
+
+    if (horaEntrada && horaSaida && horaEntrada >= horaSaida) {
+      errors.horaSaida = "Hora de saída deve ser posterior à entrada"
+    }
+
+    setValidationErrors(errors)
+  }, [horaEntrada, horaSaida])
 
   useEffect(() => {
-    setHoraEntrada(padHora(registro?.hora_entrada ?? "00:00"));
-    setHoraSaida(padHora(registro?.hora_saida ?? "00:00"));
-  }, [registro]);
+    if (open && registro) {
+      setHoraEntrada(padHora(registro?.hora_entrada ?? "00:00"))
+      setHoraSaida(padHora(registro?.hora_saida ?? "00:00"))
+      setError("")
+      setSuccess(false)
+      setUploadProgress(0)
+      setValidationErrors({})
+    }
+  }, [open, registro])
 
-
-
-const handleSubmit = async () => {
-  if (!registro) {
-    console.warn("Registro não definido!");
-    return;
+  const isFormValid = () => {
+    return (
+      registro &&
+      /^\d{2}:\d{2}$/.test(horaEntrada) &&
+      /^\d{2}:\d{2}$/.test(horaSaida) &&
+      horaEntrada < horaSaida &&
+      Object.keys(validationErrors).length === 0
+    )
   }
-  setLoading(true);
-  try {
-    const payload = {
-      hora_entrada: horaEntrada,
-      hora_saida: horaSaida,
-    };
-    const url = `${API_URL}/reg/registros-ponto/${registro.id}`;
-    const response = await axios.put(url, payload);
-    if (onAtualizado) onAtualizado(response.data);
-    onOpenChange(false);
-  } catch (error: any) {
-    alert("Erro ao atualizar registro de ponto.");
-  } finally {
-    setLoading(false);
-  }
-};
 
+  const hasChanges = () => {
+    return (
+      horaEntrada !== padHora(registro?.hora_entrada ?? "00:00") ||
+      horaSaida !== padHora(registro?.hora_saida ?? "00:00")
+    )
+  }
+
+  const handleSubmit = async () => {
+    if (!registro) {
+      setError("Registro não definido!")
+      return
+    }
+
+    if (!isFormValid()) {
+      setError("Por favor, corrija os erros antes de continuar.")
+      return
+    }
+
+    if (!hasChanges()) {
+      setError("Nenhuma alteração detectada.")
+      return
+    }
+
+    setLoading(true)
+    setError("")
+    setUploadProgress(0)
+
+    try {
+      const payload = {
+        hora_entrada: horaEntrada,
+        hora_saida: horaSaida,
+      }
+
+      // Simular progresso de upload
+      const progressInterval = setInterval(() => {
+        setUploadProgress((prev) => {
+          if (prev >= 90) {
+            clearInterval(progressInterval)
+            return prev
+          }
+          return prev + 15
+        })
+      }, 200)
+
+      const url = `${API_URL}/reg/registros-ponto/${registro.id}`
+      const response = await axios.put(url, payload)
+
+      clearInterval(progressInterval)
+      setUploadProgress(100)
+      setSuccess(true)
+
+      // Aguardar um pouco para mostrar o sucesso
+      setTimeout(() => {
+        if (onAtualizado) onAtualizado(response.data)
+        onOpenChange(false)
+      }, 1500)
+    } catch (error: any) {
+      console.error("Erro ao atualizar registro de ponto:", error)
+      setError("Erro ao atualizar registro de ponto. Verifique os dados e tente novamente.")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // Formata a data para dd/MM/yyyy
-  const dataFormatada = registro?.data_hora
-    ? format(new Date(registro.data_hora), "dd/MM/yyyy")
-    : "";
+  const dataFormatada = registro?.data_hora ? format(new Date(registro.data_hora), "dd/MM/yyyy") : ""
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Editar Registro de Ponto</DialogTitle>
-          <DialogDescription>
-            Atualize os horários de entrada e saída do funcionário
-          </DialogDescription>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 shadow-sm">
+              <Clock className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+            </div>
+            <div>
+              <DialogTitle className="text-2xl font-bold">Editar Registro de Ponto</DialogTitle>
+              <DialogDescription className="text-gray-600 dark:text-gray-400">
+                Atualize os horários de entrada e saída do funcionário {registro?.funcionario_nome || ""}.
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="data" className="block text-sm font-medium text-gray-700">Data</label>
-            <Input
-              type="text"
-              id="data"
-              value={dataFormatada}
-              disabled
-              readOnly
-              className="bg-gray-100 cursor-not-allowed"
-            />
+        {success ? (
+          <div className="flex flex-col items-center justify-center py-12 space-y-4">
+            <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+              <Check className="w-8 h-8 text-gray-700 dark:text-gray-300" />
+            </div>
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Registro Atualizado!</h3>
+              <p className="text-gray-600 dark:text-gray-400">Os horários foram atualizados com sucesso.</p>
+            </div>
           </div>
-          <Input
-            type="time"
-            placeholder="Hora de Entrada"
-            value={horaEntrada}
-            onChange={(e) => setHoraEntrada(padHora(e.target.value))}
-            disabled={!registro}
-          />
-          <Input
-            type="time"
-            placeholder="Hora de Saída"
-            value={horaSaida}
-            onChange={(e) => setHoraSaida(padHora(e.target.value))}
-            disabled={!registro}
-          />
+        ) : (
+          <div className="space-y-6">
+            {error && (
+              <Alert
+                variant="destructive"
+                className="border-red-200 bg-red-50 dark:bg-red-900/20 animate-in slide-in-from-top-2 duration-300"
+              >
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
 
-          <div className="flex justify-end">
-            <Button
+            {/* Informações do Registro */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-2">
+                Informações do Registro
+              </h3>
+
+              <div className="grid grid-cols-1 gap-4">
+                {/* Data */}
+                <div className="space-y-2">
+                  <Label htmlFor="data" className="text-sm font-medium flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                    Data do Registro
+                  </Label>
+                  <Input
+                    type="text"
+                    id="data"
+                    value={dataFormatada}
+                    disabled
+                    readOnly
+                    className="pl-4 h-12 bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600 cursor-not-allowed text-gray-500 dark:text-gray-400"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Horários */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-2">
+                Horários
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Hora de Entrada */}
+                <div className="space-y-2">
+                  <Label htmlFor="horaEntrada" className="text-sm font-medium flex items-center gap-2">
+                    <LogIn className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                    Hora de Entrada
+                  </Label>
+                  <Input
+                    type="time"
+                    id="horaEntrada"
+                    value={horaEntrada}
+                    onChange={(e) => setHoraEntrada(padHora(e.target.value))}
+                    disabled={!registro || loading}
+                    className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400 focus:ring-gray-200 dark:focus:ring-gray-600"
+                  />
+                  {validationErrors.horaEntrada && (
+                    <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      {validationErrors.horaEntrada}
+                    </p>
+                  )}
+                </div>
+
+                {/* Hora de Saída */}
+                <div className="space-y-2">
+                  <Label htmlFor="horaSaida" className="text-sm font-medium flex items-center gap-2">
+                    <LogOut className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                    Hora de Saída
+                  </Label>
+                  <Input
+                    type="time"
+                    id="horaSaida"
+                    value={horaSaida}
+                    onChange={(e) => setHoraSaida(padHora(e.target.value))}
+                    disabled={!registro || loading}
+                    className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400 focus:ring-gray-200 dark:focus:ring-gray-600"
+                  />
+                  {validationErrors.horaSaida && (
+                    <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      {validationErrors.horaSaida}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Informação adicional */}
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                  <Clock className="w-4 h-4" />
+                  <span>
+                    {horaEntrada && horaSaida && horaEntrada < horaSaida
+                      ? `Jornada: ${(() => {
+                          const [hE, mE] = horaEntrada.split(":").map(Number)
+                          const [hS, mS] = horaSaida.split(":").map(Number)
+                          const totalMinutos = hS * 60 + mS - (hE * 60 + mE)
+                          const horas = Math.floor(totalMinutos / 60)
+                          const minutos = totalMinutos % 60
+                          return `${horas}h${minutos > 0 ? ` ${minutos}min` : ""}`
+                        })()}`
+                      : "Defina os horários para calcular a jornada"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Progress Bar durante upload */}
+            {loading && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-400">Atualizando registro...</span>
+                  <span className="font-medium">{uploadProgress}%</span>
+                </div>
+                <Progress value={uploadProgress} className="h-2" />
+              </div>
+            )}
+
+            {/* Botões de Ação */}
+            <div className="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => onOpenChange(false)}
+                disabled={loading}
+                className="px-6 h-11 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+              >
+                Cancelar
+              </Button>
+
+              <Button
                 onClick={handleSubmit}
-                disabled={
-                    loading ||
-                    !registro ||
-                    !/^\d{2}:\d{2}$/.test(horaEntrada) ||
-                    !/^\d{2}:\d{2}$/.test(horaSaida)
-                }
-                className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-white dark:text-black dark:hover:bg-gray-200"
-                >
-                {loading ? "Salvando..." : "Salvar"}
-                </Button>
+                disabled={loading || !isFormValid() || !hasChanges()}
+                className={`px-8 h-11 font-medium transition-all duration-300 ${
+                  loading
+                    ? "bg-gray-400 dark:bg-gray-600 cursor-not-allowed"
+                    : isFormValid() && hasChanges()
+                      ? "bg-gray-800 hover:bg-gray-900 dark:bg-white dark:hover:bg-gray-200 dark:text-gray-800 text-white"
+                      : "bg-gray-300 dark:bg-gray-700 cursor-not-allowed text-gray-500 dark:text-gray-400"
+                }`}
+              >
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Salvando...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Save className="w-4 h-4" />
+                    <span>Salvar Alterações</span>
+                  </div>
+                )}
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
       </DialogContent>
     </Dialog>
-  );
+  )
 }
