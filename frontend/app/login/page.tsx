@@ -144,14 +144,14 @@ export default function LoginPage() {
 
         {/* Content */}
         <div className="relative z-10 flex flex-col justify-center items-center w-full h-full p-12">
-          <div className="flex flex-col items-center justify-center space-y-12 text-center">
+            <div className="flex flex-col items-center justify-center space-y-12 text-center mb-9" style={{ marginTop: "-60px" }}>
             {/* Logo da Prefeitura */}
             <Image
               width={320}
               height={120}
               alt="Logo Prefeitura Municipal de Itaguaí"
               src="/images/smctic_dark_mode2.png"
-              className="mx-auto mb-" // Adiciona espaçamento inferior
+              className="mx-auto mb-2" 
               priority
               style={{ filter: "brightness(0) invert(1)" }}
             />
