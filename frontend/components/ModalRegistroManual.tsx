@@ -68,21 +68,21 @@ export default function ModalCadastroManual({ open, onOpenChange, onSuccess }: M
     funcionarioSelecionado?.tipo_escala && ["12x36", "24x72"].includes(funcionarioSelecionado.tipo_escala)
 
   useEffect(() => {
-    const fetchFuncionarios = async () => {
-      try {
-        if (!unidadeId) return
-        const { data: lista } = await api.get(`/unid/${unidadeId}/funcionarios`)
-        setFuncionarios(lista)
-      } catch (err) {
-        console.error("Erro ao buscar funcionários:", err)
-        setError("Erro ao carregar funcionários.")
-      }
+  const fetchFuncionarios = async () => {
+    try {
+      if (!user?.id) return
+      const { data: lista } = await api.get(`/secre/${user.secretaria_id}/funcionarios`)
+      setFuncionarios(lista)
+    } catch (err) {
+      console.error("Erro ao buscar funcionários:", err)
+      setError("Erro ao carregar funcionários.")
     }
+  }
 
-    if (open && unidadeId) {
-      fetchFuncionarios()
-    }
-  }, [open, unidadeId])
+  if (open && user?.id) {
+    fetchFuncionarios()
+  }
+}, [open, user?.id])
 
   useEffect(() => {
     // Fechar dropdown ao clicar fora
