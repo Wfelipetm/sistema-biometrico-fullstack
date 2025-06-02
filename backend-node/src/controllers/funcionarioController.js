@@ -185,19 +185,21 @@ module.exports = {
     const { id } = req.params;
     try {
       const result = await db.query(
-        `SELECT id, nome, cpf, cargo, unidade_id, data_admissao, id_biometrico FROM funcionarios WHERE id = $1`,
+        `SELECT * FROM funcionarios WHERE id = $1`,
         [id]
       );
 
       if (result.rowCount === 0) {
         return res.status(404).json({ error: "Funcionário não encontrado." });
       }
+
       res.status(200).json(result.rows[0]);
     } catch (error) {
       console.error("Erro ao buscar funcionário por ID:", error.message);
       res.status(500).json({ error: "Erro interno no servidor. Por favor, tente novamente mais tarde." });
     }
   },
+
 
 
 
