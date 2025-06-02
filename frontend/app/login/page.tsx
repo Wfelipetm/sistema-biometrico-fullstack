@@ -177,9 +177,7 @@ export default function LoginPage() {
           <div className="w-full max-w-md space-y-8">
             {/* Mobile Logo - Only visible on small screens */}
             <div className="lg:hidden text-center space-y-4">
-              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-gray-500 to-gray-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <Shield className="w-8 h-8 text-white" />
-              </div>
+              
 
               <div className="space-y-2">
                 <Image

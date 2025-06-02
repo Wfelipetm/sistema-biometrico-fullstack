@@ -91,7 +91,7 @@ export default function Header() {
 					)}
 					<span className="sr-only">Alternar tema</span>
 				</Button>
-				<NotificationDropdown />
+				{/* <NotificationDropdown /> */}
 
 				{user.papel !== "quiosque" || liberado ? (
 					<DropdownMenu>
