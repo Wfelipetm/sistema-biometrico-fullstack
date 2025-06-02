@@ -20,6 +20,7 @@ import {
   Check,
   Loader2,
   Save,
+  MailIcon,
 } from "lucide-react"
 import { api } from "@/lib/api"
 
@@ -28,6 +29,7 @@ interface FuncionarioEditado {
   nome: string
   cpf: string
   cargo: string
+  email: string
   data_admissao: string
   unidade_id: number
   matricula: string
@@ -66,6 +68,7 @@ export default function ModalEditarFuncionario({
   const [matricula, setMatricula] = useState("")
   const [tipoEscala, setTipoEscala] = useState("")
   const [telefone, setTelefone] = useState("")
+  const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [success, setSuccess] = useState(false)
@@ -75,6 +78,7 @@ export default function ModalEditarFuncionario({
     cpf?: string
     cargo?: string
     telefone?: string
+    email?: string
   }>({})
 
   // Validação em tempo real
@@ -115,6 +119,7 @@ export default function ModalEditarFuncionario({
           setMatricula(data.matricula || "")
           setTipoEscala(data.tipo_escala || "")
           setTelefone(data.telefone || "")
+          setEmail(data.email || "")
           setError("")
           setSuccess(false)
           setUploadProgress(0)
@@ -158,7 +163,8 @@ export default function ModalEditarFuncionario({
       dataAdmissao !== funcionario.data_admissao?.substring(0, 10) ||
       matricula !== funcionario.matricula ||
       tipoEscala !== funcionario.tipo_escala ||
-      telefone !== funcionario.telefone
+      telefone !== funcionario.telefone ||
+      email !== funcionario.email
     )
   }
 
@@ -189,6 +195,7 @@ export default function ModalEditarFuncionario({
       if (matricula !== funcionario.matricula) payload.matricula = matricula
       if (tipoEscala !== funcionario.tipo_escala) payload.tipo_escala = tipoEscala
       if (telefone !== funcionario.telefone) payload.telefone = telefone
+      if (email !== funcionario.email) payload.email = email.trim()
 
       // Simular progresso de upload
       const progressInterval = setInterval(() => {
@@ -319,6 +326,31 @@ export default function ModalEditarFuncionario({
                     </span>
                   </div>
                 </div>
+              </div>
+            </div>
+            {/* Email */}
+            <div className="space-y-2">
+              <Label htmlFor="nome" className="text-sm font-medium flex items-center gap-2">
+                <MailIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                Email
+              </Label>
+              <Input
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Ex: joao.silva@example.com"
+                required
+                className="pl-4 h-12 border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400 focus:ring-gray-200 dark:focus:ring-gray-600"
+              />
+              {validationErrors.email && (
+                <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" />
+                  {validationErrors.email}
+                </p>
+              )}
+              <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                <span>Mínimo 2 caracteres</span>
+                <span className={email.length > 100 ? "text-red-500 dark:text-red-400" : ""}>{email.length}/100</span>
               </div>
             </div>
 
@@ -466,13 +498,12 @@ export default function ModalEditarFuncionario({
               <Button
                 onClick={handleSubmit}
                 disabled={loading || !isFormValid() || !hasChanges()}
-                className={`px-8 h-11 font-medium transition-all duration-300 ${
-                  loading
+                className={`px-8 h-11 font-medium transition-all duration-300 ${loading
                     ? "bg-gray-400 dark:bg-gray-600 cursor-not-allowed"
                     : isFormValid() && hasChanges()
                       ? "bg-gray-800 hover:bg-gray-900 dark:bg-white dark:hover:bg-gray-200 dark:text-gray-800 text-white"
                       : "bg-gray-300 dark:bg-gray-700 cursor-not-allowed text-gray-500 dark:text-gray-400"
-                }`}
+                  }`}
               >
                 {loading ? (
                   <div className="flex items-center gap-2">

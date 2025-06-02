@@ -20,6 +20,7 @@ import ModalSenhaAdmin from "@/components/modal-senha-quiosque";
 import logoDark from '../public/images/regua-logo-itaguai_dark3.png';
 import logoLight from '../public/images/regua-logo-itaguai_light3.png';
 import Image from "next/image";
+import NotificationDropdown from "./Notificações";
 
 export default function Header() {
 	const { user, logout } = useAuth();
@@ -90,6 +91,7 @@ export default function Header() {
 					)}
 					<span className="sr-only">Alternar tema</span>
 				</Button>
+				<NotificationDropdown />
 
 				{user.papel !== "quiosque" || liberado ? (
 					<DropdownMenu>
