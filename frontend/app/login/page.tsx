@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useCallback, useRef, useMemo } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import {
   AlertCircle,
@@ -30,7 +30,19 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { api } from "@/lib/api"
 import { registrarLog } from "@/utils/logger"
 
-// Hook para detectar conexão
+// Preload critical resources
+const preloadResources = () => {
+  if (typeof window !== "undefined") {
+    // Preload logo image
+    const link = document.createElement("link")
+    link.rel = "preload"
+    link.as = "image"
+    link.href = "https://chat.itaguai.rj.gov.br/static/media/logo.67730401.png"
+    document.head.appendChild(link)
+  }
+}
+
+// Memoized hook para detectar conexão
 const useOnlineStatus = () => {
   const [isOnline, setIsOnline] = useState(true)
 
@@ -38,8 +50,8 @@ const useOnlineStatus = () => {
     const handleOnline = () => setIsOnline(true)
     const handleOffline = () => setIsOnline(false)
 
-    window.addEventListener("online", handleOnline)
-    window.addEventListener("offline", handleOffline)
+    window.addEventListener("online", handleOnline, { passive: true })
+    window.addEventListener("offline", handleOffline, { passive: true })
 
     return () => {
       window.removeEventListener("online", handleOnline)
@@ -50,52 +62,57 @@ const useOnlineStatus = () => {
   return isOnline
 }
 
-// Hook para força da senha
+// Memoized hook para força da senha
 const usePasswordStrength = (password: string) => {
   const [strength, setStrength] = useState(0)
   const [feedback, setFeedback] = useState("")
 
-  useEffect(() => {
-    if (!password) {
-      setStrength(0)
-      setFeedback("")
-      return
-    }
+  const calculateStrength = useCallback((pwd: string) => {
+    if (!pwd) return { score: 0, feedback: "" }
 
     let score = 0
     let feedbackText = ""
 
-    if (password.length >= 8) score += 25
-    if (/[A-Z]/.test(password)) score += 25
-    if (/[0-9]/.test(password)) score += 25
-    if (/[^A-Za-z0-9]/.test(password)) score += 25
+    if (pwd.length >= 8) score += 25
+    if (/[A-Z]/.test(pwd)) score += 25
+    if (/[0-9]/.test(pwd)) score += 25
+    if (/[^A-Za-z0-9]/.test(pwd)) score += 25
 
     if (score <= 25) feedbackText = "Senha fraca"
     else if (score <= 50) feedbackText = "Senha regular"
     else if (score <= 75) feedbackText = "Senha boa"
     else feedbackText = "Senha forte"
 
-    setStrength(score)
-    setFeedback(feedbackText)
-  }, [password])
+    return { score, feedback: feedbackText }
+  }, [])
 
-  return { strength, feedback }
+  useEffect(() => {
+    const { score, feedback } = calculateStrength(password)
+    setStrength(score)
+    setFeedback(feedback)
+  }, [password, calculateStrength])
+
+  return useMemo(() => ({ strength, feedback }), [strength, feedback])
 }
 
-// Hook para timeout de sessão
+// Optimized session timeout hook
 const useSessionTimeout = () => {
   const [timeLeft, setTimeLeft] = useState(1800) // 30 minutos
   const [showWarning, setShowWarning] = useState(false)
+
+  const formatTime = useCallback((seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, "0")}`
+  }, [])
 
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 300 && !showWarning) {
-          // 5 minutos restantes
           setShowWarning(true)
         }
         if (prev <= 0) {
-          // Logout automático
           window.location.reload()
           return 0
         }
@@ -106,16 +123,21 @@ const useSessionTimeout = () => {
     return () => clearInterval(timer)
   }, [showWarning])
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, "0")}`
-  }
-
-  return { timeLeft: formatTime(timeLeft), showWarning }
+  return useMemo(
+    () => ({
+      timeLeft: formatTime(timeLeft),
+      showWarning,
+    }),
+    [timeLeft, showWarning, formatTime],
+  )
 }
 
 export default function LoginPage() {
+  // Preload resources on component mount
+  useEffect(() => {
+    preloadResources()
+  }, [])
+
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -144,85 +166,104 @@ export default function LoginPage() {
   const { strength: passwordStrength, feedback: passwordFeedback } = usePasswordStrength(password)
   const { timeLeft, showWarning } = useSessionTimeout()
 
-  // Validação de email em tempo real
-  useEffect(() => {
+  // Memoized email validation
+  const emailValidation = useMemo(() => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     const isGovEmail = email.includes("@itaguai.rj.gov.br")
-    setEmailValid(emailRegex.test(email) && isGovEmail)
+    return emailRegex.test(email) && isGovEmail
   }, [email])
 
-  // Validação de senha em tempo real
-  useEffect(() => {
-    setPasswordValid(password.length >= 6)
+  // Memoized password validation
+  const passwordValidation = useMemo(() => {
+    return password.length >= 6
   }, [password])
 
-  // Detectar Caps Lock
+  // Update validation states
+  useEffect(() => {
+    setEmailValid(emailValidation)
+  }, [emailValidation])
+
+  useEffect(() => {
+    setPasswordValid(passwordValidation)
+  }, [passwordValidation])
+
+  // Optimized Caps Lock detection
   const handleKeyPress = useCallback((e: KeyboardEvent) => {
-    setCapsLockOn(e.getModifierState && e.getModifierState("CapsLock"))
+    if (e.getModifierState) {
+      setCapsLockOn(e.getModifierState("CapsLock"))
+    }
   }, [])
 
   useEffect(() => {
-    document.addEventListener("keydown", handleKeyPress)
+    document.addEventListener("keydown", handleKeyPress, { passive: true })
     return () => document.removeEventListener("keydown", handleKeyPress)
   }, [handleKeyPress])
 
-  // Timer para lockout
+  // Optimized lockout timer
   useEffect(() => {
-    if (lockoutTime > 0) {
-      const timer = setTimeout(() => setLockoutTime(lockoutTime - 1), 1000)
-      return () => clearTimeout(timer)
-    }
+    if (lockoutTime <= 0) return
+
+    const timer = setTimeout(() => setLockoutTime(lockoutTime - 1), 1000)
+    return () => clearTimeout(timer)
   }, [lockoutTime])
 
-  // Autofoco no campo email
+  // Optimized autofocus
   useEffect(() => {
     if (checkedAuth && emailRef.current) {
-      emailRef.current.focus()
+      // Use requestAnimationFrame to avoid layout shift
+      requestAnimationFrame(() => {
+        emailRef.current?.focus()
+      })
     }
   }, [checkedAuth])
 
-  // Anúncios para screen readers
+  // Optimized announcements
   const addAnnouncement = useCallback((message: string) => {
     setAnnouncements((prev) => [...prev, message])
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       setAnnouncements((prev) => prev.slice(1))
     }, 3000)
+    return () => clearTimeout(timeoutId)
   }, [])
 
+  // Memoized auth check
   useEffect(() => {
-    // Reset form state
-    setEmail("")
-    setPassword("")
-    setError("")
-    setLoading(false)
+    const checkAuth = async () => {
+      setEmail("")
+      setPassword("")
+      setError("")
+      setLoading(false)
 
-    // Check for existing authentication
-    const hasTokenCookie = document.cookie.split(";").some((c) => c.trim().startsWith("token="))
+      const hasTokenCookie = document.cookie.split(";").some((c) => c.trim().startsWith("token="))
 
-    if (hasTokenCookie && pathname === "/login") {
-      const userCookie = document.cookie.split(";").find((c) => c.trim().startsWith("user="))
-      let role = ""
+      if (hasTokenCookie && pathname === "/login") {
+        const userCookie = document.cookie.split(";").find((c) => c.trim().startsWith("user="))
+        let role = ""
 
-      if (userCookie) {
-        try {
-          const user = JSON.parse(decodeURIComponent(userCookie.split("=")[1]))
-          role = user.papel
-        } catch (e) {
-          console.error("Error parsing user cookie:", e)
+        if (userCookie) {
+          try {
+            const user = JSON.parse(decodeURIComponent(userCookie.split("=")[1]))
+            role = user.papel
+          } catch (e) {
+            console.error("Error parsing user cookie:", e)
+          }
         }
+
+        if (role === "gestor") {
+          window.location.href = "/dashboard/unidades"
+        } else {
+          window.location.href = "/dashboard"
+        }
+        return
       }
 
-      if (role === "gestor") {
-        window.location.href = "/dashboard/unidades"
-      } else {
-        window.location.href = "/dashboard"
-      }
-      return
+      setCheckedAuth(true)
     }
 
-    setCheckedAuth(true)
+    checkAuth()
   }, [pathname])
 
+  // Optimized login progress simulation
   const simulateLoginProgress = useCallback(() => {
     setLoginProgress(0)
     const interval = setInterval(() => {
@@ -237,136 +278,153 @@ export default function LoginPage() {
     return interval
   }, [])
 
-  const getSpecificErrorMessage = (error: any) => {
-    if (error.response?.status === 401) {
-      return "E-mail ou senha incorretos. Verifique suas credenciais e tente novamente."
-    }
-    if (error.response?.status === 429) {
-      return "Muitas tentativas de login. Aguarde alguns minutos antes de tentar novamente."
-    }
-    if (error.response?.status === 403) {
-      return "Sua conta foi temporariamente suspensa. Entre em contato com o suporte."
-    }
-    if (!isOnline) {
-      return "Sem conexão com a internet. Verifique sua conexão e tente novamente."
-    }
-    return "Erro interno do servidor. Tente novamente em alguns instantes."
-  }
+  // Memoized error message generator
+  const getSpecificErrorMessage = useCallback(
+    (error: any) => {
+      if (error.response?.status === 401) {
+        return "E-mail ou senha incorretos. Verifique suas credenciais e tente novamente."
+      }
+      if (error.response?.status === 429) {
+        return "Muitas tentativas de login. Aguarde alguns minutos antes de tentar novamente."
+      }
+      if (error.response?.status === 403) {
+        return "Sua conta foi temporariamente suspensa. Entre em contato com o suporte."
+      }
+      if (!isOnline) {
+        return "Sem conexão com a internet. Verifique sua conexão e tente novamente."
+      }
+      return "Erro interno do servidor. Tente novamente em alguns instantes."
+    },
+    [isOnline],
+  )
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  // Optimized form submission
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault()
 
-    if (lockoutTime > 0) {
-      const message = `Muitas tentativas. Tente novamente em ${lockoutTime} segundos.`
-      setError(message)
-      addAnnouncement(message)
-      return
-    }
-
-    if (!isOnline) {
-      const message = "Sem conexão com a internet. Verifique sua conexão e tente novamente."
-      setError(message)
-      addAnnouncement(message)
-      return
-    }
-
-    setError("")
-    setLoading(true)
-    addAnnouncement("Iniciando autenticação...")
-    const progressInterval = simulateLoginProgress()
-
-    try {
-      const response = await api.post("/auth/login", {
-        email,
-        senha: password,
-        lembrar: rememberMe,
-      })
-
-      await registrarLog({
-        usuario_id: response.data.usuario?.id ?? null,
-        acao: "Login efetuado com sucesso",
-        rota: "/auth/login",
-        metodo_http: "POST",
-        status_code: 200,
-        dados: { email, lembrar: rememberMe },
-        sistema: "web",
-        modulo: "Login",
-        ip: null,
-        user_agent: navigator.userAgent,
-      })
-
-      localStorage.setItem("token", response.data.token)
-      localStorage.setItem("user", JSON.stringify(response.data.usuario))
-      api.defaults.headers.common.Authorization = `Bearer ${response.data.token}`
-
-      const cookieOptions = rememberMe ? "; max-age=2592000" : "" // 30 dias se lembrar
-      document.cookie = `token=${response.data.token}; path=/${cookieOptions}`
-      document.cookie = `user=${encodeURIComponent(JSON.stringify(response.data.usuario))}; path=/${cookieOptions}`
-
-      // Reset attempts on success
-      setAttempts(0)
-      setLoginProgress(100)
-      addAnnouncement("Login realizado com sucesso! Redirecionando...")
-
-      setTimeout(() => {
-        const role = response.data.usuario?.papel
-        if (role === "gestor") {
-          window.location.href = "/dashboard/unidades"
-        } else {
-          window.location.href = "/dashboard"
-        }
-      }, 500)
-    } catch (err: unknown) {
-      clearInterval(progressInterval)
-      setLoginProgress(0)
-
-      const newAttempts = attempts + 1
-      setAttempts(newAttempts)
-
-      let errorMessage = ""
-      if (newAttempts >= 3) {
-        setLockoutTime(30) // 30 seconds lockout
-        errorMessage = "Muitas tentativas de login. Conta temporariamente bloqueada por 30 segundos."
-      } else {
-        errorMessage = getSpecificErrorMessage(err)
-        errorMessage += ` ${3 - newAttempts} tentativa(s) restante(s).`
+      if (lockoutTime > 0) {
+        const message = `Muitas tentativas. Tente novamente em ${lockoutTime} segundos.`
+        setError(message)
+        addAnnouncement(message)
+        return
       }
 
-      setError(errorMessage)
-      addAnnouncement(errorMessage)
+      if (!isOnline) {
+        const message = "Sem conexão com a internet. Verifique sua conexão e tente novamente."
+        setError(message)
+        addAnnouncement(message)
+        return
+      }
 
-      await registrarLog({
-        usuario_id: null,
-        acao: "Falha no login",
-        rota: "/auth/login",
-        metodo_http: "POST",
-        status_code: err.response?.status ?? null,
-        dados: { email, tentativa: newAttempts },
-        sistema: "web",
-        modulo: "Login",
-        ip: null,
-        user_agent: navigator.userAgent,
-      })
+      setError("")
+      setLoading(true)
+      addAnnouncement("Iniciando autenticação...")
+      const progressInterval = simulateLoginProgress()
 
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
-  }
+      try {
+        const response = await api.post("/auth/login", {
+          email,
+          senha: password,
+          lembrar: rememberMe,
+        })
 
-  const handleForgotPassword = () => {
+        await registrarLog({
+          usuario_id: response.data.usuario?.id ?? null,
+          acao: "Login efetuado com sucesso",
+          rota: "/auth/login",
+          metodo_http: "POST",
+          status_code: 200,
+          dados: { email, lembrar: rememberMe },
+          sistema: "web",
+          modulo: "Login",
+          ip: null,
+          user_agent: navigator.userAgent,
+        })
+
+        localStorage.setItem("token", response.data.token)
+        localStorage.setItem("user", JSON.stringify(response.data.usuario))
+        api.defaults.headers.common.Authorization = `Bearer ${response.data.token}`
+
+        const cookieOptions = rememberMe ? "; max-age=2592000" : ""
+        document.cookie = `token=${response.data.token}; path=/${cookieOptions}`
+        document.cookie = `user=${encodeURIComponent(JSON.stringify(response.data.usuario))}; path=/${cookieOptions}`
+
+        setAttempts(0)
+        setLoginProgress(100)
+        addAnnouncement("Login realizado com sucesso! Redirecionando...")
+
+        setTimeout(() => {
+          const role = response.data.usuario?.papel
+          if (role === "gestor") {
+            window.location.href = "/dashboard/unidades"
+          } else {
+            window.location.href = "/dashboard"
+          }
+        }, 500)
+      } catch (err: unknown) {
+        clearInterval(progressInterval)
+        setLoginProgress(0)
+
+        const newAttempts = attempts + 1
+        setAttempts(newAttempts)
+
+        let errorMessage = ""
+        if (newAttempts >= 3) {
+          setLockoutTime(30)
+          errorMessage = "Muitas tentativas de login. Conta temporariamente bloqueada por 30 segundos."
+        } else {
+          errorMessage = getSpecificErrorMessage(err)
+          errorMessage += ` ${3 - newAttempts} tentativa(s) restante(s).`
+        }
+
+        setError(errorMessage)
+        addAnnouncement(errorMessage)
+
+        await registrarLog({
+          usuario_id: null,
+          acao: "Falha no login",
+          rota: "/auth/login",
+          metodo_http: "POST",
+          status_code: err.response?.status ?? null,
+          dados: { email, tentativa: newAttempts },
+          sistema: "web",
+          modulo: "Login",
+          ip: null,
+          user_agent: navigator.userAgent,
+        })
+
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    },
+    [
+      lockoutTime,
+      isOnline,
+      email,
+      password,
+      rememberMe,
+      attempts,
+      addAnnouncement,
+      simulateLoginProgress,
+      getSpecificErrorMessage,
+    ],
+  )
+
+  // Optimized forgot password handler
+  const handleForgotPassword = useCallback(() => {
     setShowForgotPassword(true)
     addAnnouncement("Redirecionando para recuperação de senha...")
-    // Aqui você implementaria a lógica de recuperação de senha
     setTimeout(() => {
       alert(
         "Funcionalidade de recuperação de senha será implementada em breve. Entre em contato com o suporte: (21) 3782-9090",
       )
       setShowForgotPassword(false)
     }, 1000)
-  }
+  }, [addAnnouncement])
 
-  // Keyboard shortcuts
+  // Optimized keyboard shortcuts
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === "Enter") {
@@ -375,24 +433,29 @@ export default function LoginPage() {
           handleSubmit(e as any)
         }
       }
-      // Navegação por Tab melhorada
       if (e.key === "Tab") {
         addAnnouncement("Navegando pelos campos do formulário")
       }
     },
-    [emailValid, passwordValid],
+    [emailValid, passwordValid, handleSubmit, addAnnouncement],
   )
 
   useEffect(() => {
-    document.addEventListener("keydown", handleKeyDown)
+    document.addEventListener("keydown", handleKeyDown, { passive: false })
     return () => document.removeEventListener("keydown", handleKeyDown)
   }, [handleKeyDown])
 
+  // Memoized form validation
+  const isFormValid = useMemo(() => {
+    return emailValid && passwordValid && !lockoutTime
+  }, [emailValid, passwordValid, lockoutTime])
+
+  // Loading state with skeleton
   if (!checkedAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
         <div className="flex flex-col items-center space-y-6" role="status" aria-live="polite">
-          <div className="relative">
+          <div className="relative w-16 h-16">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
             <div className="absolute inset-0 rounded-full border-2 border-blue-200"></div>
           </div>
@@ -405,10 +468,53 @@ export default function LoginPage() {
     )
   }
 
-  const isFormValid = emailValid && passwordValid && !lockoutTime
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex flex-col relative overflow-hidden">
+      {/* Critical CSS inlined to prevent FOUC */}
+      <style jsx>{`
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-5px); }
+          75% { transform: translateX(5px); }
+        }
+        .shake {
+          animation: shake 0.5s ease-in-out;
+        }
+        .sr-only {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+          border: 0;
+        }
+        .sr-only:focus {
+          position: static;
+          width: auto;
+          height: auto;
+          padding: inherit;
+          margin: inherit;
+          overflow: visible;
+          clip: auto;
+          white-space: normal;
+        }
+        /* Prevent layout shift for logo container */
+        .logo-container {
+          width: 200px;
+          height: 80px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        /* Optimize form container to prevent shifts */
+        .form-container {
+          min-height: 600px;
+        }
+      `}</style>
+
       {/* Screen Reader Announcements */}
       <div aria-live="polite" aria-atomic="true" className="sr-only">
         {announcements.map((announcement, index) => (
@@ -454,15 +560,17 @@ export default function LoginPage() {
           <header className="text-center space-y-6">
             <div className="flex justify-center">
               <div className="relative group">
-                {/* Logo da Prefeitura */}
-                <div className="mb-4">
+                {/* Logo da Prefeitura with fixed dimensions to prevent CLS */}
+                <div className="mb-4 logo-container">
                   <Image
                     src="https://chat.itaguai.rj.gov.br/static/media/logo.67730401.png"
                     alt="Logotipo da Prefeitura Municipal de Itaguaí"
                     width={200}
                     height={80}
-                    className="mx-auto h-16 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                    className="h-16 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
                     priority
+                    placeholder="blur"
+                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAQABQDASIAAhEBAxEB/8QAFwAAAwEAAAAAAAAAAAAAAAAAAAECA//EACQQAAIBAwMEAwEAAAAAAAAAAAECEQADIQQSMUFRYRMicYGRof/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEQMhMf/aAAwDAQACEQMRAD8A5aqKKACiiigAooooAKKKKACiiigD/9k="
                   />
                 </div>
               </div>
@@ -471,16 +579,12 @@ export default function LoginPage() {
             <div className="space-y-3">
               <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Sistema de Biometria</h1>
               <p className="text-gray-600 text-lg">Acesse sua conta com segurança</p>
-              <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
-                <Shield className="w-4 h-4" aria-hidden="true" />
-                <span>Secretaria Municipal de Ciência, Tecnologia e Inovação</span>
-              </div>
             </div>
           </header>
 
-          {/* Card de Login */}
+          {/* Card de Login with fixed min-height to prevent CLS */}
           <section
-            className="bg-white/80 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/60 p-8 space-y-8 transform transition-all duration-300 hover:shadow-3xl"
+            className="bg-white/80 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/60 p-8 space-y-8 transform transition-all duration-300 hover:shadow-3xl form-container"
             aria-labelledby="login-form-title"
           >
             <h2 id="login-form-title" className="sr-only">
@@ -858,38 +962,6 @@ export default function LoginPage() {
           </section>
         </div>
       </main>
-
-      <style jsx>{`
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-5px); }
-          75% { transform: translateX(5px); }
-        }
-        .shake {
-          animation: shake 0.5s ease-in-out;
-        }
-        .sr-only {
-          position: absolute;
-          width: 1px;
-          height: 1px;
-          padding: 0;
-          margin: -1px;
-          overflow: hidden;
-          clip: rect(0, 0, 0, 0);
-          white-space: nowrap;
-          border: 0;
-        }
-        .sr-only:focus {
-          position: static;
-          width: auto;
-          height: auto;
-          padding: inherit;
-          margin: inherit;
-          overflow: visible;
-          clip: auto;
-          white-space: normal;
-        }
-      `}</style>
     </div>
   )
 }
