@@ -125,28 +125,28 @@ module.exports = {
 
         try {
             const query = `
-            SELECT 
-                rp.data_hora::DATE AS data, 
-                rp.hora_entrada, 
-                rp.hora_saida, 
-                rp.horas_normais, 
-                rp.hora_extra, 
-                rp.hora_desconto,
-                rp.total_trabalhado,
-                f.nome AS funcionario_nome, 
-                f.data_admissao, 
-                f.cargo, 
-                f.matricula, 
-                f.tipo_escala,
-                f.cpf,
-                f.email,
-                u.nome AS unidade_nome
-            FROM Registros_Ponto rp
-            INNER JOIN funcionarios f ON rp.funcionario_id = f.id
-            INNER JOIN unidades u ON rp.unidade_id = u.id
-            WHERE f.id = $1 AND EXTRACT(MONTH FROM rp.data_hora) = $2 AND EXTRACT(YEAR FROM rp.data_hora) = $3
-            ORDER BY rp.data_hora ASC
-        `;
+        SELECT 
+            rp.data_hora::DATE AS data, 
+            rp.hora_entrada, 
+            rp.hora_saida, 
+            rp.horas_normais, 
+            rp.hora_extra, 
+            rp.hora_desconto,
+            rp.total_trabalhado,
+            f.nome AS funcionario_nome, 
+            f.data_admissao, 
+            f.cargo, 
+            f.matricula, 
+            f.tipo_escala,
+            f.cpf,
+            f.email,
+            u.nome AS unidade_nome
+        FROM Registros_Ponto rp
+        INNER JOIN funcionarios f ON rp.funcionario_id = f.id
+        INNER JOIN unidades u ON rp.unidade_id = u.id
+        WHERE f.id = $1 AND EXTRACT(MONTH FROM rp.data_hora) = $2 AND EXTRACT(YEAR FROM rp.data_hora) = $3
+        ORDER BY rp.data_hora ASC
+    `;
 
             const result = await db.query(query, [funcionario_id, mes, ano]);
             if (result.rows.length === 0) {
@@ -160,18 +160,33 @@ module.exports = {
             let totalHorasExtras = 0;
             let totalHorasDesconto = 0;
 
+            // Função para converter interval (objeto) em string "HH:mm:ss"
+            function intervalToString(interval) {
+                if (!interval) return '--';
+                if (typeof interval === 'string') return interval; // Já pode estar como string dependendo do driver
+                const h = String(interval.hours || 0).padStart(2, '0');
+                const m = String(interval.minutes || 0).padStart(2, '0');
+                const s = String(interval.seconds || 0).padStart(2, '0');
+                return `${h}:${m}:${s}`;
+            }
+
             const registros = result.rows.map(row => {
-                totalHorasNormais += timeToDecimal(row.total_trabalhado);
-                totalHorasExtras += timeToDecimal(row.hora_extra);
-                totalHorasDesconto += timeToDecimal(row.hora_desconto);
+                // Converte os campos interval do Postgres para string
+                const horas_normais = intervalToString(row.total_trabalhado);
+                const horas_extras = intervalToString(row.hora_extra);
+                const horas_desconto = intervalToString(row.hora_desconto);
+
+                totalHorasNormais += timeToDecimal(horas_normais);
+                totalHorasExtras += timeToDecimal(horas_extras);
+                totalHorasDesconto += timeToDecimal(horas_desconto);
 
                 return {
                     data: format(new Date(row.data), 'dd/MM/yyyy'),
                     hora_entrada: row.hora_entrada || '--',
                     hora_saida: row.hora_saida || '--',
-                    horas_normais: row.total_trabalhado || '--',
-                    horas_extras: row.hora_extra || '--',
-                    horas_desconto: row.hora_desconto || '--',
+                    horas_normais: horas_normais,
+                    horas_extras: horas_extras,
+                    horas_desconto: horas_desconto,
                     justificativa: ' ',
                 };
             });
@@ -199,14 +214,13 @@ module.exports = {
     }
 }
 
-// Converte "HH:mm:ss" para decimal de horas
+// Função utilitária:
 function timeToDecimal(timeStr) {
-    if (!timeStr || timeStr === '00:00:00') return 0;
+    if (!timeStr || timeStr === '--' || timeStr === '00:00:00') return 0;
     const [h, m, s] = timeStr.split(':').map(Number);
     return h + m / 60 + s / 3600;
 }
 
-// Converte decimal de horas para "HH:mm:ss"
 function decimalToHora(decimal) {
     if (!decimal) return '--';
     const horas = Math.floor(decimal);
@@ -214,4 +228,3 @@ function decimalToHora(decimal) {
     const segundos = Math.round((((decimal - horas) * 60) - minutos) * 60);
     return `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
 }
-
