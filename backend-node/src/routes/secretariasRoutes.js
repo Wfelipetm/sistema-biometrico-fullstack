@@ -13,6 +13,8 @@ router.put('/:id', secretariasController.atualizarSecretaria);
 router.delete('/:id', secretariasController.excluirSecretaria);
 router.get('/:id/unidades', secretariasController.listarUnidadesDaSecretaria);
 router.get('/usuario/:id', secretariasController.obterSecretariaPorUsuarioId);
+
+// ---> listar todas as secretarias com o total de registros por secretaria
 router.get('/:id/funcionarios', secretariasController.listarFuncionariosPorSecretaria);
 
 

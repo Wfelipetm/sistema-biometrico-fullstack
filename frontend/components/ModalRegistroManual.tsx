@@ -11,28 +11,13 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
-import {
-  AlertCircle,
-  User,
-  Calendar,
-  Clock,
-  LogIn,
-  LogOut,
-  Check,
-  Loader2,
-  Save,
-  AlertTriangle,
-  HelpCircle,
-} from "lucide-react"
+import { AlertCircle, User, Calendar, Clock, LogIn, LogOut, Check, Loader2, Save } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import { registrarLog } from "@/utils/logger"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 type Funcionario = {
   id: string
   nome: string
-  tipo_escala?: string
 }
 
 type ModalCadastroManualProps = {
@@ -47,12 +32,9 @@ export default function ModalCadastroManual({ open, onOpenChange, onSuccess }: M
 
   const [funcionarioId, setFuncionarioId] = useState("")
   const [funcionarioInput, setFuncionarioInput] = useState("")
-  const [funcionarioSelecionado, setFuncionarioSelecionado] = useState<Funcionario | null>(null)
   const [horaEntrada, setHoraEntrada] = useState("00:00")
   const [horaSaida, setHoraSaida] = useState("00:00")
-  const [dataEntrada, setDataEntrada] = useState(() => new Date().toISOString().slice(0, 10))
-  const [dataSaida, setDataSaida] = useState(() => new Date().toISOString().slice(0, 10))
-  const [tipoRegistro, setTipoRegistro] = useState<"entrada" | "saida" | "completo">("completo")
+  const [data, setData] = useState(() => new Date().toISOString().slice(0, 10))
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
@@ -63,11 +45,7 @@ export default function ModalCadastroManual({ open, onOpenChange, onSuccess }: M
   const router = useRouter()
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Determina se o funcionário tem escala especial (12x36, 24x72)
-  const isEscalaEspecial =
-    funcionarioSelecionado?.tipo_escala && ["12x36", "24x72"].includes(funcionarioSelecionado.tipo_escala)
-
-  useEffect(() => {
+   useEffect(() => {
   const fetchFuncionarios = async () => {
     try {
       if (!user?.id) return
@@ -97,28 +75,14 @@ export default function ModalCadastroManual({ open, onOpenChange, onSuccess }: M
     }
   }, [])
 
-  // Quando um funcionário é selecionado, verifica se tem escala especial
-  useEffect(() => {
-    if (funcionarioSelecionado?.tipo_escala && ["12x36", "24x72"].includes(funcionarioSelecionado.tipo_escala)) {
-      // Para escalas especiais, o padrão é registrar entrada
-      setTipoRegistro("entrada")
-    } else {
-      // Para escalas normais, mantém o registro completo
-      setTipoRegistro("completo")
-    }
-  }, [funcionarioSelecionado])
-
   const filteredFuncionarios = funcionarios.filter((f) => f.nome.toLowerCase().includes(funcionarioInput.toLowerCase()))
 
   const resetForm = () => {
     setFuncionarioId("")
     setFuncionarioInput("")
-    setFuncionarioSelecionado(null)
     setHoraEntrada("00:00")
     setHoraSaida("00:00")
-    setDataEntrada(new Date().toISOString().slice(0, 10))
-    setDataSaida(new Date().toISOString().slice(0, 10))
-    setTipoRegistro("completo")
+    setData(new Date().toISOString().slice(0, 10))
     setError("")
     setSuccess(false)
     setUploadProgress(0)
@@ -126,20 +90,7 @@ export default function ModalCadastroManual({ open, onOpenChange, onSuccess }: M
   }
 
   const isFormValid = () => {
-    if (!funcionarioId) return false
-
-    if (isEscalaEspecial) {
-      // Para escalas especiais, validação depende do tipo de registro
-      if (tipoRegistro === "entrada") {
-        return !!dataEntrada && !!horaEntrada
-      } else if (tipoRegistro === "saida") {
-        return !!dataSaida && !!horaSaida
-      }
-      return false // Não permite registro completo para escalas especiais
-    } else {
-      // Para escalas normais
-      return !!dataEntrada && !!horaEntrada && !!horaSaida
-    }
+    return funcionarioId && data && horaEntrada && horaSaida
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -154,36 +105,13 @@ export default function ModalCadastroManual({ open, onOpenChange, onSuccess }: M
       return
     }
 
-    let body: any = {
+    const body = {
       funcionario_id: funcionarioId,
       unidade_id: unidadeId,
+      hora_entrada: horaEntrada,
+      hora_saida: horaSaida,
+      data,
       id_biometrico: "registro-manual",
-    }
-
-    // Monta o body de acordo com o tipo de registro
-    if (isEscalaEspecial) {
-      if (tipoRegistro === "entrada") {
-        body = {
-          ...body,
-          data_entrada: dataEntrada,
-          hora_entrada: horaEntrada,
-        }
-      } else if (tipoRegistro === "saida") {
-        body = {
-          ...body,
-          data_saida: dataSaida,
-          hora_saida: horaSaida,
-        }
-      }
-    } else {
-      // Para escalas normais
-      body = {
-        ...body,
-        data_entrada: dataEntrada,
-        data_saida: dataSaida || dataEntrada, // Se não informou data de saída, usa a mesma da entrada
-        hora_entrada: horaEntrada,
-        hora_saida: horaSaida,
-      }
     }
 
     console.log("[BODY ENVIADO PARA O SERVIDOR]", body)
@@ -208,7 +136,7 @@ export default function ModalCadastroManual({ open, onOpenChange, onSuccess }: M
       // REGISTRO DE LOG
       const logData = {
         usuario_id: user?.id ?? null,
-        acao: `Registro manual de ponto (${tipoRegistro}) para funcionário ID ${funcionarioId}`,
+        acao: `Registro manual de ponto para funcionário ID ${funcionarioId}`,
         rota: "/reg/registros-ponto",
         metodo_http: "POST",
         status_code: 201,
@@ -251,13 +179,7 @@ export default function ModalCadastroManual({ open, onOpenChange, onSuccess }: M
       console.log("Log de erro manual:", logErro)
       await registrarLog(logErro)
 
-      // Tenta extrair mensagem de erro da API
-      const errorMessage =
-        (err as any)?.response?.data?.error ||
-        (err as any)?.response?.data?.message ||
-        "Erro ao cadastrar o registro. Verifique os dados e tente novamente."
-
-      setError(errorMessage)
+      setError("Erro ao cadastrar o registro. Verifique os dados e tente novamente.")
     } finally {
       setLoading(false)
     }
@@ -266,7 +188,6 @@ export default function ModalCadastroManual({ open, onOpenChange, onSuccess }: M
   const handleFuncionarioSelect = (f: Funcionario) => {
     setFuncionarioId(f.id)
     setFuncionarioInput(f.nome)
-    setFuncionarioSelecionado(f)
     setShowDropdown(false)
   }
 
@@ -326,7 +247,6 @@ export default function ModalCadastroManual({ open, onOpenChange, onSuccess }: M
                   onChange={(e) => {
                     setFuncionarioInput(e.target.value)
                     setFuncionarioId("") // limpa seleção ao digitar
-                    setFuncionarioSelecionado(null)
                     setShowDropdown(true)
                   }}
                   placeholder="Digite o nome do funcionário"
@@ -344,20 +264,7 @@ export default function ModalCadastroManual({ open, onOpenChange, onSuccess }: M
                           className="w-full text-left px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-200 first:rounded-t-lg last:rounded-b-lg"
                           onClick={() => handleFuncionarioSelect(f)}
                         >
-                          <div className="flex justify-between items-center">
-                            <span>{f.nome}</span>
-                            {f.tipo_escala && (
-                              <span
-                                className={`text-xs px-2 py-1 rounded-full ${
-                                  ["12x36", "24x72"].includes(f.tipo_escala)
-                                    ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
-                                    : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
-                                }`}
-                              >
-                                {f.tipo_escala}
-                              </span>
-                            )}
-                          </div>
+                          {f.nome}
                         </button>
                       </li>
                     ))}
@@ -370,54 +277,7 @@ export default function ModalCadastroManual({ open, onOpenChange, onSuccess }: M
                   </div>
                 )}
               </div>
-
-              {/* Exibe informação sobre escala especial */}
-              {funcionarioSelecionado && isEscalaEspecial && (
-                <Alert className="bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800/30">
-                  <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                  <AlertDescription className="text-amber-700 dark:text-amber-300">
-                    Este funcionário possui escala especial ({funcionarioSelecionado.tipo_escala}). Registre entrada e
-                    saída separadamente.
-                  </AlertDescription>
-                </Alert>
-              )}
             </div>
-
-            {/* Tipo de Registro para Escalas Especiais */}
-            {funcionarioSelecionado && isEscalaEspecial && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-2 flex items-center gap-2">
-                  Tipo de Registro
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <HelpCircle className="h-4 w-4 text-gray-500 dark:text-gray-400 cursor-help" />
-                      </TooltipTrigger>
-                      <TooltipContent className="max-w-xs">
-                        Para escalas especiais, registre entrada e saída separadamente.
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </h3>
-
-                <Tabs
-                  value={tipoRegistro}
-                  onValueChange={(v) => setTipoRegistro(v as "entrada" | "saida" | "completo")}
-                  className="w-full"
-                >
-                  <TabsList className="grid grid-cols-2 w-full">
-                    <TabsTrigger value="entrada" className="flex items-center gap-2">
-                      <LogIn className="w-4 h-4" />
-                      <span>Entrada</span>
-                    </TabsTrigger>
-                    <TabsTrigger value="saida" className="flex items-center gap-2">
-                      <LogOut className="w-4 h-4" />
-                      <span>Saída</span>
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
-              </div>
-            )}
 
             {/* Data e Horários */}
             <div className="space-y-4">
@@ -425,131 +285,55 @@ export default function ModalCadastroManual({ open, onOpenChange, onSuccess }: M
                 Data e Horários
               </h3>
 
-              {/* Para escalas especiais */}
-              {funcionarioSelecionado && isEscalaEspecial ? (
-                <div>
-                  {tipoRegistro === "entrada" ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Data de Entrada */}
-                      <div className="space-y-2">
-                        <Label htmlFor="dataEntrada" className="text-sm font-medium flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                          Data de Entrada
-                        </Label>
-                        <Input
-                          id="dataEntrada"
-                          type="date"
-                          value={dataEntrada}
-                          onChange={(e) => setDataEntrada(e.target.value)}
-                          required
-                          className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400 focus:ring-gray-200 dark:focus:ring-gray-600"
-                        />
-                      </div>
-
-                      {/* Hora de Entrada */}
-                      <div className="space-y-2">
-                        <Label htmlFor="horaEntrada" className="text-sm font-medium flex items-center gap-2">
-                          <LogIn className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                          Hora de Entrada
-                        </Label>
-                        <Input
-                          id="horaEntrada"
-                          type="time"
-                          value={horaEntrada}
-                          onChange={(e) => setHoraEntrada(e.target.value)}
-                          required
-                          className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400 focus:ring-gray-200 dark:focus:ring-gray-600"
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Data de Saída */}
-                      <div className="space-y-2">
-                        <Label htmlFor="dataSaida" className="text-sm font-medium flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                          Data de Saída
-                        </Label>
-                        <Input
-                          id="dataSaida"
-                          type="date"
-                          value={dataSaida}
-                          onChange={(e) => setDataSaida(e.target.value)}
-                          required
-                          className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400 focus:ring-gray-200 dark:focus:ring-gray-600"
-                        />
-                      </div>
-
-                      {/* Hora de Saída */}
-                      <div className="space-y-2">
-                        <Label htmlFor="horaSaida" className="text-sm font-medium flex items-center gap-2">
-                          <LogOut className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                          Hora de Saída
-                        </Label>
-                        <Input
-                          id="horaSaida"
-                          type="time"
-                          value={horaSaida}
-                          onChange={(e) => setHoraSaida(e.target.value)}
-                          required
-                          className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400 focus:ring-gray-200 dark:focus:ring-gray-600"
-                        />
-                      </div>
-                    </div>
-                  )}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Data */}
+                <div className="space-y-2">
+                  <Label htmlFor="data" className="text-sm font-medium flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                    Data
+                  </Label>
+                  <Input
+                    id="data"
+                    type="date"
+                    value={data}
+                    onChange={(e) => setData(e.target.value)}
+                    required
+                    className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400 focus:ring-gray-200 dark:focus:ring-gray-600"
+                  />
                 </div>
-              ) : (
-                /* Para escalas normais */
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* Data */}
-                  <div className="space-y-2">
-                    <Label htmlFor="dataEntrada" className="text-sm font-medium flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                      Data
-                    </Label>
-                    <Input
-                      id="dataEntrada"
-                      type="date"
-                      value={dataEntrada}
-                      onChange={(e) => setDataEntrada(e.target.value)}
-                      required
-                      className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400 focus:ring-gray-200 dark:focus:ring-gray-600"
-                    />
-                  </div>
 
-                  {/* Hora de Entrada */}
-                  <div className="space-y-2">
-                    <Label htmlFor="horaEntrada" className="text-sm font-medium flex items-center gap-2">
-                      <LogIn className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                      Entrada
-                    </Label>
-                    <Input
-                      id="horaEntrada"
-                      type="time"
-                      value={horaEntrada}
-                      onChange={(e) => setHoraEntrada(e.target.value)}
-                      required
-                      className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400 focus:ring-gray-200 dark:focus:ring-gray-600"
-                    />
-                  </div>
-
-                  {/* Hora de Saída */}
-                  <div className="space-y-2">
-                    <Label htmlFor="horaSaida" className="text-sm font-medium flex items-center gap-2">
-                      <LogOut className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                      Saída
-                    </Label>
-                    <Input
-                      id="horaSaida"
-                      type="time"
-                      value={horaSaida}
-                      onChange={(e) => setHoraSaida(e.target.value)}
-                      required
-                      className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400 focus:ring-gray-200 dark:focus:ring-gray-600"
-                    />
-                  </div>
+                {/* Hora de Entrada */}
+                <div className="space-y-2">
+                  <Label htmlFor="horaEntrada" className="text-sm font-medium flex items-center gap-2">
+                    <LogIn className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                    Entrada
+                  </Label>
+                  <Input
+                    id="horaEntrada"
+                    type="time"
+                    value={horaEntrada}
+                    onChange={(e) => setHoraEntrada(e.target.value)}
+                    required
+                    className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400 focus:ring-gray-200 dark:focus:ring-gray-600"
+                  />
                 </div>
-              )}
+
+                {/* Hora de Saída */}
+                <div className="space-y-2">
+                  <Label htmlFor="horaSaida" className="text-sm font-medium flex items-center gap-2">
+                    <LogOut className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                    Saída
+                  </Label>
+                  <Input
+                    id="horaSaida"
+                    type="time"
+                    value={horaSaida}
+                    onChange={(e) => setHoraSaida(e.target.value)}
+                    required
+                    className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400 focus:ring-gray-200 dark:focus:ring-gray-600"
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Progress Bar durante upload */}
