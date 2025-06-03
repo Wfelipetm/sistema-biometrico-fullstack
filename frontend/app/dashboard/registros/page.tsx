@@ -246,6 +246,20 @@ export default function RegistrosPage() {
     }
   }
 
+function formatInterval(interval: any) {
+  if (!interval) return "-";
+  // Se vier string (ex: "23:00:00"), retorna direto
+  if (typeof interval === "string") return interval;
+  // Se vier objeto { days, hours, minutes, seconds }
+  const d = interval.days ?? 0;
+  const h = interval.hours ?? 0;
+  const m = interval.minutes ?? 0;
+  const s = interval.seconds ?? 0;
+  const totalHours = d * 24 + h;
+  return `${totalHours.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+}
+
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -332,13 +346,13 @@ export default function RegistrosPage() {
                     {pagedRegistros.length > 0 ? (
                       pagedRegistros.map((registro) => (
                         <TableRow key={registro.id}>
-                          <TableCell className="font-medium">{registro.funcionario_nome}</TableCell>
-                          <TableCell>{registro.unidade_nome}</TableCell>
-                          <TableCell>{formatDate(registro.data_hora)}</TableCell>
-                          <TableCell>{registro.hora_entrada || "-"}</TableCell>
-                          <TableCell>{registro.hora_saida || "-"}</TableCell>
-                          <TableCell>{registro.hora_extra || "-"}</TableCell>
-                          <TableCell>{registro.hora_desconto || "-"}</TableCell>
+                         <TableCell className="font-medium">{registro.funcionario_nome}</TableCell>
+  <TableCell>{registro.unidade_nome}</TableCell>
+  <TableCell>{formatDate(registro.data_hora)}</TableCell>
+  <TableCell>{registro.hora_entrada || "-"}</TableCell>
+  <TableCell>{registro.hora_saida || "-"}</TableCell>
+  <TableCell>{formatInterval(registro.hora_extra)}</TableCell>
+  <TableCell>{formatInterval(registro.hora_desconto)}</TableCell>
                           {user?.papel !== "gestor" && (
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-2">

@@ -5,264 +5,87 @@ module.exports = {
 
     // POST
     // Cria um novo registro de ponto (entrada ou saída) para um funcionário em uma unidade.
+
     async criarRegistroPonto(req, res) {
-        // Recebe os dados da requisição
-        const {
-            funcionario_id,
-            unidade_id,
-            hora_entrada,
-            hora_saida,
-            id_biometrico,
-            data_entrada,
-            data_saida,
-            data, // compatibilidade com formato antigo
-        } = req.body
+        const { funcionario_id, unidade_id, hora_entrada, hora_saida, id_biometrico, data } = req.body;
 
-        console.log("[DEBUG] Requisição recebida:", req.body)
+        console.log('[DEBUG] Requisição recebida:', req.body);
 
-        // Validação básica
-        if (!funcionario_id || !unidade_id) {
+        if (!funcionario_id || !unidade_id || !hora_entrada || !hora_saida || !data) {
+            console.warn('[AVISO] Campos obrigatórios ausentes:', { funcionario_id, unidade_id, hora_entrada, hora_saida, data });
             return res.status(400).json({
-                error: "Campos obrigatórios: funcionario_id, unidade_id",
-            })
-        }
-
-        // Verifica se é entrada ou saída (pelo menos um deve estar preenchido)
-        if (!hora_entrada && !hora_saida) {
-            return res.status(400).json({
-                error: "Você deve informar pelo menos hora_entrada ou hora_saida",
-            })
+                error: 'Todos os campos são obrigatórios (funcionario_id, unidade_id, hora_entrada, hora_saida, data)',
+            });
         }
 
         try {
-            // Verifica existência do funcionário e obtém tipo de escala
-            console.log("[DEBUG] Verificando existência do funcionário...")
-            const funcionarioResult = await db.query(`SELECT id, nome, tipo_escala FROM funcionarios WHERE id = $1`, [
-                funcionario_id,
-            ])
+            console.log('[DEBUG] Verificando existência do funcionário...');
+            const funcionarioResult = await db.query(
+                `SELECT id, nome FROM funcionarios WHERE id = $1`,
+                [funcionario_id]
+            );
 
             if (funcionarioResult.rows.length === 0) {
-                console.warn("[ERRO] Funcionário não encontrado:", funcionario_id)
-                return res.status(404).json({ error: "Funcionário não encontrado" })
+                console.warn('[ERRO] Funcionário não encontrado:', funcionario_id);
+                return res.status(404).json({ error: 'Funcionário não encontrado' });
             }
 
-            const funcionario = funcionarioResult.rows[0]
-            console.log("[DEBUG] Funcionário encontrado:", funcionario.nome, "Escala:", funcionario.tipo_escala)
+            const funcionarioNome = funcionarioResult.rows[0].nome;
 
-            // Verifica existência da unidade
-            console.log("[DEBUG] Verificando existência da unidade...")
-            const unidadeResult = await db.query(`SELECT id, nome FROM unidades WHERE id = $1`, [unidade_id])
+            console.log('[DEBUG] Verificando existência da unidade...');
+            const unidadeResult = await db.query(
+                `SELECT id, nome FROM unidades WHERE id = $1`,
+                [unidade_id]
+            );
 
             if (unidadeResult.rows.length === 0) {
-                console.warn("[ERRO] Unidade não encontrada:", unidade_id)
-                return res.status(404).json({ error: "Unidade não encontrada" })
+                console.warn('[ERRO] Unidade não encontrada:', unidade_id);
+                return res.status(404).json({ error: 'Unidade não encontrada' });
             }
 
-            const unidadeNome = unidadeResult.rows[0].nome
+            const unidadeNome = unidadeResult.rows[0].nome;
 
-            // Determina se é escala especial
-            const isEscalaEspecial = ["12x36", "24x72"].includes(funcionario.tipo_escala)
-            console.log("[DEBUG] Escala especial:", isEscalaEspecial ? "SIM" : "NÃO")
+            const dataFormatadaISO = data; // Assume que o frontend envia '2025-05-08'
+            console.log('[DEBUG] Data recebida:', dataFormatadaISO);
 
-            // 🔄 Compatibilidade: aceita tanto formato novo quanto antigo
-            const dataEntradaFinal = data_entrada || data || new Date().toISOString().split("T")[0]
-            const dataSaidaFinal = data_saida || data || new Date().toISOString().split("T")[0]
+            // Verifica se já existe ponto registrado no dia
+            console.log('[DEBUG] Verificando se o funcionário já bateu ponto hoje...');
+            const pontoExistente = await db.query(
+                `
+                SELECT id FROM Registros_Ponto 
+                WHERE funcionario_id = $1 AND data_hora = $2
+                `,
+                [funcionario_id, dataFormatadaISO]
+            );
 
-            // Determina a data_hora para compatibilidade
-            let dataHora
-            if (hora_entrada) {
-                dataHora = `${dataEntradaFinal}T${hora_entrada}:00`
-            } else if (hora_saida) {
-                dataHora = `${dataSaidaFinal}T${hora_saida}:00`
-            } else {
-                dataHora = new Date().toISOString()
+            if (pontoExistente.rows.length > 0) {
+                console.warn('[INFO] Ponto já registrado para o funcionário:', funcionario_id);
+                return res.status(200).json({ message: 'Você já bateu o ponto hoje.' });
             }
 
-            // LÓGICA PARA ESCALAS ESPECIAIS
-            if (isEscalaEspecial) {
-                console.log("[DEBUG] Aplicando lógica para escala especial:", funcionario.tipo_escala)
+            console.log('[DEBUG] Inserindo registro de ponto...');
+            const result = await db.query(
+                `
+                INSERT INTO Registros_Ponto (funcionario_id, unidade_id, data_hora, hora_entrada, hora_saida, id_biometrico)
+                VALUES ($1, $2, $3, $4, $5, $6)
+                RETURNING *
+                `,
+                [funcionario_id, unidade_id, dataFormatadaISO, hora_entrada, hora_saida, id_biometrico || null]
+            );
 
-                // CASO 1: REGISTRANDO ENTRADA (hora_entrada preenchida)
-                if (hora_entrada) {
-                    console.log("[DEBUG] Registrando ENTRADA para escala especial")
+            return res.status(201).json({
+                ...result.rows[0],
+                data_hora: dataFormatadaISO,
+                funcionario_nome: funcionarioNome,
+                unidade_nome: unidadeNome,
+            });
 
-                    // Verifica se já existe entrada em aberto
-                    const entradaAberta = await db.query(
-                        `SELECT id, data_entrada, hora_entrada 
-             FROM registros_ponto 
-             WHERE funcionario_id = $1 AND hora_saida IS NULL AND hora_entrada IS NOT NULL
-               AND data_entrada >= CURRENT_DATE - INTERVAL '3 days'
-             ORDER BY data_entrada DESC, hora_entrada DESC LIMIT 1`,
-                        [funcionario_id],
-                    )
-
-                    if (entradaAberta.rows.length > 0) {
-                        const registro = entradaAberta.rows[0]
-                        console.warn("[ERRO] Funcionário já possui entrada em aberto:", registro)
-                        return res.status(400).json({
-                            error: `Funcionário já possui entrada em aberto desde ${registro.data_entrada} às ${registro.hora_entrada}. Complete a saída antes de registrar nova entrada.`,
-                        })
-                    }
-
-                    // Cria novo registro com ENTRADA preenchida e SAÍDA NULL
-                    const result = await db.query(
-                        `INSERT INTO registros_ponto (
-                funcionario_id, unidade_id, data_hora, 
-                data_entrada, hora_entrada, 
-                data_saida, hora_saida, 
-                id_biometrico
-            ) VALUES ($1, $2, $3, $4, $5, NULL, NULL, $6) 
-            RETURNING *`,
-                        [funcionario_id, unidade_id, dataHora, dataEntradaFinal, hora_entrada, id_biometrico || null],
-                    )
-
-                    console.log("[SUCCESS] ✅ Registro de ENTRADA criado com sucesso:", {
-                        id: result.rows[0].id,
-                        funcionario: funcionario.nome,
-                        escala: funcionario.tipo_escala,
-                        entrada: `${dataEntradaFinal} ${hora_entrada}`,
-                    })
-
-                    return res.status(201).json({
-                        ...result.rows[0],
-                        funcionario_nome: funcionario.nome,
-                        unidade_nome: unidadeNome,
-                        tipo_escala: funcionario.tipo_escala,
-                        mensagem: "Entrada registrada com sucesso",
-                    })
-                }
-
-                // CASO 2: REGISTRANDO SAÍDA (hora_saida preenchida)
-                if (hora_saida) {
-                    console.log("[DEBUG] Registrando SAÍDA para escala especial")
-
-                    // Verifica se existe entrada em aberto para fechar
-                    const entradaAberta = await db.query(
-                        `SELECT id, data_entrada, hora_entrada 
-             FROM registros_ponto 
-             WHERE funcionario_id = $1 AND hora_saida IS NULL AND hora_entrada IS NOT NULL
-               AND data_entrada >= CURRENT_DATE - INTERVAL '3 days'
-             ORDER BY data_entrada DESC, hora_entrada DESC LIMIT 1`,
-                        [funcionario_id],
-                    )
-
-                    if (entradaAberta.rows.length === 0) {
-                        console.warn("[ERRO] Funcionário não possui entrada em aberto para registrar saída")
-                        return res.status(400).json({
-                            error: "Funcionário não possui entrada em aberto para registrar saída. Registre uma entrada primeiro.",
-                        })
-                    }
-
-                    // Cria novo registro com ENTRADA NULL e SAÍDA preenchida
-                    const result = await db.query(
-                        `INSERT INTO registros_ponto (
-                funcionario_id, unidade_id, data_hora, 
-                data_entrada, hora_entrada, 
-                data_saida, hora_saida, 
-                id_biometrico
-            ) VALUES ($1, $2, $3, NULL, NULL, $4, $5, $6) 
-            RETURNING *`,
-                        [funcionario_id, unidade_id, dataHora, dataSaidaFinal, hora_saida, id_biometrico || null],
-                    )
-
-                    // Calcula duração do turno
-                    const entradaRegistro = entradaAberta.rows[0]
-                    const entradaDateTime = new Date(`${entradaRegistro.data_entrada}T${entradaRegistro.hora_entrada}:00`)
-                    const saidaDateTime = new Date(`${dataSaidaFinal}T${hora_saida}:00`)
-                    const diffMs = saidaDateTime.getTime() - entradaDateTime.getTime()
-                    const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-                    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60))
-                    const duracaoTurno = `${diffHours}h ${diffMinutes}min`
-
-                    console.log("[SUCCESS] ✅ Registro de SAÍDA criado com sucesso:", {
-                        id: result.rows[0].id,
-                        funcionario: funcionario.nome,
-                        escala: funcionario.tipo_escala,
-                        saida: `${dataSaidaFinal} ${hora_saida}`,
-                        entrada_relacionada: `${entradaRegistro.data_entrada} ${entradaRegistro.hora_entrada}`,
-                        duracao: duracaoTurno,
-                    })
-
-                    return res.status(201).json({
-                        ...result.rows[0],
-                        funcionario_nome: funcionario.nome,
-                        unidade_nome: unidadeNome,
-                        tipo_escala: funcionario.tipo_escala,
-                        entrada_relacionada: {
-                            id: entradaRegistro.id,
-                            data: entradaRegistro.data_entrada,
-                            hora: entradaRegistro.hora_entrada,
-                        },
-                        duracao_turno: duracaoTurno,
-                        mensagem: "Saída registrada com sucesso",
-                    })
-                }
-            } else {
-                // LÓGICA PARA ESCALAS NORMAIS (não especiais)
-                console.log("[DEBUG] Aplicando lógica para escala normal")
-
-                // Verifica se já existe ponto registrado no mesmo instante
-                const pontoExistente = await db.query(
-                    `SELECT id FROM registros_ponto 
-           WHERE funcionario_id = $1 AND data_hora = $2`,
-                    [funcionario_id, dataHora],
-                )
-
-                if (pontoExistente.rows.length > 0) {
-                    console.warn("[INFO] Ponto já registrado para o funcionário:", funcionario_id)
-                    return res.status(200).json({ message: "Você já bateu o ponto neste horário." })
-                }
-
-                // Para escalas normais, cria registro completo com entrada e saída
-                const result = await db.query(
-                    `INSERT INTO registros_ponto (
-              funcionario_id, unidade_id, data_hora, 
-              data_entrada, hora_entrada, 
-              data_saida, hora_saida, 
-              id_biometrico
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
-          RETURNING *`,
-                    [
-                        funcionario_id,
-                        unidade_id,
-                        dataHora,
-                        dataEntradaFinal,
-                        hora_entrada,
-                        dataSaidaFinal,
-                        hora_saida,
-                        id_biometrico || null,
-                    ],
-                )
-
-                console.log("[SUCCESS] ✅ Registro normal criado com sucesso:", {
-                    id: result.rows[0].id,
-                    funcionario: funcionario.nome,
-                    escala: funcionario.tipo_escala,
-                })
-
-                return res.status(201).json({
-                    ...result.rows[0],
-                    funcionario_nome: funcionario.nome,
-                    unidade_nome: unidadeNome,
-                    tipo_escala: funcionario.tipo_escala,
-                    mensagem: "Registro de ponto criado com sucesso",
-                })
-            }
         } catch (error) {
-            console.error("[ERRO] Falha ao criar registro de ponto:", error.message)
-            console.error("[STACK]", error.stack)
-
-            // Tratamento específico para erros de trigger
-            if (error.message.includes("deve ser posterior") || error.message.includes("negativo")) {
-                return res.status(400).json({
-                    error: "Erro de validação de horários. Verifique se a data/hora de saída é posterior à entrada.",
-                    details: error.message,
-                })
-            }
-
-            return res.status(500).json({ error: "Erro ao registrar ponto. Contate o suporte." })
+            console.error('[ERRO] Falha ao criar registro de ponto:', error.message);
+            return res.status(500).json({ error: 'Erro ao registrar ponto. Contate o suporte.' });
         }
-    },
+    }
+    ,
 
     // GET
     // Listar todos os registros de ponto de todos os funcionários, incluindo dados de biometria e a unidade.
