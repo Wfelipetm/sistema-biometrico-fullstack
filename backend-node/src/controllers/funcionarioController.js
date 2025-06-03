@@ -111,35 +111,50 @@ module.exports = {
     } = req.body;
 
     try {
+      // Busca os dados atuais do funcionário
+      const { rows } = await db.query("SELECT * FROM funcionarios WHERE id = $1", [id]);
+      if (rows.length === 0) {
+        return res.status(404).json({ error: "Funcionário não encontrado" });
+      }
+
+      const funcionarioAtual = rows[0];
+
+      // Usa valor enviado ou o atual se não enviado
+      const updatedNome = nome !== undefined ? nome : funcionarioAtual.nome;
+      const updatedCpf = cpf !== undefined ? cpf : funcionarioAtual.cpf;
+      const updatedCargo = cargo !== undefined ? cargo : funcionarioAtual.cargo;
+      const updatedDataAdmissao = data_admissao !== undefined ? data_admissao : funcionarioAtual.data_admissao;
+      const updatedUnidadeId = unidade_id !== undefined ? unidade_id : funcionarioAtual.unidade_id;
+      const updatedMatricula = matricula !== undefined ? matricula : funcionarioAtual.matricula;
+      const updatedTipoEscala = tipo_escala !== undefined ? tipo_escala : funcionarioAtual.tipo_escala;
+      const updatedTelefone = telefone !== undefined ? telefone : funcionarioAtual.telefone;
+
+      // Atualiza no banco
       const result = await db.query(
         `UPDATE funcionarios
-         SET nome = $1,
-             cpf = $2,
-             cargo = $3,
-             data_admissao = $4,
-             unidade_id = $5,
-             matricula = $6,
-             tipo_escala = $7,
-             telefone = $8,
-             updated_at = CURRENT_TIMESTAMP
-         WHERE id = $9
-         RETURNING *`,
+       SET nome = $1,
+           cpf = $2,
+           cargo = $3,
+           data_admissao = $4,
+           unidade_id = $5,
+           matricula = $6,
+           tipo_escala = $7,
+           telefone = $8,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = $9
+       RETURNING *`,
         [
-          nome,
-          cpf,
-          cargo,
-          data_admissao,
-          unidade_id,
-          matricula,
-          tipo_escala,
-          telefone,
+          updatedNome,
+          updatedCpf,
+          updatedCargo,
+          updatedDataAdmissao,
+          updatedUnidadeId,
+          updatedMatricula,
+          updatedTipoEscala,
+          updatedTelefone,
           id
         ]
       );
-
-      if (result.rowCount === 0) {
-        return res.status(404).json({ error: "Funcionário não encontrado" });
-      }
 
       res.status(200).json(result.rows[0]);
     } catch (error) {
@@ -147,8 +162,6 @@ module.exports = {
     }
   }
   ,
-
-
 
 
   async listarFuncionariosPorUnidade(req, res) {

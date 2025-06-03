@@ -238,13 +238,16 @@ export default function RegistrosPage() {
 
   const pagedRegistros = registrosOrdenados.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
-  const formatDate = (dateString: string) => {
-    try {
-      return format(new Date(dateString), "dd/MM/yyyy", { locale: ptBR })
-    } catch {
-      return dateString
-    }
+const formatDate = (dateString: string) => {
+  try {
+    // Pega só os primeiros 10 caracteres que correspondem a "yyyy-MM-dd"
+    const datePart = dateString.slice(0, 10); // Ex: "2025-06-03"
+    const [year, month, day] = datePart.split("-");
+    return `${day}/${month}/${year}`;
+  } catch {
+    return dateString;
   }
+};
 
 function formatInterval(interval: any) {
   if (!interval) return "-";
