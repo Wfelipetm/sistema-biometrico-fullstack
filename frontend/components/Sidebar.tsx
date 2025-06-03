@@ -22,10 +22,6 @@ import {
   Sparkles,
 } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
-import { useTheme } from "next-themes"
-import logoDark from "../public/images/logo_biometrico_dark4.png"
-import logoLight from "../public/images/logo_biometrico_light4.png"
-import Image from "next/image"
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   collapsed?: boolean
@@ -78,16 +74,13 @@ const NavLink = memo(
         <Link
           href={href}
           className={cn(
-            "flex items-center gap-2 sm:gap-3 rounded-lg sm:rounded-xl text-sm font-medium transition-all duration-200",
-            "hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:shadow-sm",
-            "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-background",
-            "dark:hover:from-blue-950/50 dark:hover:to-indigo-950/50",
-            "cursor-pointer",
-            active
-              ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/25"
-              : "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white",
-            collapsed ? "justify-center px-2 sm:px-3 py-3 sm:py-3.5" : "px-3 sm:px-4 py-3 sm:py-3.5",
-            isMobile ? "min-h-[48px]" : "min-h-[44px]", // Área de toque consistente
+            "flex items-center gap-3 rounded-xl text-sm font-semibold transition-all duration-300",
+            "hover:bg-gradient-to-r hover:from-itaguai-50 hover:to-itaguai-100 hover:shadow-sm",
+            "focus:outline-none focus:ring-2 focus:ring-itaguai-500 focus:ring-offset-2 focus:ring-offset-background",
+            "cursor-pointer transform hover:scale-[1.02]",
+            active ? "bg-gradient-itaguai text-white shadow-itaguai" : "text-itaguai-700 hover:text-itaguai-900",
+            collapsed ? "justify-center px-3 py-4" : "px-4 py-4",
+            isMobile ? "min-h-[52px]" : "min-h-[48px]",
           )}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
@@ -97,9 +90,9 @@ const NavLink = memo(
           <div className="flex items-center justify-center flex-shrink-0">
             <Icon
               className={cn(
-                "h-5 w-5 transition-all duration-200",
-                active ? "text-white drop-shadow-sm" : "text-slate-600 dark:text-slate-400",
-                isHovered && !active ? "text-blue-600 dark:text-blue-400" : "",
+                "h-5 w-5 transition-all duration-300",
+                active ? "text-white drop-shadow-sm" : "text-itaguai-600",
+                isHovered && !active ? "text-itaguai-700 scale-110" : "",
               )}
             />
           </div>
@@ -112,10 +105,10 @@ const NavLink = memo(
                 <Badge
                   variant={active ? "secondary" : "outline"}
                   className={cn(
-                    "ml-2 h-5 px-2 text-xs font-semibold transition-all duration-200 flex-shrink-0",
+                    "ml-2 h-5 px-2 text-xs font-bold transition-all duration-300 flex-shrink-0",
                     active
                       ? "bg-white/20 text-white border-white/30"
-                      : "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800",
+                      : "bg-itaguai-50 text-itaguai-700 border-itaguai-200",
                   )}
                 >
                   {badge}
@@ -134,17 +127,17 @@ const NavLink = memo(
         {collapsed && !isMobile && (
           <div
             className={cn(
-              "absolute left-full ml-3 top-1/2 -translate-y-1/2 z-50",
-              "bg-slate-900 text-white text-sm px-3 py-2 rounded-lg shadow-lg",
-              "opacity-0 pointer-events-none transition-all duration-200 whitespace-nowrap",
+              "absolute left-full ml-4 top-1/2 -translate-y-1/2 z-50",
+              "bg-itaguai-900 text-white text-sm px-3 py-2 rounded-xl shadow-itaguai-lg",
+              "opacity-0 pointer-events-none transition-all duration-300 whitespace-nowrap",
               "group-hover:opacity-100 group-hover:pointer-events-auto group-hover:translate-x-1",
               "before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:-translate-x-1",
-              "before:border-4 before:border-transparent before:border-r-slate-900",
+              "before:border-4 before:border-transparent before:border-r-itaguai-900",
             )}
           >
             <div className="font-semibold text-sm leading-tight">{label}</div>
             {description && (
-              <div className="text-xs text-slate-300 mt-1 leading-relaxed font-normal">{description}</div>
+              <div className="text-xs text-itaguai-300 mt-1 leading-relaxed font-normal">{description}</div>
             )}
           </div>
         )}
@@ -156,23 +149,26 @@ NavLink.displayName = "NavLink"
 
 // Enhanced Footer component with responsive design
 const SidebarFooter = memo(({ collapsed, isMobile }: { collapsed: boolean; isMobile: boolean }) => (
-  <div className="mt-auto border-t bg-gradient-to-r from-slate-50 to-blue-50 dark:from-slate-900 dark:to-blue-950">
-    <div className={cn("transition-all duration-200", collapsed ? "p-2 sm:p-3" : "p-3 sm:p-4")}>
+  <div className="mt-auto border-t border-itaguai-200 bg-gradient-to-r from-itaguai-50 to-white">
+    <div className={cn("transition-all duration-300", collapsed ? "p-3" : "p-4")}>
       {!collapsed ? (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-400">
-            <Sparkles className="h-3 w-3 text-blue-500 flex-shrink-0" />
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 text-xs font-semibold text-itaguai-600">
+            <Sparkles className="h-3 w-3 text-itaguai-500 flex-shrink-0" />
             <span className="truncate leading-tight">Sistema Biométrico v2.0</span>
           </div>
           {!isMobile && (
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-normal">
-              © 2025 Desenvolvido por <span className="font-semibold text-blue-600 dark:text-blue-400">SMCTIC</span>
-            </p>
+            <div className="text-xs text-itaguai-500 leading-relaxed font-medium space-y-1">
+              <p>© 2025 Prefeitura de Itaguaí</p>
+              <p>
+                Desenvolvido por <span className="font-semibold text-itaguai-600">SMCTIC</span>
+              </p>
+            </div>
           )}
         </div>
       ) : (
         <div className="flex justify-center">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+          <div className="w-10 h-10 bg-gradient-itaguai rounded-xl flex items-center justify-center shadow-itaguai">
             <Sparkles className="h-4 w-4 text-white" />
           </div>
         </div>
@@ -185,13 +181,11 @@ SidebarFooter.displayName = "SidebarFooter"
 // Enhanced Logo component with better responsive design
 const SidebarLogo = memo(
   ({
-    theme,
     isGestor,
     collapsed,
     onToggleCollapse,
     isMobile,
   }: {
-    theme: string | undefined
     isGestor: boolean
     collapsed: boolean
     onToggleCollapse: () => void
@@ -199,43 +193,33 @@ const SidebarLogo = memo(
   }) => (
     <div
       className={cn(
-        "relative border-b bg-gradient-to-r from-white to-blue-50 dark:from-slate-900 dark:to-blue-950",
+        "relative border-b border-itaguai-200 bg-gradient-to-r from-white to-itaguai-50",
         "transition-all duration-300",
-        collapsed ? "h-16 sm:h-18" : "h-18 sm:h-20",
+        collapsed ? "h-18" : "h-20",
       )}
     >
-      <div
-        className={cn(
-          "h-full flex items-center",
-          collapsed ? "justify-center px-2 sm:px-3" : "justify-between px-3 sm:px-4",
-        )}
-      >
+      <div className={cn("h-full flex items-center", collapsed ? "justify-center px-3" : "justify-between px-4")}>
         {/* Logo/Brand area com alinhamento centralizado */}
         <Link
           href={isGestor ? "/dashboard/unidades" : "/dashboard"}
           className={cn(
-            "flex items-center gap-2 font-semibold transition-all duration-200",
-            "hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg",
+            "flex items-center gap-3 font-bold transition-all duration-300",
+            "hover:scale-105 focus:outline-none focus:ring-2 focus:ring-itaguai-500 focus:ring-offset-2 rounded-xl",
             collapsed ? "p-2" : "flex-1 py-2",
           )}
         >
           {collapsed ? (
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-              <Home className="h-5 w-5 text-white" />
+            <div className="w-12 h-12 bg-gradient-itaguai rounded-xl flex items-center justify-center shadow-itaguai">
+              <Home className="h-6 w-6 text-white" />
             </div>
           ) : (
-            <div className="flex items-center justify-start w-full">
-              <Image
-                src={theme === "light" ? logoLight : logoDark}
-                alt="Logo Prefeitura Itaguaí - Sistema Biométrico"
-                style={{
-                  height: isMobile ? 44 : 52,
-                  width: "auto",
-                  maxWidth: isMobile ? 200 : 260,
-                }}
-                className="object-contain transition-transform duration-200 hover:scale-105"
-                priority
-              />
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-itaguai rounded-xl flex items-center justify-center shadow-itaguai">
+                <Building2 className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-itaguai-900 tracking-tight leading-tight">Sistema Biométrico</h2>
+              </div>
             </div>
           )}
         </Link>
@@ -246,10 +230,10 @@ const SidebarLogo = memo(
             variant="ghost"
             size="icon"
             onClick={onToggleCollapse}
-            className="h-8 w-8 flex-shrink-0 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="h-9 w-9 flex-shrink-0 hover:bg-itaguai-100 transition-all duration-300 focus:ring-2 focus:ring-itaguai-500 focus:ring-offset-2 rounded-xl"
             aria-label="Recolher sidebar"
           >
-            <ChevronLeft className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+            <ChevronLeft className="h-4 w-4 text-itaguai-600" />
           </Button>
         )}
 
@@ -258,10 +242,10 @@ const SidebarLogo = memo(
             variant="ghost"
             size="icon"
             onClick={onToggleCollapse}
-            className="absolute -right-3 top-1/2 -translate-y-1/2 h-6 w-6 bg-white dark:bg-slate-800 border shadow-md hover:bg-blue-50 dark:hover:bg-blue-900/50 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="absolute -right-4 top-1/2 -translate-y-1/2 h-8 w-8 bg-white border border-itaguai-200 shadow-itaguai hover:bg-itaguai-50 transition-all duration-300 focus:ring-2 focus:ring-itaguai-500 focus:ring-offset-2 rounded-xl"
             aria-label="Expandir sidebar"
           >
-            <ChevronRight className="h-3 w-3 text-slate-600 dark:text-slate-400" />
+            <ChevronRight className="h-3 w-3 text-itaguai-600" />
           </Button>
         )}
       </div>
@@ -272,7 +256,6 @@ SidebarLogo.displayName = "SidebarLogo"
 
 export default function Sidebar({ className, collapsed: controlledCollapsed, onCollapsedChange }: SidebarProps) {
   const pathname = usePathname()
-  const { theme } = useTheme()
   const { user } = useAuth()
   const [internalCollapsed, setInternalCollapsed] = useState(false)
   const isMobile = useIsMobile()
@@ -369,22 +352,21 @@ export default function Sidebar({ className, collapsed: controlledCollapsed, onC
   return (
     <div
       className={cn(
-        "flex flex-col h-full border-r bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
-        "transition-all duration-300 ease-in-out shadow-sm",
-        collapsed ? (isMobile ? "w-12" : "w-16") : isMobile ? "w-56" : "w-64",
+        "flex flex-col h-full border-r border-itaguai-200 bg-white/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60",
+        "transition-all duration-300 ease-in-out shadow-itaguai",
+        collapsed ? (isMobile ? "w-16" : "w-20") : isMobile ? "w-64" : "w-72",
         className,
       )}
     >
       <SidebarLogo
-        theme={theme}
         isGestor={isGestor}
         collapsed={collapsed}
         onToggleCollapse={handleToggleCollapse}
         isMobile={isMobile}
       />
 
-      <ScrollArea className="flex-1 py-2 sm:py-3">
-        <nav className={cn("grid gap-1", collapsed ? "px-1 sm:px-2" : "px-2 sm:px-3")}>
+      <ScrollArea className="flex-1 py-4">
+        <nav className={cn("grid gap-2", collapsed ? "px-2" : "px-4")}>
           {routes.map((route) => (
             <NavLink
               key={route.href}
