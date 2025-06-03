@@ -86,33 +86,33 @@ const NavLink = memo(
             active
               ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/25"
               : "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white",
-            collapsed ? "justify-center px-1 sm:px-2 py-2 sm:py-3" : "px-2 sm:px-3 py-2 sm:py-3",
-            isMobile ? "min-h-[44px]" : "", // Minimum touch target on mobile
+            collapsed ? "justify-center px-2 sm:px-3 py-3 sm:py-3.5" : "px-3 sm:px-4 py-3 sm:py-3.5",
+            isMobile ? "min-h-[48px]" : "min-h-[44px]", // Área de toque consistente
           )}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
           aria-label={collapsed ? `${label}${description ? ` - ${description}` : ""}` : undefined}
         >
-          {/* Icon with enhanced styling */}
-          <div className="flex items-center justify-center">
+          {/* Icon com alinhamento centralizado */}
+          <div className="flex items-center justify-center flex-shrink-0">
             <Icon
               className={cn(
-                "h-4 w-4 sm:h-5 sm:w-5 transition-all duration-200",
+                "h-5 w-5 transition-all duration-200",
                 active ? "text-white drop-shadow-sm" : "text-slate-600 dark:text-slate-400",
                 isHovered && !active ? "text-blue-600 dark:text-blue-400" : "",
               )}
             />
           </div>
 
-          {/* Label and badge */}
+          {/* Label e badge com alinhamento melhorado */}
           {!collapsed && (
             <div className="flex items-center justify-between flex-1 min-w-0">
-              <span className="truncate font-medium text-xs sm:text-sm">{label}</span>
+              <span className="truncate font-semibold text-sm leading-tight">{label}</span>
               {badge && (
                 <Badge
                   variant={active ? "secondary" : "outline"}
                   className={cn(
-                    "ml-1 sm:ml-2 h-4 sm:h-5 px-1 sm:px-2 text-xs font-semibold transition-all duration-200",
+                    "ml-2 h-5 px-2 text-xs font-semibold transition-all duration-200 flex-shrink-0",
                     active
                       ? "bg-white/20 text-white border-white/30"
                       : "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800",
@@ -124,17 +124,17 @@ const NavLink = memo(
             </div>
           )}
 
-          {/* Active indicator */}
+          {/* Indicador ativo com posicionamento preciso */}
           {active && (
-            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 sm:w-1 h-6 sm:h-8 bg-white rounded-r-full shadow-sm" />
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full shadow-sm" />
           )}
         </Link>
 
-        {/* Tooltip for collapsed state - only on desktop */}
+        {/* Tooltip para estado collapsed - apenas desktop */}
         {collapsed && !isMobile && (
           <div
             className={cn(
-              "absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50",
+              "absolute left-full ml-3 top-1/2 -translate-y-1/2 z-50",
               "bg-slate-900 text-white text-sm px-3 py-2 rounded-lg shadow-lg",
               "opacity-0 pointer-events-none transition-all duration-200 whitespace-nowrap",
               "group-hover:opacity-100 group-hover:pointer-events-auto group-hover:translate-x-1",
@@ -142,8 +142,10 @@ const NavLink = memo(
               "before:border-4 before:border-transparent before:border-r-slate-900",
             )}
           >
-            <div className="font-medium">{label}</div>
-            {description && <div className="text-xs text-slate-300 mt-1">{description}</div>}
+            <div className="font-semibold text-sm leading-tight">{label}</div>
+            {description && (
+              <div className="text-xs text-slate-300 mt-1 leading-relaxed font-normal">{description}</div>
+            )}
           </div>
         )}
       </div>
@@ -154,26 +156,24 @@ NavLink.displayName = "NavLink"
 
 // Enhanced Footer component with responsive design
 const SidebarFooter = memo(({ collapsed, isMobile }: { collapsed: boolean; isMobile: boolean }) => (
-  <div
-    className={cn("mt-auto border-t bg-gradient-to-r from-slate-50 to-blue-50 dark:from-slate-900 dark:to-blue-950")}
-  >
-    <div className={cn("transition-all duration-200", collapsed ? "p-1 sm:p-2" : "p-2 sm:p-4")}>
+  <div className="mt-auto border-t bg-gradient-to-r from-slate-50 to-blue-50 dark:from-slate-900 dark:to-blue-950">
+    <div className={cn("transition-all duration-200", collapsed ? "p-2 sm:p-3" : "p-3 sm:p-4")}>
       {!collapsed ? (
-        <div className="space-y-1 sm:space-y-2">
-          <div className="flex items-center gap-1 sm:gap-2 text-xs text-slate-600 dark:text-slate-400">
-            <Sparkles className="h-2 w-2 sm:h-3 sm:w-3 text-blue-500 flex-shrink-0" />
-            <span className="font-medium truncate">Sistema Biométrico v2.0</span>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-400">
+            <Sparkles className="h-3 w-3 text-blue-500 flex-shrink-0" />
+            <span className="truncate leading-tight">Sistema Biométrico v2.0</span>
           </div>
           {!isMobile && (
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-normal">
               © 2025 Desenvolvido por <span className="font-semibold text-blue-600 dark:text-blue-400">SMCTIC</span>
             </p>
           )}
         </div>
       ) : (
         <div className="flex justify-center">
-          <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-md sm:rounded-lg flex items-center justify-center">
-            <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
+          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+            <Sparkles className="h-4 w-4 text-white" />
           </div>
         </div>
       )}
@@ -201,27 +201,27 @@ const SidebarLogo = memo(
       className={cn(
         "relative border-b bg-gradient-to-r from-white to-blue-50 dark:from-slate-900 dark:to-blue-950",
         "transition-all duration-300",
-        collapsed ? "h-14 sm:h-16" : "h-16 sm:h-20",
+        collapsed ? "h-16 sm:h-18" : "h-18 sm:h-20",
       )}
     >
       <div
         className={cn(
           "h-full flex items-center",
-          collapsed ? "justify-center px-1 sm:px-2" : "justify-between px-2 sm:px-4",
+          collapsed ? "justify-center px-2 sm:px-3" : "justify-between px-3 sm:px-4",
         )}
       >
-        {/* Logo/Brand area */}
+        {/* Logo/Brand area com alinhamento centralizado */}
         <Link
           href={isGestor ? "/dashboard/unidades" : "/dashboard"}
           className={cn(
             "flex items-center gap-2 font-semibold transition-all duration-200",
             "hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg",
-            collapsed ? "p-1 sm:p-2" : "flex-1",
+            collapsed ? "p-2" : "flex-1 py-2",
           )}
         >
           {collapsed ? (
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg">
-              <Home className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+              <Home className="h-5 w-5 text-white" />
             </div>
           ) : (
             <div className="flex items-center justify-start w-full">
@@ -229,9 +229,9 @@ const SidebarLogo = memo(
                 src={theme === "light" ? logoLight : logoDark}
                 alt="Logo Prefeitura Itaguaí - Sistema Biométrico"
                 style={{
-                  height: isMobile ? 40 : 50,
+                  height: isMobile ? 44 : 52,
                   width: "auto",
-                  maxWidth: isMobile ? 180 : 240,
+                  maxWidth: isMobile ? 200 : 260,
                 }}
                 className="object-contain transition-transform duration-200 hover:scale-105"
                 priority
@@ -240,37 +240,28 @@ const SidebarLogo = memo(
           )}
         </Link>
 
-        {/* Collapse toggle button - only on desktop */}
+        {/* Botões de toggle com alinhamento consistente */}
         {!collapsed && !isMobile && (
           <Button
             variant="ghost"
             size="icon"
             onClick={onToggleCollapse}
-            className={cn(
-              "h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0",
-              "hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all duration-200",
-              "focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
-            )}
+            className="h-8 w-8 flex-shrink-0 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             aria-label="Recolher sidebar"
           >
-            <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4 text-slate-600 dark:text-slate-400" />
+            <ChevronLeft className="h-4 w-4 text-slate-600 dark:text-slate-400" />
           </Button>
         )}
 
-        {/* Expand button for collapsed state - only on desktop */}
         {collapsed && !isMobile && (
           <Button
             variant="ghost"
             size="icon"
             onClick={onToggleCollapse}
-            className={cn(
-              "absolute -right-2 sm:-right-3 top-1/2 -translate-y-1/2 h-5 w-5 sm:h-6 sm:w-6 bg-white dark:bg-slate-800 border shadow-md",
-              "hover:bg-blue-50 dark:hover:bg-blue-900/50 transition-all duration-200",
-              "focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
-            )}
+            className="absolute -right-3 top-1/2 -translate-y-1/2 h-6 w-6 bg-white dark:bg-slate-800 border shadow-md hover:bg-blue-50 dark:hover:bg-blue-900/50 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             aria-label="Expandir sidebar"
           >
-            <ChevronRight className="h-2 w-2 sm:h-3 sm:w-3 text-slate-600 dark:text-slate-400" />
+            <ChevronRight className="h-3 w-3 text-slate-600 dark:text-slate-400" />
           </Button>
         )}
       </div>
@@ -392,8 +383,8 @@ export default function Sidebar({ className, collapsed: controlledCollapsed, onC
         isMobile={isMobile}
       />
 
-      <ScrollArea className="flex-1 py-1 sm:py-2">
-        <nav className={cn("grid gap-0.5 sm:gap-1", collapsed ? "px-0.5 sm:px-1" : "px-1 sm:px-3")}>
+      <ScrollArea className="flex-1 py-2 sm:py-3">
+        <nav className={cn("grid gap-1", collapsed ? "px-1 sm:px-2" : "px-2 sm:px-3")}>
           {routes.map((route) => (
             <NavLink
               key={route.href}
