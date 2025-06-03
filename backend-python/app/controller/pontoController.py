@@ -5,6 +5,9 @@ from app.services.biometric import IndexSearch, identify_user
 import requests
 
 # Função para enviar e-mail via backend Node.js
+
+#http://localhost:3001
+#http://biometrico.itaguai.rj.gov.br:3001
 def send_email(subject, recipient, body):
     try:
         response = requests.post("http://localhost:3001/api/enviar-email", json={
