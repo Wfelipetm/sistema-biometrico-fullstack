@@ -10,11 +10,11 @@ init_mail(app)
 
 
 # Ativando CORS somente para o domínio específico e com suporte a cookies
-CORS(
-    app,
-    supports_credentials=True,
-    origins=["https://prefeitura.itaguai.rj.gov.br"]
-)
+# CORS(
+#     app,
+#     supports_credentials=True,
+#     origins=["https://prefeitura.itaguai.rj.gov.br"]
+# )
 
 conn = get_db_connection()
 if conn:

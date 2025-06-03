@@ -195,12 +195,7 @@ export default function ModalCadastroFuncionarios({
       email: email.trim(),
       data_admissao: dataAdmissao,
     }
-// DEPURAÇÃO
-  console.log(">>> Enviando para o servidor:");
-  console.log("URL:", "https://127.0.0.1:5000/register");
-  console.log("Headers:", { "Content-Type": "application/json" });
-  console.log("Payload:", payload);
-  console.log("Payload JSON:", JSON.stringify(payload));
+
     try {
       // Simular progresso de upload
       const progressInterval = setInterval(() => {
