@@ -1,7 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
-
+import { useEffect, useRef } from "react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -14,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
-import { Menu, Moon, Sun, LogOut, User, Settings, Bell, Shield, ChevronDown } from "lucide-react"
+import { Menu, Moon, Sun, LogOut, User, Settings, Bell, Shield, ChevronDown, Keyboard } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import Sidebar from "./Sidebar"
@@ -24,6 +23,7 @@ import logoDark from "../public/images/regua-logo-itaguai_dark3.png"
 import logoLight from "../public/images/regua-logo-itaguai_light3.png"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
+import { useRouter } from "next/navigation"
 
 export default function Header() {
   const { user, logout } = useAuth()
@@ -32,6 +32,54 @@ export default function Header() {
   const [modalOpen, setModalOpen] = useState(false)
   const [liberado, setLiberado] = useState(false)
   const [notifications, setNotifications] = useState(3) // Simulated notifications
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
+  const router = useRouter()
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only trigger shortcuts when not typing in an input field
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return
+      }
+
+      // Alt+K to show keyboard shortcuts
+      if (e.altKey && e.key === "k") {
+        setShowKeyboardShortcuts((prev) => !prev)
+      }
+
+      // Alt+D to go to dashboard
+      if (e.altKey && e.key === "d") {
+        router.push("/dashboard")
+      }
+
+      // Alt+P to go to profile
+      if (e.altKey && e.key === "p") {
+        router.push("/profile")
+      }
+
+      // Alt+T to toggle theme
+      if (e.altKey && e.key === "t") {
+        setTheme(theme === "dark" ? "light" : "dark")
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [theme, setTheme, router])
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowKeyboardShortcuts(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
   useEffect(() => {
     setMounted(true)
@@ -94,16 +142,32 @@ export default function Header() {
     return fullName.trim().split(" ")[0]
   }
 
+  const handleProfileClick = () => {
+    router.push("/profile")
+  }
+
+  const handleSettingsClick = () => {
+    router.push("/settings")
+  }
+
   return (
-    <header className="sticky top-0 z-50 flex h-20 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-6 transition-all duration-200">
+    <header
+      className="sticky top-0 z-50 flex h-20 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-6 transition-all duration-200"
+      role="banner"
+      aria-label="Cabeçalho do sistema"
+    >
       {/* Left side - Mobile menu for non-kiosk users */}
       {user.papel !== "quiosque" && (
         <div>
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden hover:bg-accent/50 transition-colors">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden hover:bg-accent/50 transition-colors"
+                aria-label="Abrir menu de navegação"
+              >
                 <Menu className="h-5 w-5" />
-                <span className="sr-only">Abrir menu de navegação</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0 w-80">
@@ -129,9 +193,55 @@ export default function Header() {
 
       {/* Right side - Actions and user menu */}
       <div className="flex items-center gap-2">
+        {/* Keyboard shortcuts button */}
+        <div className="relative" ref={dropdownRef}>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowKeyboardShortcuts(!showKeyboardShortcuts)}
+            className="hover:bg-accent/50 transition-colors hidden sm:flex"
+            aria-label="Atalhos de teclado"
+          >
+            <Keyboard className="h-5 w-5 text-slate-600" />
+          </Button>
+
+          {showKeyboardShortcuts && (
+            <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg border border-slate-200 z-50">
+              <div className="p-3 border-b border-slate-200">
+                <h3 className="font-semibold text-sm text-slate-900">Atalhos de Teclado</h3>
+              </div>
+              <div className="p-2">
+                <ul className="space-y-1">
+                  <li className="flex justify-between items-center p-2 text-xs hover:bg-slate-50 rounded-md">
+                    <span className="text-slate-700">Dashboard</span>
+                    <kbd className="px-2 py-1 bg-slate-100 rounded text-slate-600 font-mono text-xs">Alt + D</kbd>
+                  </li>
+                  <li className="flex justify-between items-center p-2 text-xs hover:bg-slate-50 rounded-md">
+                    <span className="text-slate-700">Perfil</span>
+                    <kbd className="px-2 py-1 bg-slate-100 rounded text-slate-600 font-mono text-xs">Alt + P</kbd>
+                  </li>
+                  <li className="flex justify-between items-center p-2 text-xs hover:bg-slate-50 rounded-md">
+                    <span className="text-slate-700">Alternar tema</span>
+                    <kbd className="px-2 py-1 bg-slate-100 rounded text-slate-600 font-mono text-xs">Alt + T</kbd>
+                  </li>
+                  <li className="flex justify-between items-center p-2 text-xs hover:bg-slate-50 rounded-md">
+                    <span className="text-slate-700">Atalhos</span>
+                    <kbd className="px-2 py-1 bg-slate-100 rounded text-slate-600 font-mono text-xs">Alt + K</kbd>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Notifications (only for non-kiosk users) */}
         {user.papel !== "quiosque" && (
-          <Button variant="ghost" size="icon" className="relative hover:bg-accent/50 transition-colors">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative hover:bg-accent/50 transition-colors"
+            aria-label={notifications > 0 ? `${notifications} notificações não lidas` : "Notificações"}
+          >
             <Bell className="h-5 w-5" />
             {notifications > 0 && (
               <Badge
@@ -141,9 +251,6 @@ export default function Header() {
                 {notifications > 9 ? "9+" : notifications}
               </Badge>
             )}
-            <span className="sr-only">
-              {notifications > 0 ? `${notifications} notificações não lidas` : "Notificações"}
-            </span>
           </Button>
         )}
 
@@ -153,16 +260,20 @@ export default function Header() {
           size="icon"
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           className="hover:bg-accent/50 transition-colors"
+          aria-label={theme === "dark" ? "Ativar modo claro" : "Ativar modo escuro"}
         >
           {theme === "dark" ? <Sun className="h-5 w-5 text-amber-500" /> : <Moon className="h-5 w-5 text-slate-600" />}
-          <span className="sr-only">{theme === "dark" ? "Ativar modo claro" : "Ativar modo escuro"}</span>
         </Button>
 
         {/* User menu */}
         {user.papel !== "quiosque" || liberado ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-auto p-2 hover:bg-accent/50 transition-colors group">
+              <Button
+                variant="ghost"
+                className="relative h-auto p-2 hover:bg-accent/50 transition-colors group"
+                aria-label="Menu do usuário"
+              >
                 <div className="flex items-center gap-3">
                   <div className="relative">
                     <Avatar className="h-9 w-9 ring-2 ring-background shadow-md">
@@ -187,7 +298,7 @@ export default function Header() {
               </Button>
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="end" className="w-72 p-0 shadow-lg border-0 bg-white">
+            <DropdownMenuContent align="end" className="w-72 p-0 shadow-lg border-0 bg-white" sideOffset={8}>
               {/* User Profile Section */}
               <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-start gap-4 p-4 pb-3">
@@ -199,7 +310,7 @@ export default function Header() {
                   </Avatar>
                   <div className="flex flex-col space-y-1 min-w-0 flex-1">
                     <h4 className="font-semibold text-sm text-slate-900 leading-tight">{user?.nome}</h4>
-                    <p className="text-xs text-slate-600 font-medium leading-relaxed">{user?.email}</p>
+                    <p className="text-xs text-slate-600 font-medium leading-relaxed truncate">{user?.email}</p>
                   </div>
                 </div>
                 <div className="px-4 pb-3">
@@ -214,12 +325,18 @@ export default function Header() {
 
               {/* Menu Items */}
               <div className="py-1">
-                <DropdownMenuItem className="px-4 py-3 cursor-pointer hover:bg-slate-50 transition-colors focus:bg-slate-50">
+                <DropdownMenuItem
+                  onClick={handleProfileClick}
+                  className="px-4 py-3 cursor-pointer hover:bg-slate-50 transition-colors focus:bg-slate-50 focus:text-slate-900"
+                >
                   <User className="mr-3 h-4 w-4 text-slate-600" />
                   <span className="font-medium text-sm text-slate-900">Meu Perfil</span>
                 </DropdownMenuItem>
 
-                <DropdownMenuItem className="px-4 py-3 cursor-pointer hover:bg-slate-50 transition-colors focus:bg-slate-50">
+                <DropdownMenuItem
+                  onClick={handleSettingsClick}
+                  className="px-4 py-3 cursor-pointer hover:bg-slate-50 transition-colors focus:bg-slate-50 focus:text-slate-900"
+                >
                   <Settings className="mr-3 h-4 w-4 text-slate-600" />
                   <span className="font-medium text-sm text-slate-900">Configurações</span>
                 </DropdownMenuItem>
@@ -244,6 +361,7 @@ export default function Header() {
             variant="ghost"
             onClick={() => setModalOpen(true)}
             className="relative h-auto p-2 hover:bg-accent/50 transition-colors group"
+            aria-label="Acessar modo administrador"
           >
             <div className="flex items-center gap-3">
               <div className="relative">
