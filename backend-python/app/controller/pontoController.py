@@ -94,7 +94,7 @@ def register_ponto():
             """, (funcionario_id, unidade_id, data_hora, hora_entrada, hora_saida, id_biometrico))
 
             mensagem = (
-                        f"Registro de entrada realizado com sucesso na unidade: {unidade_nome}\n"
+                        f"Registro de entrada realizado com sucesso para funcionario: {user_name}\n"
                         f"Comprovante enviado para o e-mail {email}"
                     )
 
@@ -128,7 +128,7 @@ def register_ponto():
                 WHERE id = %s
             """, (hora_saida, ultimo_ponto[0]))
             mensagem = (
-                        f"Registro de saida realizado com sucesso na unidade: {unidade_nome}\n"
+                        f"Registro de saida realizado com sucesso para funcionario: {user_name}\n"
                         f"Comprovante enviado para o e-mail {email}"
                     )
             send_email(
