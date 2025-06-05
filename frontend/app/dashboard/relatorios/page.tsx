@@ -138,14 +138,13 @@ export default function RelatoriosPage() {
 				<CardContent className="space-y-6">
 					{/* Form */}
 					<div className="grid gap-5 items-center md:grid-cols-4">
-						<FuncionarioSearch
-							funcionarios={funcionariosParaPesquisa}
-							selectedFuncionario={selectedFuncionario}
-							onSelect={handleSelectFuncionario}
-							recentFuncionarios={recentFuncionarios}
-							loading={loadingFuncionarios}
-							error={errorFuncionarios}
-						/>
+					<FuncionarioSearch
+									selectedFuncionario={selectedFuncionario}
+									onSelect={handleSelectFuncionario}
+									recentFuncionarios={recentFuncionarios}
+									loading={loadingFuncionarios}
+									error={errorFuncionarios}
+								/>
 
 						<PeriodoSelector
 							mes={mes}
