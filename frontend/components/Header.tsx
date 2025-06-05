@@ -20,6 +20,7 @@ import ModalSenhaAdmin from "@/components/modal-senha-quiosque";
 import logoDark from '../public/images/regua-logo-itaguai_dark3.png';
 import logoLight from '../public/images/regua-logo-itaguai_light3.png';
 import Image from "next/image";
+import NotificationDropdown from "./Notificações";
 
 export default function Header() {
 	const { user, logout } = useAuth();
@@ -78,7 +79,7 @@ export default function Header() {
 
 			{/* Direita: botões e avatar */}
 			<div className="flex items-center gap-2">
-				<Button
+				{/* <Button
 					variant="outline"
 					size="icon"
 					onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
@@ -89,7 +90,8 @@ export default function Header() {
 						<Moon className="h-5 w-5" />
 					)}
 					<span className="sr-only">Alternar tema</span>
-				</Button>
+				</Button> */}
+				{/* <NotificationDropdown /> */}
 
 				{user.papel !== "quiosque" || liberado ? (
 					<DropdownMenu>

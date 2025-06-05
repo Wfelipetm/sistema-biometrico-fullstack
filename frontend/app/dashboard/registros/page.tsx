@@ -288,19 +288,10 @@ function formatInterval(interval: any) {
           <CardDescription>Total de {filteredRegistros.length} registros de ponto</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 flex flex-col md:flex-row items-center gap-2">
-            {/* <Search className="h-4 w-4 text-muted-foreground" />
-                        <Input
-                            placeholder="Buscar geral..."
-                            value={searchTerm}
-                            onChange={(e) => {
-                                setSearchTerm(e.target.value);
-                                setCurrentPage(1);a
-                            }}
-                            className="max-w-xs"
-                        /> */}
-            <Search className="h-4 w-4 text-muted-foreground" />
-            <Input
+            <div className="mb-4 flex flex-col md:flex-row items-center gap-2">
+            <div className="flex items-center gap-2">
+              <Search className="h-4 w-4 text-muted-foreground" />
+              <Input
               placeholder="Filtrar por funcionário"
               value={filtroFuncionario}
               onChange={(e) => {
@@ -308,22 +299,23 @@ function formatInterval(interval: any) {
                 setCurrentPage(1)
               }}
               className="max-w-xs"
-            />
+              />
+            </div>
             {user?.papel !== "gestor" && (
-              <>
-                <Search className="h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Filtrar por unidade"
-                  value={filtroUnidade}
-                  onChange={(e) => {
-                    setFiltroUnidade(e.target.value)
-                    setCurrentPage(1)
-                  }}
-                  className="max-w-xs"
-                />
-              </>
+              <div className="flex items-center gap-2">
+              <Search className="h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Filtrar por unidade"
+                value={filtroUnidade}
+                onChange={(e) => {
+                setFiltroUnidade(e.target.value)
+                setCurrentPage(1)
+                }}
+                className="max-w-xs"
+              />
+              </div>
             )}
-          </div>
+            </div>
 
           {loading ? (
             <div className="flex items-center justify-center py-8">
