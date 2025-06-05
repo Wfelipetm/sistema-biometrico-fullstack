@@ -13,8 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
-import { Menu, Moon, Sun, LogOut, User, Settings, Bell, Shield, ChevronDown, Keyboard } from "lucide-react"
-import { useTheme } from "next-themes"
+import { Menu, LogOut, User, Settings, Bell, Shield, ChevronDown, Keyboard } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import Sidebar from "./Sidebar"
 import { useAuth } from "@/contexts/AuthContext"
@@ -109,8 +108,6 @@ const KeyboardShortcutsPanel = ({ isVisible }: { isVisible: boolean }) => {
 
 export default function Header() {
   const { user, logout } = useAuth()
-  const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [liberado, setLiberado] = useState(false)
   const [notifications] = useState(3)
@@ -154,10 +151,6 @@ export default function Header() {
     router.push("/settings")
   }, [router])
 
-  const handleThemeToggle = useCallback(() => {
-    setTheme(theme === "dark" ? "light" : "dark")
-  }, [theme, setTheme])
-
   const toggleKeyboardShortcuts = useCallback(() => {
     setShowKeyboardShortcuts((prev) => !prev)
   }, [])
@@ -189,13 +182,9 @@ export default function Header() {
           e.preventDefault()
           router.push("/profile")
           break
-        case "t":
-          e.preventDefault()
-          setTheme(theme === "dark" ? "light" : "dark")
-          break
       }
     },
-    [theme, setTheme, router],
+    [router],
   )
 
   // Memoized click outside handler
@@ -206,10 +195,6 @@ export default function Header() {
   }, [])
 
   // Optimized effects
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
@@ -228,7 +213,7 @@ export default function Header() {
   const isKioskUser = useMemo(() => user?.papel === "quiosque", [user?.papel])
 
   // Early return for loading state
-  if (!mounted || !user) {
+  if (!user) {
     return <LoadingSkeleton />
   }
 
@@ -297,21 +282,6 @@ export default function Header() {
             )}
           </Button>
         )}
-
-        {/* Theme toggle */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleThemeToggle}
-          className="h-10 w-10 hover:bg-itaguai-50 transition-colors duration-200 rounded-xl"
-          aria-label={theme === "dark" ? "Ativar modo claro" : "Ativar modo escuro"}
-        >
-          {theme === "dark" ? (
-            <Sun className="h-5 w-5 text-warning-500" />
-          ) : (
-            <Moon className="h-5 w-5 text-itaguai-600" />
-          )}
-        </Button>
 
         {/* User menu */}
         {!isKioskUser || liberado ? (
