@@ -1,18 +1,20 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
+
 import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { AlertCircle, User, Eye, EyeOff, Loader2, Shield, Lock } from "lucide-react"
+import { AlertCircle, Eye, EyeOff, Loader2, Lock, User, Shield, Fingerprint, Building2 } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { api } from "@/lib/api"
 import { registrarLog } from "@/utils/logger"
 import type { AxiosError } from "axios"
 import Image from "next/image"
+
 import NeuralNetworkBackground from "@/components/neural-network-background"
 
 export default function LoginPage() {
@@ -26,6 +28,10 @@ export default function LoginPage() {
   const [passwordFocused, setPasswordFocused] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
+  const emailRef = useRef<HTMLInputElement>(null)
+  const isEmailValid = email.includes("@itaguai.rj.gov.br") && email.includes(".")
+  const isPasswordValid = password.length >= 6
+  const isFormValid = isEmailValid && isPasswordValid
 
   useEffect(() => {
     setEmail("")
@@ -43,7 +49,7 @@ export default function LoginPage() {
         try {
           const user = JSON.parse(decodeURIComponent(userCookie.split("=")[1]))
           papel = user.papel
-        } catch {}
+        } catch { }
       }
       if (papel === "gestor") {
         window.location.href = "/dashboard/unidades"
@@ -120,198 +126,136 @@ export default function LoginPage() {
 
   if (!checkedAuth) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-itaguai-50 via-white to-itaguai-100">
+        <div className="flex flex-col items-center space-y-6 animate-fade-in">
+          <div className="relative">
+            <div className="w-16 h-16 border-4 border-itaguai-200 border-t-itaguai-600 rounded-full animate-spin"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Building2 className="w-6 h-6 text-itaguai-600" />
+            </div>
+          </div>
+          <div className="text-center space-y-2">
+            <h2 className="text-xl font-semibold text-itaguai-900">Sistema Biométrico</h2>
+            <p className="text-itaguai-600 font-medium">Carregando...</p>
+          </div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Column - Branding & Visual */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        {/* Background Image - Biometria */}
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: "url('/images/biodedo.jpeg')",
-            backgroundColor: "#111827", // Fallback color
-          }}
-        >
-          {/* Overlay para melhorar contraste */}
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-900/80 via-gray-800/70 to-gray-900/80"></div>
-        </div>
-
-        {/* Content */}
-        <div className="relative z-10 flex flex-col justify-center items-center w-full h-full p-12">
-            <div className="flex flex-col items-center justify-center space-y-12 text-center mb-9" style={{ marginTop: "-60px" }}>
-            {/* Logo da Prefeitura */}
-            <Image
-              width={320}
-              height={120}
-              alt="Logo Prefeitura Municipal de Itaguaí"
-              src="/images/smctic_dark_mode2.png"
-              className="mx-auto mb-2" 
-              priority
-              style={{ filter: "brightness(0) invert(1)" }}
-            />
-
-            {/* Título do Sistema */}
-            <div className="text-center">
-              <h1 className="text-4xl font-bold text-white mb-2">Sistema de Biometria</h1>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-itaguai-50 via-white to-itaguai-100 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background decorativo */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-itaguai-100 rounded-full opacity-50 blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-itaguai-200 rounded-full opacity-30 blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-itaguai-100 to-transparent rounded-full opacity-20 blur-3xl"></div>
       </div>
 
-      {/* Right Column - Login Form com Neural Network Background */}
-      <div className="w-full lg:w-1/2 relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-slate-100 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        {/* Neural Network Background - Mais nítida e com cores adaptáveis */}
-        {/* <NeuralNetworkBackground className="opacity-70 dark:opacity-60" /> */}
+      {/* Container principal */}
+      <div className="w-full max-w-md mx-auto relative z-10 animate-slide-up">
+        <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-itaguai-lg border border-white/20 p-8 space-y-8">
+          <div className="text-center space-y-6">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-itaguai rounded-2xl shadow-itaguai relative">
+              <Fingerprint className="w-10 h-10 text-white drop-shadow-sm" />
+              <div className="absolute -top-1 -right-1 w-6 h-6 bg-success-500 rounded-full flex items-center justify-center">
+                <Shield className="w-3 h-3 text-white" />
+              </div>
+            </div>
+            <div className="space-y-3">
+              <h1 className="text-3xl font-bold text-itaguai-900 tracking-tight">Sistema Biométrico</h1>
+              <div className="space-y-1">
+                <p className="text-itaguai-700 font-medium">Prefeitura de Itaguaí</p>
+                <p className="text-sm text-itaguai-600">Acesse sua conta institucional</p>
+              </div>
+            </div>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Mensagem de erro */}
+            {error && (
+              <Alert variant="destructive" className="border-error-200 bg-error-50 animate-scale-in">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription className="text-sm font-medium text-error-700">{error}</AlertDescription>
+              </Alert>
+            )}
 
-        {/* Background Pattern - mantido como fallback para mobile */}
-        <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] dark:bg-grid-slate-700/25 dark:[mask-image:linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.5))] lg:hidden"></div>
-
-        {/* Conteúdo centralizado */}
-        <div className="relative z-10 flex items-center justify-center min-h-screen p-8">
-          <div className="w-full max-w-md space-y-8">
-            {/* Mobile Logo - Only visible on small screens */}
-            <div className="lg:hidden text-center space-y-4">
-              
-
-              <div className="space-y-2">
-                <Image
-                  width={220}
-                  height={80}
-                  alt="Logo Prefeitura Municipal de Itaguaí"
-                  src="/images/smctic_light_mode.png"
-                  className="mx-auto block dark:hidden"
-                  priority
-                />
-                <Image
-                  width={220}
-                  height={80}
-                  alt="Logo Prefeitura Municipal de Itaguaí"
-                  src="/images/smctic_dark_mode2.png"
-                  className="mx-auto hidden dark:block"
-                  priority
-                  style={{ filter: "brightness(0) invert(1)" }}
+            {/* Email Field */}
+            <div className="space-y-3">
+              <Label htmlFor="email" className="text-sm font-semibold text-itaguai-900">
+                E-mail institucional
+              </Label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <User className="h-5 w-5 text-itaguai-400" />
+                </div>
+                <Input
+                  ref={emailRef}
+                  id="email"
+                  type="email"
+                  placeholder="seu.nome@itaguai.rj.gov.br"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onFocus={() => setEmailFocused(true)}
+                  onBlur={() => setEmailFocused(false)}
+                  className="pl-12 h-14 text-base border-itaguai-200 rounded-xl focus:ring-2 focus:ring-itaguai-500 focus:border-itaguai-500 bg-white/50 backdrop-blur-sm transition-all duration-200"
+                  required
                 />
               </div>
             </div>
 
-            {/* Login Card com backdrop blur melhorado */}
-            <div className="bg-white/85 dark:bg-gray-800/85 backdrop-blur-xl border border-white/30 dark:border-gray-700/50 rounded-2xl shadow-2xl shadow-gray-500/20 dark:shadow-gray-500/10 p-8 space-y-6">
-              {/* Header */}
-              <div className="text-center space-y-2">
-                <h2 className="text-2xl font-bold text-blue-600 dark:text-white">Bem-vindo</h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Acesse sua conta para continuar</p>
-              </div>
-
-              {/* Form */}
-              <form onSubmit={handleSubmit} className="space-y-5">
-                {error && (
-                  <Alert
-                    variant="destructive"
-                    className="border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800 animate-in slide-in-from-top-2 duration-300"
-                  >
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription className="text-sm">{error}</AlertDescription>
-                  </Alert>
-                )}
-
-                {/* Email Field */}
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Email
-                  </Label>
-                  <div className="relative">
-                    <User
-                      className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 transition-colors duration-200 ${
-                        emailFocused || email ? "text-blue-600 dark:text-gray-300" : "text-gray-400"
-                      }`}
-                    />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="seu@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      onFocus={() => setEmailFocused(true)}
-                      onBlur={() => setEmailFocused(false)}
-                      required
-                      className="pl-10 h-12 bg-white/60 dark:bg-gray-700/60 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-gray-500 focus:border-transparent transition-all duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                    />
-                  </div>
+            {/* Password Field */}
+            <div className="space-y-3">
+              
+              <div className="relative">
+                <Label htmlFor="password" className="text-sm font-semibold text-itaguai-900">
+                  Senha
+                </Label>
+                <div className="absolute mt-4 left-0 pl-4 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-itaguai-400" />
                 </div>
-
-                {/* Password Field */}
-                <div className="space-y-2">
-                  {/* <div className="flex items-center justify-between">
-                    <Label htmlFor="password" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Senha
-                    </Label>
-                    <Link
-                      href="/recuperar-senha"
-                      className="text-xs text-blue-600 dark:text-gray-400 hover:text-blue-800 dark:hover:text-gray-300 font-medium transition-colors duration-200"
-                    >
-                      Esqueceu a senha?
-                    </Link>
-                  </div> */}
-                  <div className="relative">
-                    <Lock
-                      className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 transition-colors duration-200 ${
-                        passwordFocused || password ? "text-blue-600 dark:text-gray-300" : "text-gray-400"
-                      }`}
-                    />
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      onFocus={() => setPasswordFocused(true)}
-                      onBlur={() => setPasswordFocused(false)}
-                      required
-                      className="pl-10 pr-12 h-12 bg-white/60 dark:bg-gray-700/60 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-gray-500 focus:border-transparent transition-all duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                      placeholder="Digite sua senha"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-blue-600 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-gray-500 focus:ring-offset-2 rounded transition-all duration-200"
-                      aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Submit Button */}
-                <Button
-                  type="submit"
-                  size="lg"
-                  disabled={loading || !email || !password}
-                  className={`
-                    w-full h-12 rounded-xl font-medium transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]
-                    ${
-                      loading
-                        ? "bg-gray-500 text-white cursor-not-allowed"
-                        : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-gray-600 dark:to-gray-700 dark:hover:from-gray-700 dark:hover:to-gray-800 text-white shadow-lg hover:shadow-xl disabled:from-blue-300 disabled:to-blue-400 dark:disabled:from-gray-300 dark:disabled:to-gray-400 disabled:cursor-not-allowed disabled:transform-none"
-                    }
-                  `}
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onFocus={() => setPasswordFocused(true)}
+                  onBlur={() => setPasswordFocused(false)}
+                  required
+                  className="pl-12 pr-14 h-14 text-base border-itaguai-200 rounded-xl focus:ring-2 focus:ring-itaguai-500 focus:border-itaguai-500 bg-white/50 backdrop-blur-sm transition-all duration-200"
+                  placeholder="Digite sua senha"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-itaguai-400 hover:text-itaguai-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-itaguai-500 rounded-lg"
+                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                 >
-                  {loading ? (
-                    <div className="flex items-center justify-center space-x-2">
-                      <Loader2 className="animate-spin w-5 h-5" />
-                      <span>Entrando...</span>
-                    </div>
-                  ) : (
-                    "Entrar no Sistema"
-                  )}
-                </Button>
+                  {showPassword ? <EyeOff className="h-5 w-5 mt-7" /> : <Eye className="h-5 w-5 mt-7" />}
+                </button>
+              </div>
+            </div>
 
-                {/* Register Link */}
-                {/* <div className="text-center text-sm">
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              disabled={loading || !isFormValid}
+              className="w-full h-14 bg-gradient-itaguai hover:shadow-itaguai text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            >
+              {loading ? (
+                <div className="flex items-center justify-center space-x-3">
+                  <Loader2 className="animate-spin w-5 h-5" />
+                  <span>Entrando...</span>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center space-x-3">
+                  <Shield className="w-5 h-5" />
+                  <span>Entrar no Sistema</span>
+                </div>
+              )}
+            </Button>
+
+            {/* Register Link */}
+            {/* <div className="text-center text-sm">
                   <span className="text-gray-500 dark:text-gray-400">Não tem uma conta? </span>
                   <Link
                     href="/cadastro"
@@ -320,21 +264,23 @@ export default function LoginPage() {
                     Cadastre-se
                   </Link>
                 </div> */}
-              </form>
-            </div>
+          </form>
+        <div className="text-center space-y-4 pt-6 border-t border-itaguai-100">
+          <div className="flex items-center justify-center space-x-2 text-sm text-itaguai-600">
+            <Shield className="w-4 h-4 text-success-600" />
+            <span className="font-medium">Conexão segura e criptografada</span>
+          </div>
 
-            {/* Footer */}
-            <div className="text-center space-y-2">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                © {new Date().getFullYear()} Sistema de Biometria
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-500">
-                Desenvolvido por <span className="font-medium text-gray-600 dark:text-gray-400">SMCTIC</span>
-              </p>
-            </div>
+          <div className="text-xs text-itaguai-500 space-y-1">
+            <p>© 2025 Prefeitura Municipal de Itaguaí</p>
+            <p>Desenvolvido pela Secretaria Municipal de Ciência, Tecnologia e Inovação</p>
           </div>
         </div>
+        </div>
+
+        {/* Footer */}
       </div>
     </div>
+
   )
 }
