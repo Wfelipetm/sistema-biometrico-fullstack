@@ -23,6 +23,7 @@ type Registro = {
   id: number
   funcionario_id: number
   unidade_id: number
+  tipo_escala?: string
   data_hora: string
   hora_entrada: string | null
   hora_saida: string | null
@@ -67,11 +68,8 @@ export default function RegistrosPage() {
       const unidades = await unidadesResponse.json()
 
       const registrosPromises = unidades.map((unidade: { id: string }) => api.get(`/unid/${unidade.id}/registros`))
-
       const registrosResponses = await Promise.all(registrosPromises)
       let todosRegistros = registrosResponses.flatMap((res) => res.data)
-
-      // FILTRO PARA GESTOR: só vê registros da própria unidade
       if (user.papel === "gestor" && user.unidade_id) {
         todosRegistros = todosRegistros.filter((registro) => registro.unidade_id === user.unidade_id)
       }
@@ -89,36 +87,36 @@ export default function RegistrosPage() {
     fetchRegistros()
   }, [fetchRegistros])
 
-const handleEscolhaRegistro = () => {
-  if (user?.papel === "gestor") {
-    setShowBiometriaModal(true)
-    handleNovoRegistro()
-    return
-  }
-
-  toast.confirm(
-    "Novo Registro de Ponto",
-    "Como você deseja registrar o ponto?",
-    async () => {
+  const handleEscolhaRegistro = () => {
+    if (user?.papel === "gestor") {
       setShowBiometriaModal(true)
-      await handleNovoRegistro()
-    },
-    {
-      confirmText: "Biometria",
-      cancelText: "Manual",
-      variant: "default",
-    },
-  )
-
-  setTimeout(() => {
-    const cancelButton = document.querySelector("[data-sonner-toast] button:first-child")
-    if (cancelButton) {
-      cancelButton.addEventListener("click", () => {
-        setShowManualModal(true)
-      })
+      handleNovoRegistro()
+      return
     }
-  }, 100)
-}
+
+    toast.confirm(
+      "Novo Registro de Ponto",
+      "Como você deseja registrar o ponto?",
+      async () => {
+        setShowBiometriaModal(true)
+        await handleNovoRegistro()
+      },
+      {
+        confirmText: "Biometria",
+        cancelText: "Manual",
+        variant: "default",
+      },
+    )
+
+    setTimeout(() => {
+      const cancelButton = document.querySelector("[data-sonner-toast] button:first-child")
+      if (cancelButton) {
+        cancelButton.addEventListener("click", () => {
+          setShowManualModal(true)
+        })
+      }
+    }, 100)
+  }
 
   const handleNovoRegistro = async () => {
     setLoading(true)
@@ -253,30 +251,29 @@ const handleEscolhaRegistro = () => {
 
   const pagedRegistros = registrosOrdenados.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
-const formatDate = (dateString: string) => {
-  try {
-    // Pega só os primeiros 10 caracteres que correspondem a "yyyy-MM-dd"
-    const datePart = dateString.slice(0, 10); // Ex: "2025-06-03"
-    const [year, month, day] = datePart.split("-");
-    return `${day}/${month}/${year}`;
-  } catch {
-    return dateString;
+  const formatDate = (dateString: string) => {
+    try {
+      // Pega só os primeiros 10 caracteres que correspondem a "yyyy-MM-dd"
+      const datePart = dateString.slice(0, 10) // Ex: "2025-06-03"
+      const [year, month, day] = datePart.split("-")
+      return `${day}/${month}/${year}`
+    } catch {
+      return dateString
+    }
   }
-};
 
-function formatInterval(interval: any) {
-  if (!interval) return "-";
-  // Se vier string (ex: "23:00:00"), retorna direto
-  if (typeof interval === "string") return interval;
-  // Se vier objeto { days, hours, minutes, seconds }
-  const d = interval.days ?? 0;
-  const h = interval.hours ?? 0;
-  const m = interval.minutes ?? 0;
-  const s = interval.seconds ?? 0;
-  const totalHours = d * 24 + h;
-  return `${totalHours.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-}
-
+  function formatInterval(interval: any) {
+    if (!interval) return "-"
+    // Se vier string (ex: "23:00:00"), retorna direto
+    if (typeof interval === "string") return interval
+    // Se vier objeto { days, hours, minutes, seconds }
+    const d = interval.days ?? 0
+    const h = interval.hours ?? 0
+    const m = interval.minutes ?? 0
+    const s = interval.seconds ?? 0
+    const totalHours = d * 24 + h
+    return `${totalHours.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`
+  }
 
   return (
     <div className="space-y-6">
@@ -341,6 +338,7 @@ function formatInterval(interval: any) {
                     <TableRow>
                       <TableHead>Funcionário</TableHead>
                       <TableHead>Unidade</TableHead>
+                      <TableHead>Escala</TableHead>
                       <TableHead>Data</TableHead>
                       <TableHead>Entrada</TableHead>
                       <TableHead>Saída</TableHead>
@@ -355,6 +353,7 @@ function formatInterval(interval: any) {
                         <TableRow key={registro.id}>
                           <TableCell className="font-medium">{registro.funcionario_nome}</TableCell>
                           <TableCell>{registro.unidade_nome}</TableCell>
+                          <TableCell>{registro.tipo_escala || "-"}</TableCell>
                           <TableCell>{formatDate(registro.data_hora)}</TableCell>
                           <TableCell>{registro.hora_entrada || "-"}</TableCell>
                           <TableCell>{registro.hora_saida || "-"}</TableCell>
@@ -382,7 +381,7 @@ function formatInterval(interval: any) {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={user?.papel !== "gestor" ? 8 : 7} className="h-24 text-center">
+                        <TableCell colSpan={user?.papel !== "gestor" ? 9 : 8} className="h-24 text-center">
                           Nenhum registro encontrado.
                         </TableCell>
                       </TableRow>
@@ -414,10 +413,11 @@ function formatInterval(interval: any) {
                         variant={pageNumber === currentPage ? "default" : "outline"}
                         size="sm"
                         onClick={() => setCurrentPage(pageNumber)}
-                        className={`${pageNumber === currentPage
+                        className={`${
+                          pageNumber === currentPage
                             ? "bg-blue-600 text-white dark:bg-white dark:text-black"
                             : "border-gray-300 text-black dark:text-white dark:border-white"
-                          }`}
+                        }`}
                       >
                         {pageNumber}
                       </Button>
@@ -439,8 +439,15 @@ function formatInterval(interval: any) {
           )}
         </CardContent>
       </Card>
- <RegistroManualModal open={showManualModal} onOpenChange={setShowManualModal} onSuccess={handleManualSuccess} />
-    <ModalBiometria open={showBiometriaModal} />
+     <ModalEditarRegistroPonto
+        open={showEditarModal}
+        onOpenChange={setShowEditarModal}
+        registro={registroParaEditar}
+        onAtualizado={handleEditSuccess}
+      />   
+        
+      <RegistroManualModal open={showManualModal} onOpenChange={setShowManualModal} onSuccess={handleManualSuccess} />
+      <ModalBiometria open={showBiometriaModal} />
     </div>
   )
 }

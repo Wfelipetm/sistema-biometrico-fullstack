@@ -9,7 +9,6 @@ import ModalSenhaAdmin from "@/components/modal-senha-quiosque";
 import { ModalBiometria } from "@/components/ModalBiometria";
 import { useAuth } from "@/contexts/AuthContext";
 
-
 function Relogio() {
 	const [hora, setHora] = useState(() =>
 		new Date().toLocaleTimeString("pt-BR", {
@@ -45,7 +44,6 @@ export default function KioskPage() {
 	const router = useRouter();
 	const [showBiometriaModal, setShowBiometriaModal] = useState(false);
 	const { user } = useAuth();
-
 
 	const handleNovoRegistro = async () => {
 		setShowBiometriaModal(true);
@@ -89,15 +87,30 @@ export default function KioskPage() {
 			router.refresh();
 		} catch (error) {
 			setShowBiometriaModal(false);
-			console.error(
-				"Erro ao registrar ponto:",
-				error instanceof Error ? error.message : error,
-			);
-			toast.error(
-				error instanceof Error
-					? error.message
-					: "Erro inesperado ao registrar ponto.",
-			);
+
+			// Só mostra no console se NÃO for "Failed to fetch"
+			if (!(error instanceof TypeError && error.message === "Failed to fetch")) {
+				console.error(
+					"Erro ao registrar ponto:",
+					error instanceof Error ? error.message : error,
+				);
+			}
+
+			// Tratamento específico para erro de conexão/dispositivo offline
+			if (
+				error instanceof TypeError &&
+				error.message === "Failed to fetch"
+			) {
+				toast.error(
+					"Falha de conexão com o dispositivo biométrico. Verifique se o equipamento está ligado e conectado à rede."
+				);
+			} else {
+				toast.error(
+					error instanceof Error
+						? error.message
+						: "Erro inesperado ao registrar ponto.",
+				);
+			}
 		} finally {
 			setLoading(false);
 		}
