@@ -167,73 +167,69 @@ function DashboardPage() {
 			registrosDiarios: `${API_URL}/secre/grafico-reg-secre-mes-todo/${user.secretaria_id}`,
 		};
 		const fetchAll = async () => {
-			setLoading(true);
+	setLoading(true);
 
-			try {
-				const requests = Object.values(urls).map((url) => fetch(url));
-				const results = await Promise.allSettled(requests);
+	try {
+		const requests = Object.values(urls).map((url) => fetch(url));
+		const results = await Promise.allSettled(requests);
 
-				for (let i = 0; i < results.length; i++) {
-					const key = Object.keys(urls)[i];
-					const result = results[i];
+		for (let i = 0; i < results.length; i++) {
+			const key = Object.keys(urls)[i];
+			const result = results[i];
 
-					if (result.status === "fulfilled") {
-						const res = result.value;
-						if (res.ok) {
-							try {
-								const data = await res.json();
-								// atualiza o estado só se a resposta é válida
-								switch (key) {
-									case "unidades":
-										setStats((prev) => ({ ...prev, unidades: data }));
-										break;
-									case "funcionarios":
-										setStats((prev) => ({ ...prev, funcionarios: data }));
-										break;
-									case "funcionariosRecentes":
-										setStats((prev) => ({
-											...prev,
-											funcionariosRecentes: data,
-										}));
-										break;
-									case "registrosHoje":
-										setSecretariaNome(data.nome || "");
-										setStats((prev) => ({ ...prev, registrosHoje: data }));
-										break;
-									case "registrosMes":
-										setStats((prev) => ({ ...prev, registrosMes: data }));
-										break;
-									case "registrosDiarios":
-										setStats((prev) => ({ ...prev, registrosDiarios: data }));
-										if (data && data.length > 0) {
-											setMesAtual(obterNomeMes(data[0].data));
-										}
-										break;
-								}
-							} catch (err) {
-								console.error(
-									`Erro ao converter JSON da resposta ${key}:`,
-									err,
-								);
-							}
-						} else {
-							// Caso retorne erro HTTP, loga, mas continua
-							console.warn(
-								`Erro HTTP na resposta ${key}: ${res.status} ${res.statusText}`,
-							);
-						}
-					} else {
-						// Requisição falhou (ex: rede)
-						console.warn(`Falha na requisição ${key}:`, result.reason);
-					}
+			if (result.status === "fulfilled") {
+				const res = result.value;
+
+				if (!res.ok) {
+					console.warn(`[${key}] Erro HTTP: ${res.status} ${res.statusText}`);
+					continue;
 				}
-			} catch (err) {
-				// Erro inesperado geral
-				console.error("Erro inesperado ao buscar dados:", err);
-			} finally {
-				setLoading(false);
+
+				try {
+					const data = await res.json();
+					if (!data) continue;
+
+					switch (key) {
+						case "unidades":
+							setStats((prev) => ({ ...prev, unidades: data }));
+							break;
+						case "funcionarios":
+							setStats((prev) => ({ ...prev, funcionarios: data }));
+							break;
+						case "funcionariosRecentes":
+							setStats((prev) => ({
+								...prev,
+								funcionariosRecentes: data,
+							}));
+							break;
+						case "registrosHoje":
+							setSecretariaNome(data.nome || "");
+							setStats((prev) => ({ ...prev, registrosHoje: data }));
+							break;
+						case "registrosMes":
+							setStats((prev) => ({ ...prev, registrosMes: data }));
+							break;
+						case "registrosDiarios":
+							setStats((prev) => ({ ...prev, registrosDiarios: data }));
+							if (data.length > 0) {
+								setMesAtual(obterNomeMes(data[0].data));
+							}
+							break;
+					}
+				} catch (err) {
+					console.error(`[${key}] Erro ao parsear JSON:`, err);
+				}
+			} else {
+				console.warn(`[${key}] Falha na requisição:`, result.reason);
 			}
-		};
+		}
+	} catch (err) {
+		console.error("Erro inesperado ao buscar dados:", err);
+	} finally {
+		setLoading(false);
+	}
+};
+
 
 		fetchAll();
 	}, [user?.secretaria_id, user?.unidade_id]);
