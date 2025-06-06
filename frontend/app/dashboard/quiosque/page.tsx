@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Fingerprint, RefreshCcw, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast } from  "@/components/ui/toast-custom"
+import { toast } from "@/components/ui/toast-custom";
 import ModalSenhaAdmin from "@/components/modal-senha-quiosque";
 import { ModalBiometria } from "@/components/ModalBiometria";
+import { useAuth } from "@/contexts/AuthContext";
+
 
 function Relogio() {
 	const [hora, setHora] = useState(() =>
@@ -42,66 +44,70 @@ export default function KioskPage() {
 	const [modalOpen, setModalOpen] = useState(false);
 	const router = useRouter();
 	const [showBiometriaModal, setShowBiometriaModal] = useState(false);
+	const { user } = useAuth();
 
-const handleNovoRegistro = async () => {
-    setShowBiometriaModal(true); // Abre o modal
 
-    setLoading(true);
+	const handleNovoRegistro = async () => {
+		setShowBiometriaModal(true);
+		setLoading(true);
 
-    // Pequeno delay para o usuário ver o modal
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+		await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    const payload = {
-        funcionario_id: 1,
-        unidade_id: 1,
-        data_hora: new Date().toISOString(),
-    };
+		const payload = {
+			funcionario_id: 1,
+			unidade_id: 1,
+			data_hora: new Date().toISOString(),
+		};
 
-    try {
-        const response = await fetch("https://127.0.0.1:5000/register_ponto", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-            mode: "cors",
-        });
+		try {
+			const response = await fetch("https://127.0.0.1:5000/register_ponto", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(payload),
+				mode: "cors",
+			});
 
-        const contentType = response.headers.get("Content-Type");
+			const contentType = response.headers.get("Content-Type");
 
-        let data: { message?: string } = {};
-        if (contentType?.includes("application/json")) {
-            data = await response.json();
-        } else {
-            const text = await response.text();
-            throw new Error(text || "Erro desconhecido");
-        }
+			let data: { message?: string } = {};
+			if (contentType?.includes("application/json")) {
+				data = await response.json();
+			} else {
+				const text = await response.text();
+				throw new Error(text || "Erro desconhecido");
+			}
 
-        if (!response.ok) {
-            setShowBiometriaModal(false); // Fecha o modal em caso de erro
-            const mensagemErro = data.message || "Erro ao registrar ponto.";
-            toast.error(mensagemErro);
-            return;
-        }
+			if (!response.ok) {
+				setShowBiometriaModal(false);
+				const mensagemErro = data.message || "Erro ao registrar ponto.";
+				toast.error(mensagemErro);
+				return;
+			}
 
-        setShowBiometriaModal(false); // Fecha o modal em caso de sucesso
-        toast.success(data.message || "Registro de ponto realizado com sucesso!");
-        router.refresh();
-    } catch (error) {
-        setShowBiometriaModal(false); // Fecha o modal em caso de erro
-        console.error(
-            "Erro ao registrar ponto:",
-            error instanceof Error ? error.message : error,
-        );
-        toast.error(
-            error instanceof Error
-                ? error.message
-                : "Erro inesperado ao registrar ponto.",
-        );
-    } finally {
-        setLoading(false);
-    }
-};
+			setShowBiometriaModal(false);
+			toast.success(data.message || "Registro de ponto realizado com sucesso!");
+			router.refresh();
+		} catch (error) {
+			setShowBiometriaModal(false);
+			console.error(
+				"Erro ao registrar ponto:",
+				error instanceof Error ? error.message : error,
+			);
+			toast.error(
+				error instanceof Error
+					? error.message
+					: "Erro inesperado ao registrar ponto.",
+			);
+		} finally {
+			setLoading(false);
+		}
+	};
 
 	const handleExitKiosk = () => {
+		if (!user?.email) {
+			toast.error("Usuário não carregado! Faça login novamente.");
+			return;
+		}
 		setModalOpen(true);
 	};
 
@@ -121,6 +127,7 @@ const handleNovoRegistro = async () => {
 				className="absolute top-4 right-4 z-10 p-2 rounded-full hover:bg-muted/70 transition"
 				aria-label="Sair do modo Kiosk"
 				style={{ opacity: 0.5 }}
+				disabled={!user?.email}
 			>
 				<X className="w-8 h-8 text-background" />
 			</button>
@@ -140,6 +147,5 @@ const handleNovoRegistro = async () => {
 			</Button>
 			<ModalBiometria open={showBiometriaModal} />
 		</div>
-		
 	);
 }
