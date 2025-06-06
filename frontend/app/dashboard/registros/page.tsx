@@ -87,6 +87,12 @@ export default function RegistrosPage() {
   }, [fetchRegistros])
 
   const handleEscolhaRegistro = () => {
+    if (user?.papel === "gestor") {
+      // Gestor só pode registrar via biometria
+      handleNovoRegistro()
+      return
+    }
+
     toast.confirm(
       "Novo Registro de Ponto",
       "Como você deseja registrar o ponto?",
@@ -238,29 +244,29 @@ export default function RegistrosPage() {
 
   const pagedRegistros = registrosOrdenados.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
-const formatDate = (dateString: string) => {
-  try {
-    // Pega só os primeiros 10 caracteres que correspondem a "yyyy-MM-dd"
-    const datePart = dateString.slice(0, 10); // Ex: "2025-06-03"
-    const [year, month, day] = datePart.split("-");
-    return `${day}/${month}/${year}`;
-  } catch {
-    return dateString;
-  }
-};
+  const formatDate = (dateString: string) => {
+    try {
+      // Pega só os primeiros 10 caracteres que correspondem a "yyyy-MM-dd"
+      const datePart = dateString.slice(0, 10); // Ex: "2025-06-03"
+      const [year, month, day] = datePart.split("-");
+      return `${day}/${month}/${year}`;
+    } catch {
+      return dateString;
+    }
+  };
 
-function formatInterval(interval: any) {
-  if (!interval) return "-";
-  // Se vier string (ex: "23:00:00"), retorna direto
-  if (typeof interval === "string") return interval;
-  // Se vier objeto { days, hours, minutes, seconds }
-  const d = interval.days ?? 0;
-  const h = interval.hours ?? 0;
-  const m = interval.minutes ?? 0;
-  const s = interval.seconds ?? 0;
-  const totalHours = d * 24 + h;
-  return `${totalHours.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-}
+  function formatInterval(interval: any) {
+    if (!interval) return "-";
+    // Se vier string (ex: "23:00:00"), retorna direto
+    if (typeof interval === "string") return interval;
+    // Se vier objeto { days, hours, minutes, seconds }
+    const d = interval.days ?? 0;
+    const h = interval.hours ?? 0;
+    const m = interval.minutes ?? 0;
+    const s = interval.seconds ?? 0;
+    const totalHours = d * 24 + h;
+    return `${totalHours.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  }
 
 
   return (
@@ -288,34 +294,34 @@ function formatInterval(interval: any) {
           <CardDescription>Total de {filteredRegistros.length} registros de ponto</CardDescription>
         </CardHeader>
         <CardContent>
-            <div className="mb-4 flex flex-col md:flex-row items-center gap-2">
+          <div className="mb-4 flex flex-col md:flex-row items-center gap-2">
             <div className="flex items-center gap-2">
               <Search className="h-4 w-4 text-muted-foreground" />
               <Input
-              placeholder="Filtrar por funcionário"
-              value={filtroFuncionario}
-              onChange={(e) => {
-                setFiltroFuncionario(e.target.value)
-                setCurrentPage(1)
-              }}
-              className="max-w-xs"
+                placeholder="Filtrar por funcionário"
+                value={filtroFuncionario}
+                onChange={(e) => {
+                  setFiltroFuncionario(e.target.value)
+                  setCurrentPage(1)
+                }}
+                className="max-w-xs"
               />
             </div>
             {user?.papel !== "gestor" && (
               <div className="flex items-center gap-2">
-              <Search className="h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Filtrar por unidade"
-                value={filtroUnidade}
-                onChange={(e) => {
-                setFiltroUnidade(e.target.value)
-                setCurrentPage(1)
-                }}
-                className="max-w-xs"
-              />
+                <Search className="h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Filtrar por unidade"
+                  value={filtroUnidade}
+                  onChange={(e) => {
+                    setFiltroUnidade(e.target.value)
+                    setCurrentPage(1)
+                  }}
+                  className="max-w-xs"
+                />
               </div>
             )}
-            </div>
+          </div>
 
           {loading ? (
             <div className="flex items-center justify-center py-8">
@@ -341,13 +347,13 @@ function formatInterval(interval: any) {
                     {pagedRegistros.length > 0 ? (
                       pagedRegistros.map((registro) => (
                         <TableRow key={registro.id}>
-                         <TableCell className="font-medium">{registro.funcionario_nome}</TableCell>
-  <TableCell>{registro.unidade_nome}</TableCell>
-  <TableCell>{formatDate(registro.data_hora)}</TableCell>
-  <TableCell>{registro.hora_entrada || "-"}</TableCell>
-  <TableCell>{registro.hora_saida || "-"}</TableCell>
-  <TableCell>{formatInterval(registro.hora_extra)}</TableCell>
-  <TableCell>{formatInterval(registro.hora_desconto)}</TableCell>
+                          <TableCell className="font-medium">{registro.funcionario_nome}</TableCell>
+                          <TableCell>{registro.unidade_nome}</TableCell>
+                          <TableCell>{formatDate(registro.data_hora)}</TableCell>
+                          <TableCell>{registro.hora_entrada || "-"}</TableCell>
+                          <TableCell>{registro.hora_saida || "-"}</TableCell>
+                          <TableCell>{formatInterval(registro.hora_extra)}</TableCell>
+                          <TableCell>{formatInterval(registro.hora_desconto)}</TableCell>
                           {user?.papel !== "gestor" && (
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-2">
@@ -402,11 +408,10 @@ function formatInterval(interval: any) {
                         variant={pageNumber === currentPage ? "default" : "outline"}
                         size="sm"
                         onClick={() => setCurrentPage(pageNumber)}
-                        className={`${
-                          pageNumber === currentPage
+                        className={`${pageNumber === currentPage
                             ? "bg-blue-600 text-white dark:bg-white dark:text-black"
                             : "border-gray-300 text-black dark:text-white dark:border-white"
-                        }`}
+                          }`}
                       >
                         {pageNumber}
                       </Button>
