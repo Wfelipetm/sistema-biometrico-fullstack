@@ -167,69 +167,108 @@ function DashboardPage() {
 			registrosDiarios: `${API_URL}/secre/grafico-reg-secre-mes-todo/${user.secretaria_id}`,
 		};
 		const fetchAll = async () => {
-	setLoading(true);
+			setLoading(true);
 
-	try {
-		const requests = Object.values(urls).map((url) => fetch(url));
-		const results = await Promise.allSettled(requests);
+			try {
+				const requests = Object.values(urls).map((url) => fetch(url));
+				const results = await Promise.allSettled(requests);
 
-		for (let i = 0; i < results.length; i++) {
-			const key = Object.keys(urls)[i];
-			const result = results[i];
+				for (let i = 0; i < results.length; i++) {
+					const key = Object.keys(urls)[i];
+					const result = results[i];
 
-			if (result.status === "fulfilled") {
-				const res = result.value;
+					if (result.status === "fulfilled") {
+						const res = result.value;
 
-				if (!res.ok) {
-					console.warn(`[${key}] Erro HTTP: ${res.status} ${res.statusText}`);
-					continue;
-				}
-
-				try {
-					const data = await res.json();
-					if (!data) continue;
-
-					switch (key) {
-						case "unidades":
-							setStats((prev) => ({ ...prev, unidades: data }));
-							break;
-						case "funcionarios":
-							setStats((prev) => ({ ...prev, funcionarios: data }));
-							break;
-						case "funcionariosRecentes":
-							setStats((prev) => ({
-								...prev,
-								funcionariosRecentes: data,
-							}));
-							break;
-						case "registrosHoje":
-							setSecretariaNome(data.nome || "");
-							setStats((prev) => ({ ...prev, registrosHoje: data }));
-							break;
-						case "registrosMes":
-							setStats((prev) => ({ ...prev, registrosMes: data }));
-							break;
-						case "registrosDiarios":
-							setStats((prev) => ({ ...prev, registrosDiarios: data }));
-							if (data.length > 0) {
-								setMesAtual(obterNomeMes(data[0].data));
+						// Trate 404 para cada endpoint esperado
+						if (!res.ok) {
+							if (key === "funcionarios" && res.status === 404) {
+								setStats((prev) => ({
+									...prev,
+									funcionarios: { secretaria_id: user.secretaria_id ?? 0, total_funcionarios: "0" },
+								}));
+								continue;
 							}
-							break;
-					}
-				} catch (err) {
-					console.error(`[${key}] Erro ao parsear JSON:`, err);
-				}
-			} else {
-				console.warn(`[${key}] Falha na requisição:`, result.reason);
-			}
-		}
-	} catch (err) {
-		console.error("Erro inesperado ao buscar dados:", err);
-	} finally {
-		setLoading(false);
-	}
-};
+							if (key === "funcionariosRecentes" && res.status === 404) {
+								setStats((prev) => ({
+									...prev,
+									funcionariosRecentes: [],
+								}));
+								continue;
+							}
+							if (key === "registrosHoje" && res.status === 404) {
+								setStats((prev) => ({
+									...prev,
+									registrosHoje: { secretaria_id: String(user.secretaria_id), total_registros_hoje: 0, nome: "" },
+								}));
+								continue;
+							}
+							if (key === "registrosMes" && res.status === 404) {
+								setStats((prev) => ({
+									...prev,
+									registrosMes: { secretaria_id: String(user.secretaria_id), secretaria_nome: "", total_registros: 0 },
+								}));
+								continue;
+							}
+							if (key === "registrosDiarios" && res.status === 404) {
+								setStats((prev) => ({
+									...prev,
+									registrosDiarios: [],
+								}));
+								continue;
+							}
+							if (key === "unidades" && res.status === 404) {
+								setStats((prev) => ({
+									...prev,
+									unidades: [],
+								}));
+								continue;
+							}
+							continue;
+						}
 
+						try {
+							const data = await res.json();
+							if (!data) continue;
+
+							switch (key) {
+								case "unidades":
+									setStats((prev) => ({ ...prev, unidades: data }));
+									break;
+								case "funcionarios":
+									setStats((prev) => ({ ...prev, funcionarios: data }));
+									break;
+								case "funcionariosRecentes":
+									setStats((prev) => ({
+										...prev,
+										funcionariosRecentes: data,
+									}));
+									break;
+								case "registrosHoje":
+									setSecretariaNome(data.nome || "");
+									setStats((prev) => ({ ...prev, registrosHoje: data }));
+									break;
+								case "registrosMes":
+									setStats((prev) => ({ ...prev, registrosMes: data }));
+									break;
+								case "registrosDiarios":
+									setStats((prev) => ({ ...prev, registrosDiarios: data }));
+									if (data.length > 0) {
+										setMesAtual(obterNomeMes(data[0].data));
+									}
+									break;
+							}
+						} catch (err) {
+							// erro ao parsear JSON ignorado
+						}
+					}
+				}
+			} catch (err) {
+				// erro inesperado ignorado
+			} finally {
+				setLoading(false);
+			}
+		};
 
 		fetchAll();
 	}, [user?.secretaria_id, user?.unidade_id]);
