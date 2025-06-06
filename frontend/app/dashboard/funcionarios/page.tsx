@@ -192,18 +192,22 @@ export default function FuncionariosPage() {
           <CardDescription>Total de {funcionarios.length} funcionários cadastrados</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 flex items-center gap-2">
-            <Search className="h-4 w-4 text-muted-foreground" />
-            <Input
+            <div className="mb-4 flex items-center gap-2">
+            <div className="relative w-full max-w-sm">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <Search className="h-4 w-4 text-muted-foreground" />
+              </span>
+              <Input
               placeholder="Buscar funcionário..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value)
                 setCurrentPage(1)
               }}
-              className="max-w-sm"
-            />
-          </div>
+              className="pl-10"
+              />
+            </div>
+            </div>
 
           {loading ? (
             <div className="flex items-center justify-center py-8">

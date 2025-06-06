@@ -301,8 +301,7 @@ function formatInterval(interval: any) {
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex flex-col md:flex-row items-center gap-2">
-            <div className="flex items-center gap-2">
-              <Search className="h-4 w-4 text-muted-foreground" />
+            <div className="relative flex items-center gap-2">
               <Input
                 placeholder="Filtrar por funcionário"
                 value={filtroFuncionario}
@@ -310,8 +309,9 @@ function formatInterval(interval: any) {
                   setFiltroFuncionario(e.target.value)
                   setCurrentPage(1)
                 }}
-                className="max-w-xs"
+                className="max-w-xs pl-8"
               />
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             </div>
             {user?.papel !== "gestor" && (
               <div className="flex items-center gap-2">
