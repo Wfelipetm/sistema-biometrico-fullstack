@@ -396,15 +396,16 @@ module.exports = {
         try {
             const params = [id];
             let query = `
-			SELECT 
-				r.*, 
-				f.nome AS funcionario_nome, 
-				u.nome AS unidade_nome
-			FROM registros_ponto r
-			INNER JOIN funcionarios f ON r.funcionario_id = f.id
-			INNER JOIN unidades u ON f.unidade_id = u.id
-			WHERE f.unidade_id = $1
-		`;
+        SELECT 
+            r.*, 
+            f.nome AS funcionario_nome, 
+            f.tipo_escala AS tipo_escala,         -- <-- Adicione esta linha!
+            u.nome AS unidade_nome
+        FROM registros_ponto r
+        INNER JOIN funcionarios f ON r.funcionario_id = f.id
+        INNER JOIN unidades u ON f.unidade_id = u.id
+        WHERE f.unidade_id = $1
+        `;
 
             if (data_inicio && data_fim) {
                 query += ` AND r.data_hora::date BETWEEN $2 AND $3`;

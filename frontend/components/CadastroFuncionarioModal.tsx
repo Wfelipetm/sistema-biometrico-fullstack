@@ -173,84 +173,85 @@ export default function ModalCadastroFuncionarios({
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-    setLoading(true)
-    setUploadProgress(0)
+  e.preventDefault()
+  setError("")
+  setLoading(true)
+  setUploadProgress(0)
 
-    if (!isFormValid()) {
-      setError("Por favor, corrija os erros antes de continuar.")
-      setLoading(false)
+  if (!isFormValid()) {
+    setError("Por favor, corrija os erros antes de continuar.")
+    setLoading(false)
+    return
+  }
+
+  const payload = {
+    userName: nome.trim(),
+    cpf,
+    cargo: cargo.trim(),
+    matricula: matricula ? Number(matricula) : undefined,
+    unidade_id: Number(unidadeId),
+    tipo_escala: tipoEscala,
+    telefone,
+    email: email.trim(),
+    data_admissao: dataAdmissao,
+  }
+
+  try {
+    // Simular progresso de upload
+    const progressInterval = setInterval(() => {
+      setUploadProgress((prev) => {
+        if (prev >= 90) {
+          clearInterval(progressInterval)
+          return prev
+        }
+        return prev + 10
+      })
+    }, 200)
+
+    const response = await fetch("https://127.0.0.1:5000/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      mode: "cors",
+    })
+
+    clearInterval(progressInterval)
+
+    if (!response.ok) {
+      const errorBody = await response.text()
+      setError(`Erro no backend Python. Status: ${response.status}, mensagem: ${errorBody}`)
       return
     }
 
-    const payload = {
-      userName: nome.trim(),
-      cpf,
-      cargo: cargo.trim(),
-      matricula: matricula ? Number(matricula) : undefined,
-      unidade_id: Number(unidadeId),
-      tipo_escala: tipoEscala,
-      telefone,
-      email: email.trim(),
-      data_admissao: dataAdmissao,
-    }
+    await response.json()
+    setUploadProgress(100)
+    setSuccess(true)
 
-    try {
-      // Simular progresso de upload
-      const progressInterval = setInterval(() => {
-        setUploadProgress((prev) => {
-          if (prev >= 90) {
-            clearInterval(progressInterval)
-            return prev
-          }
-          return prev + 10
-        })
-      }, 200)
-
-      const response = await fetch("https://127.0.0.1:5000/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-        mode: "cors",
-      })
-
-      clearInterval(progressInterval)
-
-      if (!response.ok) {
-        const errorBody = await response.text()
-        setError(`Erro no backend Python. Status: ${response.status}, mensagem: ${errorBody}`)
-        return
-      }
-
-      await response.json()
-      setUploadProgress(100)
-      setSuccess(true)
-
-      // Aguardar um pouco para mostrar o sucesso
-      setTimeout(() => {
-        resetForm()
-        onOpenChange(false)
-        router.refresh()
-        onSuccess?.()
-      }, 1500)
-    } catch (err: unknown) {
-      if (open) {
-        if (isErrorWithMessage(err)) {
-          if (err.message === "Failed to fetch") {
-            setError("Cadastro cancelado. Verifique sua conexão ou tente mais tarde.")
-          } else {
-            console.error("Erro ao cadastrar funcionário:", err.message)
-            setError("Erro ao cadastrar funcionário. Verifique os dados e tente novamente.")
-          }
+    // Aguardar um pouco para mostrar o sucesso
+    setTimeout(() => {
+      resetForm()
+      onOpenChange(false)
+      router.refresh()
+      onSuccess?.()
+    }, 1500)
+  } catch (err: unknown) {
+    if (open) {
+      if (isErrorWithMessage(err)) {
+        if (err.message === "Failed to fetch") {
+          setError("Falha de conexão com o dispositivo biométrico. Verifique se o equipamento está ligado e conectado à rede.")
+          // Não mostra no console!
         } else {
-          setError("Erro desconhecido ao cadastrar funcionário. Tente novamente.")
+          console.error("Erro ao cadastrar funcionário:", err.message)
+          setError("Erro ao cadastrar funcionário. Verifique os dados e tente novamente.")
         }
+      } else {
+        setError("Erro desconhecido ao cadastrar funcionário. Tente novamente.")
       }
-    } finally {
-      setLoading(false)
     }
+  } finally {
+    setLoading(false)
   }
+}
 
   function isErrorWithMessage(error: unknown): error is { message: string } {
     return (
