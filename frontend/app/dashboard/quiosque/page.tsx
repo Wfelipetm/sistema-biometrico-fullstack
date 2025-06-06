@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Fingerprint, RefreshCcw, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { toast } from  "@/components/ui/toast-custom"
 import ModalSenhaAdmin from "@/components/modal-senha-quiosque";
+import { ModalBiometria } from "@/components/ModalBiometria";
 
 function Relogio() {
 	const [hora, setHora] = useState(() =>
@@ -40,56 +41,65 @@ export default function KioskPage() {
 	const [loading, setLoading] = useState(false);
 	const [modalOpen, setModalOpen] = useState(false);
 	const router = useRouter();
+	const [showBiometriaModal, setShowBiometriaModal] = useState(false);
 
-	const handleNovoRegistro = async () => {
-		setLoading(true);
+const handleNovoRegistro = async () => {
+    setShowBiometriaModal(true); // Abre o modal
 
-		const payload = {
-			funcionario_id: 1, // Substitua pelo id correto do funcionário
-			unidade_id: 1, // Substitua pelo id correto da unidade
-			data_hora: new Date().toISOString(),
-		};
+    setLoading(true);
 
-		try {
-			const response = await fetch("https://127.0.0.1:5000/register_ponto", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(payload),
-				mode: "cors",
-			});
+    // Pequeno delay para o usuário ver o modal
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-			const contentType = response.headers.get("Content-Type");
+    const payload = {
+        funcionario_id: 1,
+        unidade_id: 1,
+        data_hora: new Date().toISOString(),
+    };
 
-			let data: { message?: string } = {};
-			if (contentType?.includes("application/json")) {
-				data = await response.json();
-			} else {
-				const text = await response.text();
-				throw new Error(text || "Erro desconhecido");
-			}
+    try {
+        const response = await fetch("https://127.0.0.1:5000/register_ponto", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+            mode: "cors",
+        });
 
-			if (!response.ok) {
-				const mensagemErro = data.message || "Erro ao registrar ponto.";
-				toast.error(mensagemErro);
-				return;
-			}
+        const contentType = response.headers.get("Content-Type");
 
-			toast.success(data.message || "Registro de ponto realizado com sucesso!");
-			router.refresh();
-		} catch (error) {
-			console.error(
-				"Erro ao registrar ponto:",
-				error instanceof Error ? error.message : error,
-			);
-			toast.error(
-				error instanceof Error
-					? error.message
-					: "Erro inesperado ao registrar ponto.",
-			);
-		} finally {
-			setLoading(false);
-		}
-	};
+        let data: { message?: string } = {};
+        if (contentType?.includes("application/json")) {
+            data = await response.json();
+        } else {
+            const text = await response.text();
+            throw new Error(text || "Erro desconhecido");
+        }
+
+        if (!response.ok) {
+            setShowBiometriaModal(false); // Fecha o modal em caso de erro
+            const mensagemErro = data.message || "Erro ao registrar ponto.";
+            toast.error(mensagemErro);
+            return;
+        }
+
+        setShowBiometriaModal(false); // Fecha o modal em caso de sucesso
+        toast.success(data.message || "Registro de ponto realizado com sucesso!");
+        router.refresh();
+    } catch (error) {
+        setShowBiometriaModal(false); // Fecha o modal em caso de erro
+        console.error(
+            "Erro ao registrar ponto:",
+            error instanceof Error ? error.message : error,
+        );
+        toast.error(
+            error instanceof Error
+                ? error.message
+                : "Erro inesperado ao registrar ponto.",
+        );
+    } finally {
+        setLoading(false);
+    }
+};
 
 	const handleExitKiosk = () => {
 		setModalOpen(true);
@@ -117,17 +127,19 @@ export default function KioskPage() {
 
 			<Relogio />
 			<h1 className="text-3xl font-bold text-center">Bata seu ponto</h1>
-			<Fingerprint className="w-32 h-32 text-primary animate-pulse" />
+			<Fingerprint className="w-48 h-48 text-primary animate-pulse" />
 			<Button
 				type="button"
 				size="lg"
-				className="text-lg flex items-center gap-2 px-8 py-6"
+				className="text-lg flex items-center gap-4 px-8 py-6"
 				onClick={handleNovoRegistro}
 				disabled={loading}
 			>
 				<RefreshCcw className={`w-6 h-6 ${loading ? "animate-spin" : ""}`} />
 				{loading ? "Registrando..." : "Registrar Ponto"}
 			</Button>
+			<ModalBiometria open={showBiometriaModal} />
 		</div>
+		
 	);
 }
