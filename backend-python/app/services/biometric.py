@@ -14,6 +14,7 @@ def enroll_user(id_biometrico):
     return Extraction.TextEncodeFIR
 
 def identify_user():
+    Extraction.WindowStyle = 1
     Device.Open(255)
     Extraction.Capture(1)
     Device.Close(255)

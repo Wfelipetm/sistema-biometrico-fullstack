@@ -7,13 +7,15 @@ import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Plus, Search, Edit, Trash2, ChevronLeft, ChevronRight } from "lucide-react"
+import { Plus, Search, Edit, Trash2, ChevronLeft, ChevronRight, Fingerprint } from "lucide-react"
 import { format, isSameDay, parseISO } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { useAuth } from "@/contexts/AuthContext"
 import { toast } from "@/components/ui/toast-custom"
 import RegistroManualModal from "@/components/ModalRegistroManual"
 import ModalEditarRegistroPonto from "@/components/modal-editar-registro"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { ModalBiometria } from "@/components/ModalBiometria"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -42,7 +44,7 @@ export default function RegistrosPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [filtroFuncionario, setFiltroFuncionario] = useState("")
   const [filtroUnidade, setFiltroUnidade] = useState("")
-  const [filtroData, setFiltroData] = useState("") // <-- Novo filtro de data
+  const [filtroData, setFiltroData] = useState("")
   const router = useRouter()
   const { user } = useAuth()
   const [currentPage, setCurrentPage] = useState(1)
@@ -50,6 +52,7 @@ export default function RegistrosPage() {
   const [showManualModal, setShowManualModal] = useState(false)
   const [showEditarModal, setShowEditarModal] = useState(false)
   const [registroParaEditar, setRegistroParaEditar] = useState<Registro | null>(null)
+  const [showBiometriaModal, setShowBiometriaModal] = useState(false)
 
   const fetchRegistros = useCallback(async () => {
     if (!user?.secretaria_id) return
@@ -86,33 +89,42 @@ export default function RegistrosPage() {
     fetchRegistros()
   }, [fetchRegistros])
 
-  const handleEscolhaRegistro = () => {
-    toast.confirm(
-      "Novo Registro de Ponto",
-      "Como você deseja registrar o ponto?",
-      async () => {
-        await handleNovoRegistro()
-      },
-      {
-        confirmText: "Biometria",
-        cancelText: "Manual",
-        variant: "default",
-      },
-    )
-
-    // Alternativa: abrir modal manual quando cancelar
-    setTimeout(() => {
-      const cancelButton = document.querySelector("[data-sonner-toast] button:first-child")
-      if (cancelButton) {
-        cancelButton.addEventListener("click", () => {
-          setShowManualModal(true)
-        })
-      }
-    }, 100)
+const handleEscolhaRegistro = () => {
+  if (user?.papel === "gestor") {
+    setShowBiometriaModal(true)
+    handleNovoRegistro()
+    return
   }
+
+  toast.confirm(
+    "Novo Registro de Ponto",
+    "Como você deseja registrar o ponto?",
+    async () => {
+      setShowBiometriaModal(true)
+      await handleNovoRegistro()
+    },
+    {
+      confirmText: "Biometria",
+      cancelText: "Manual",
+      variant: "default",
+    },
+  )
+
+  setTimeout(() => {
+    const cancelButton = document.querySelector("[data-sonner-toast] button:first-child")
+    if (cancelButton) {
+      cancelButton.addEventListener("click", () => {
+        setShowManualModal(true)
+      })
+    }
+  }, 100)
+}
 
   const handleNovoRegistro = async () => {
     setLoading(true)
+
+    // Pequeno delay para o usuário ler a orientação biométrica
+    await new Promise((resolve) => setTimeout(resolve, 1000))
 
     const payload = {
       funcionario_id: 1, // substitua conforme necessário
@@ -139,15 +151,18 @@ export default function RegistrosPage() {
       }
 
       if (!response.ok) {
+        setShowBiometriaModal(false)
         const mensagemErro = data.message || "Erro ao registrar ponto."
         toast.error("Falha no registro", mensagemErro)
         return
       }
 
+      setShowBiometriaModal(false)
       toast.success("Ponto registrado!", data.message || "Registro de ponto realizado com sucesso!")
       await fetchRegistros()
       router.refresh()
     } catch (error) {
+      setShowBiometriaModal(false)
       console.error("Erro ao registrar ponto:", error instanceof Error ? error.message : error)
       toast.error(
         "Erro no registro biométrico",
@@ -238,30 +253,26 @@ export default function RegistrosPage() {
 
   const pagedRegistros = registrosOrdenados.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
-const formatDate = (dateString: string) => {
-  try {
-    // Pega só os primeiros 10 caracteres que correspondem a "yyyy-MM-dd"
-    const datePart = dateString.slice(0, 10); // Ex: "2025-06-03"
-    const [year, month, day] = datePart.split("-");
-    return `${day}/${month}/${year}`;
-  } catch {
-    return dateString;
+  const formatDate = (dateString: string) => {
+    try {
+      const datePart = dateString.slice(0, 10)
+      const [year, month, day] = datePart.split("-")
+      return `${day}/${month}/${year}`
+    } catch {
+      return dateString
+    }
   }
-};
 
-function formatInterval(interval: any) {
-  if (!interval) return "-";
-  // Se vier string (ex: "23:00:00"), retorna direto
-  if (typeof interval === "string") return interval;
-  // Se vier objeto { days, hours, minutes, seconds }
-  const d = interval.days ?? 0;
-  const h = interval.hours ?? 0;
-  const m = interval.minutes ?? 0;
-  const s = interval.seconds ?? 0;
-  const totalHours = d * 24 + h;
-  return `${totalHours.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-}
-
+  function formatInterval(interval: any) {
+    if (!interval) return "-"
+    if (typeof interval === "string") return interval
+    const d = interval.days ?? 0
+    const h = interval.hours ?? 0
+    const m = interval.minutes ?? 0
+    const s = interval.seconds ?? 0
+    const totalHours = d * 24 + h
+    return `${totalHours.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`
+  }
 
   return (
     <div className="space-y-6">
@@ -273,9 +284,6 @@ function formatInterval(interval: any) {
           </p>
         </div>
         <div className="flex gap-2">
-          {/* <Button variant="outline" onClick={() => {}}>
-						<FileDown className="mr-2 h-4 w-4" /> Exportar
-					</Button> */}
           <Button className="text-white dark:bg-white dark:text-black" onClick={handleEscolhaRegistro}>
             <Plus className="mr-2 h-4 w-4" /> Novo Registro
           </Button>
@@ -288,34 +296,34 @@ function formatInterval(interval: any) {
           <CardDescription>Total de {filteredRegistros.length} registros de ponto</CardDescription>
         </CardHeader>
         <CardContent>
-            <div className="mb-4 flex flex-col md:flex-row items-center gap-2">
+          <div className="mb-4 flex flex-col md:flex-row items-center gap-2">
             <div className="flex items-center gap-2">
               <Search className="h-4 w-4 text-muted-foreground" />
               <Input
-              placeholder="Filtrar por funcionário"
-              value={filtroFuncionario}
-              onChange={(e) => {
-                setFiltroFuncionario(e.target.value)
-                setCurrentPage(1)
-              }}
-              className="max-w-xs"
+                placeholder="Filtrar por funcionário"
+                value={filtroFuncionario}
+                onChange={(e) => {
+                  setFiltroFuncionario(e.target.value)
+                  setCurrentPage(1)
+                }}
+                className="max-w-xs"
               />
             </div>
             {user?.papel !== "gestor" && (
               <div className="flex items-center gap-2">
-              <Search className="h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Filtrar por unidade"
-                value={filtroUnidade}
-                onChange={(e) => {
-                setFiltroUnidade(e.target.value)
-                setCurrentPage(1)
-                }}
-                className="max-w-xs"
-              />
+                <Search className="h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Filtrar por unidade"
+                  value={filtroUnidade}
+                  onChange={(e) => {
+                    setFiltroUnidade(e.target.value)
+                    setCurrentPage(1)
+                  }}
+                  className="max-w-xs"
+                />
               </div>
             )}
-            </div>
+          </div>
 
           {loading ? (
             <div className="flex items-center justify-center py-8">
@@ -341,13 +349,13 @@ function formatInterval(interval: any) {
                     {pagedRegistros.length > 0 ? (
                       pagedRegistros.map((registro) => (
                         <TableRow key={registro.id}>
-                         <TableCell className="font-medium">{registro.funcionario_nome}</TableCell>
-  <TableCell>{registro.unidade_nome}</TableCell>
-  <TableCell>{formatDate(registro.data_hora)}</TableCell>
-  <TableCell>{registro.hora_entrada || "-"}</TableCell>
-  <TableCell>{registro.hora_saida || "-"}</TableCell>
-  <TableCell>{formatInterval(registro.hora_extra)}</TableCell>
-  <TableCell>{formatInterval(registro.hora_desconto)}</TableCell>
+                          <TableCell className="font-medium">{registro.funcionario_nome}</TableCell>
+                          <TableCell>{registro.unidade_nome}</TableCell>
+                          <TableCell>{formatDate(registro.data_hora)}</TableCell>
+                          <TableCell>{registro.hora_entrada || "-"}</TableCell>
+                          <TableCell>{registro.hora_saida || "-"}</TableCell>
+                          <TableCell>{formatInterval(registro.hora_extra)}</TableCell>
+                          <TableCell>{formatInterval(registro.hora_desconto)}</TableCell>
                           {user?.papel !== "gestor" && (
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-2">
@@ -428,17 +436,8 @@ function formatInterval(interval: any) {
           )}
         </CardContent>
       </Card>
-      <RegistroManualModal open={showManualModal} onOpenChange={setShowManualModal} onSuccess={handleManualSuccess} />
-      {/* ...existing modals... */}
-      <ModalEditarRegistroPonto
-        open={showEditarModal}
-        onOpenChange={(open) => {
-          setShowEditarModal(open)
-          if (!open) setRegistroParaEditar(null)
-        }}
-        registro={registroParaEditar}
-        onAtualizado={handleEditSuccess}
-      />
+ <RegistroManualModal open={showManualModal} onOpenChange={setShowManualModal} onSuccess={handleManualSuccess} />
+    <ModalBiometria open={showBiometriaModal} />
     </div>
   )
 }
