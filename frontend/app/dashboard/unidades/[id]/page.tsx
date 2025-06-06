@@ -11,6 +11,7 @@ import type { ValueType } from "tailwindcss/types/config"
 import { Button } from "@/components/ui/button"
 import CadastrarFeriasModal from "@/components/CadastrarFeriasModal"
 import { toast } from "@/components/ui/toast-custom"
+import { useAuth } from "@/contexts/AuthContext"
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 type Unidade = {
@@ -44,6 +45,7 @@ interface FeriasSolicitadasPorUnidade {
 }
 
 export default function UnidadeDetalhesPage() {
+  const { user } = useAuth(); // Adicione esta linha para acessar o papel do usuário
   const params = useParams()
   const id = params.id as string
   const [unidade, setUnidade] = useState<Unidade | null>(null)
@@ -215,12 +217,14 @@ export default function UnidadeDetalhesPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-black dark:text-white">Dashboard da Unidade</h1>
         </div>
-        <Button
-          onClick={() => setShowCadastroFeriasModal(true)}
-          className="bg-blue-600 text-white dark:bg-white dark:text-black hover:bg-blue-700 dark:hover:bg-gray-200"
-        >
-          + Cadastrar Férias
-        </Button>
+        {user?.papel !== "gestor" && (
+          <Button
+            onClick={() => setShowCadastroFeriasModal(true)}
+            className="bg-blue-600 text-white dark:bg-white dark:text-black hover:bg-blue-700 dark:hover:bg-gray-200"
+          >
+            + Cadastrar Férias
+          </Button>
+        )}
       </div>
 
       <Card>

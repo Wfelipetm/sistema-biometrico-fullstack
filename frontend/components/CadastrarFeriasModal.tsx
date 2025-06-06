@@ -29,7 +29,7 @@ import {
   Save,
   Plus,
 } from "lucide-react"
-import { differenceInDays, format, addDays } from "date-fns"
+import { differenceInDays, format, addDays, parseISO, parse } from "date-fns"
 import axios from "axios"
 import { toast } from "@/components/ui/toast-custom"
 
@@ -448,8 +448,23 @@ export default function CadastrarFeriasModal({
                           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                             <Calendar className="w-3 h-3" />
                             <span>
-                              {new Date(f.data_inicio).toLocaleDateString("pt-BR")} até{" "}
-                              {new Date(f.data_fim).toLocaleDateString("pt-BR")}
+                              {f.data_inicio
+                                ? format(
+                                    f.data_inicio.includes("/")
+                                      ? parse(f.data_inicio, "dd/MM/yyyy", new Date())
+                                      : parseISO(f.data_inicio),
+                                    "dd/MM/yyyy"
+                                  )
+                                : "-"}
+                              {" até "}
+                              {f.data_fim
+                                ? format(
+                                    f.data_fim.includes("/")
+                                      ? parse(f.data_fim, "dd/MM/yyyy", new Date())
+                                      : parseISO(f.data_fim),
+                                    "dd/MM/yyyy"
+                                  )
+                                : "-"}
                             </span>
                           </div>
 
