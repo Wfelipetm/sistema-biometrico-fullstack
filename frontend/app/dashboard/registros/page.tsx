@@ -119,57 +119,76 @@ export default function RegistrosPage() {
   }
 
   const handleNovoRegistro = async () => {
-    setLoading(true)
+  setLoading(true)
 
-    // Pequeno delay para o usuário ler a orientação biométrica
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+  // Pequeno delay para o usuário ler a orientação biométrica
+  await new Promise((resolve) => setTimeout(resolve, 1000))
 
-    const payload = {
-      funcionario_id: 1, // substitua conforme necessário
-      unidade_id: 1,
-      data_hora: new Date().toISOString(),
+  const payload = {
+    funcionario_id: 1, // substitua conforme necessário
+    unidade_id: 1,
+    data_hora: new Date().toISOString(),
+  }
+
+  try {
+    const response = await fetch("https://127.0.0.1:5000/register_ponto", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      mode: "cors",
+    })
+
+    const contentType = response.headers.get("Content-Type")
+
+    let data: { message?: string } = {}
+    if (contentType?.includes("application/json")) {
+      data = await response.json()
+    } else {
+      const text = await response.text()
+      throw new Error(text || "Erro desconhecido")
     }
 
-    try {
-      const response = await fetch("https://127.0.0.1:5000/register_ponto", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-        mode: "cors",
-      })
-
-      const contentType = response.headers.get("Content-Type")
-
-      let data: { message?: string } = {}
-      if (contentType?.includes("application/json")) {
-        data = await response.json()
+    if (!response.ok) {
+      setShowBiometriaModal(false)
+      const mensagemErro = data.message || "Erro de comunicação."
+      // Trate timeout/dedo não colocado
+      if (
+        mensagemErro.toLowerCase().includes("timeout") ||
+        mensagemErro.toLowerCase().includes("dedo")
+      ) {
+        toast.error(
+          "Tempo esgotado",
+          "O tempo para colocar o dedo no dispositivo acabou. Por favor, tente novamente e coloque o dedo no leitor."
+        )
       } else {
-        const text = await response.text()
-        throw new Error(text || "Erro desconhecido")
-      }
-
-      if (!response.ok) {
-        setShowBiometriaModal(false)
-        const mensagemErro = data.message || "Erro ao registrar ponto."
         toast.error("Falha no registro", mensagemErro)
-        return
       }
+      return
+    }
 
-      setShowBiometriaModal(false)
-      toast.success("Ponto registrado!", data.message || "Registro de ponto realizado com sucesso!")
-      await fetchRegistros()
-      router.refresh()
-    } catch (error) {
-      setShowBiometriaModal(false)
+    setShowBiometriaModal(false)
+    toast.success("Ponto registrado!", data.message || "Registro de ponto realizado com sucesso!")
+    await fetchRegistros()
+    router.refresh()
+  } catch (error: any) {
+    setShowBiometriaModal(false)
+    // Erro de conexão (internet ou USB)
+    if (error instanceof TypeError && error.message === "Failed to fetch") {
+      toast.error(
+        "Falha de conexão",
+        "Não foi possível conectar ao dispositivo biométrico. Verifique se o equipamento está ligado e conectado à rede."
+      )
+    } else {
       console.error("Erro ao registrar ponto:", error instanceof Error ? error.message : error)
       toast.error(
         "Erro no registro biométrico",
-        error instanceof Error ? error.message : "Erro inesperado ao registrar ponto.",
+        error instanceof Error ? error.message : "Erro inesperado ao registrar ponto."
       )
-    } finally {
-      setLoading(false)
     }
+  } finally {
+    setLoading(false)
   }
+}
 
   const handleDelete = async (id: number, funcionarioNome: string) => {
     const dataRegistro = registros.find((r) => r.id === id)?.data_hora
