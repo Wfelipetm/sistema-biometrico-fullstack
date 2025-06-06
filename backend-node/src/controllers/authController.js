@@ -156,6 +156,34 @@ async function atualizarUsuario(req, res) {
     }
 }
 
+async function verificarSenhaUsuario(req, res) {
+    const { email, senha } = req.body;
+
+    try {
+        // Busca o usuário pelo email
+        const query = 'SELECT id, nome, email, senha FROM usuarios WHERE email = $1';
+        const result = await db.query(query, [email]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Usuário não encontrado' });
+        }
+
+        const usuario = result.rows[0];
+
+        // Compara a senha informada com o hash do banco
+        const senhaCorreta = await bcrypt.compare(senha, usuario.senha);
+
+        if (!senhaCorreta) {
+            return res.status(401).json({ error: 'Senha incorreta' });
+        }
+
+        // Se chegou aqui, a senha está correta
+        return res.status(200).json({ success: true, usuario: { id: usuario.id, nome: usuario.nome, email: usuario.email } });
+    } catch (error) {
+        console.error('Erro ao verificar senha:', error);
+        return res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+}
 
 // Deletar usuário
 async function deletarUsuario(req, res) {
@@ -184,5 +212,6 @@ module.exports = {
     loginUsuario,
     atualizarUsuario,
     deletarUsuario,
-    buscarUsuarios
+    buscarUsuarios,
+    verificarSenhaUsuario
 };
