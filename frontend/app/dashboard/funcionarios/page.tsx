@@ -342,6 +342,7 @@ export default function FuncionariosPage() {
             nome: funcionarioSelecionado.nome,
             cpf: funcionarioSelecionado.cpf,
             cargo: funcionarioSelecionado.cargo,
+            email: (funcionarioSelecionado as any).email || "", // ajuste se tiver email
             data_admissao: funcionarioSelecionado.data_admissao || "",
             unidade_id: funcionarioSelecionado.unidade_id || 0, // ajuste aqui se tiver unidade_id
             matricula: funcionarioSelecionado.matricula ? funcionarioSelecionado.matricula.toString() : "",
