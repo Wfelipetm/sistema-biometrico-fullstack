@@ -133,11 +133,11 @@ export default function UnidadesPage() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Unidades</h1>
-          <p className="text-muted-foreground">Gerencie as unidades da {user?.secretaria_nome || "secretaria"}</p>
+          <h1 className="text-3xl font-bold tracking-tight text-blue-900">Unidades</h1>
+          <p className="text-blue-700">Gerencie as unidades da {user?.secretaria_nome || "secretaria"}</p>
         </div>
         {user?.papel !== "gestor" && (
-          <Button onClick={() => setIsModalOpen(true)} className="text-white dark:bg-white dark:text-black">
+          <Button onClick={() => setIsModalOpen(true)} className="text-white bg-blue-700 hover:bg-blue-800 dark:bg-white dark:text-black">
             <Plus className="mr-2 h-4 w-4" /> Nova Unidade
           </Button>
         )}
@@ -159,8 +159,8 @@ export default function UnidadesPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Lista de Unidades</CardTitle>
-          <CardDescription>Total de {unidades.length} unidades cadastradas</CardDescription>
+          <CardTitle className="text-blue-900">Lista de Unidades</CardTitle>
+          <CardDescription className="text-blue-700">Total de {unidades.length} unidades cadastradas</CardDescription>
         </CardHeader>
         <CardContent>
           {user?.papel !== "gestor" && (
@@ -191,10 +191,9 @@ export default function UnidadesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Imagem</TableHead>
-                    <TableHead>Informações</TableHead>
-                    {/* Só mostra o cabeçalho de ações se NÃO for gestor */}
-                    {user?.papel !== "gestor" && <TableHead className="text-right">Ações</TableHead>}
+                    <TableHead className="text-blue-700">Imagem</TableHead>
+                    <TableHead className="text-blue-700">Informações</TableHead>
+                    {user?.papel !== "gestor" && <TableHead className="text-right text-blue-700">Ações</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -204,7 +203,7 @@ export default function UnidadesPage() {
                         key={unidade.id}
                         role="button"
                         tabIndex={0}
-                        className="cursor-pointer hover:bg-muted transition-colors"
+                        className="cursor-pointer hover:bg-blue-50 transition-colors"
                         onClick={() => router.push(`/dashboard/unidades/${unidade.id}`)}
                         onKeyDown={(e) => {
                           if (e.key === "Enter" || e.key === " ") {
@@ -225,10 +224,9 @@ export default function UnidadesPage() {
                           />
                         </TableCell>
                         <TableCell className="flex flex-col justify-center gap-1 text-base">
-                          <span className="font-semibold">{unidade.nome}</span>
-                          <span className="text-muted-foreground">{unidade.localizacao}</span>
+                          <span className="font-semibold text-blue-900">{unidade.nome}</span>
+                          <span className="text-blue-700">{unidade.localizacao}</span>
                         </TableCell>
-                        {/* Só mostra os botões se NÃO for gestor */}
                         {user?.papel !== "gestor" && (
                           <TableCell className="text-right">
                             <div
@@ -244,7 +242,7 @@ export default function UnidadesPage() {
                                   setIsEditModalOpen(true)
                                 }}
                               >
-                                <Edit className="h-4 w-4" />
+                                <Edit className="h-4 w-4 text-blue-700" />
                                 <span className="sr-only">Editar</span>
                               </Button>
                               <Button
@@ -252,7 +250,7 @@ export default function UnidadesPage() {
                                 size="icon"
                                 onClick={() => handleDelete(unidade.id, unidade.nome)}
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="h-4 w-4 text-blue-700" />
                                 <span className="sr-only">Excluir</span>
                               </Button>
                             </div>
@@ -262,7 +260,7 @@ export default function UnidadesPage() {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={user?.papel !== "gestor" ? 3 : 2} className="h-24 text-center">
+                      <TableCell colSpan={user?.papel !== "gestor" ? 3 : 2} className="h-24 text-center text-blue-700">
                         Nenhuma unidade encontrada.
                       </TableCell>
                     </TableRow>
@@ -274,9 +272,8 @@ export default function UnidadesPage() {
         </CardContent>
         {!loading && filteredUnidades.length > 0 && (
           <CardFooter className="flex justify-between items-center border-t px-6 py-4">
-            <div className="text-sm text-muted-foreground">
-              Mostrando {startIndex + 1}-{Math.min(endIndex, filteredUnidades.length)} de {filteredUnidades.length}{" "}
-              unidades
+            <div className="text-sm text-blue-700">
+              Mostrando {startIndex + 1}-{Math.min(endIndex, filteredUnidades.length)} de {filteredUnidades.length} unidades
             </div>
             <div className="flex items-center space-x-2">
               <Button
@@ -284,7 +281,7 @@ export default function UnidadesPage() {
                 size="icon"
                 onClick={() => changePage(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="border-gray-300 text-black dark:text-white dark:border-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="border-blue-200 text-blue-900 dark:text-blue-100 dark:border-blue-200 hover:bg-blue-50 dark:hover:bg-blue-900"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -297,8 +294,8 @@ export default function UnidadesPage() {
                   onClick={() => changePage(page)}
                   className={`w-8 h-8 p-0 ${
                     currentPage === page
-                      ? "bg-blue-600 text-white dark:bg-white dark:text-black"
-                      : "border-gray-300 text-black dark:text-white dark:border-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                      ? "bg-blue-700 text-white dark:bg-white dark:text-blue-900"
+                      : "border-blue-200 text-blue-900 dark:text-blue-100 dark:border-blue-200 hover:bg-blue-50 dark:hover:bg-blue-900"
                   }`}
                 >
                   {page}
@@ -310,7 +307,7 @@ export default function UnidadesPage() {
                 size="icon"
                 onClick={() => changePage(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="border-gray-300 text-black dark:text-white dark:border-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="border-blue-200 text-blue-900 dark:text-blue-100 dark:border-blue-200 hover:bg-blue-50 dark:hover:bg-blue-900"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>

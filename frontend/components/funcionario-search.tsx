@@ -58,12 +58,12 @@ export function FuncionarioSearch({
 
     return (
         <div className="grid gap-2">
-            <Label htmlFor="funcionario">Funcionário</Label>
+            <Label htmlFor="funcionario" className="text-blue-900">Funcionário</Label>
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                     <button
                         type="button"
-                        className="w-full border rounded px-3 py-2 text-left"
+                        className="w-full border border-blue-300 rounded px-3 py-2 text-left text-blue-900 placeholder:text-blue-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                         disabled={loading || loadingProp}
                     >
                         {selectedFuncionario?.nome || "Selecione um funcionário..."}
@@ -71,7 +71,10 @@ export function FuncionarioSearch({
                 </PopoverTrigger>
                 <PopoverContent className="w-[447px] p-0">
                     <Command>
-                        <CommandInput placeholder="Buscar funcionário..." />
+                        <CommandInput
+                            placeholder="Buscar funcionário..."
+                            className="border-blue-300 focus:border-blue-500 focus:ring-blue-500 text-blue-900 placeholder:text-blue-700"
+                        />
                         <CommandList>
                             <CommandGroup heading="Todos">
                                 {funcionarios.map((funcionario) => (
@@ -82,12 +85,13 @@ export function FuncionarioSearch({
                                             onSelect(funcionario);
                                             setOpen(false);
                                         }}
+                                        className="text-blue-900 data-[selected=true]:bg-blue-100"
                                     >
                                         {funcionario.nome}
                                     </CommandItem>
                                 ))}
                             </CommandGroup>
-                            <CommandEmpty>Nenhum funcionário encontrado.</CommandEmpty>
+                            <CommandEmpty className="text-blue-700">Nenhum funcionário encontrado.</CommandEmpty>
                         </CommandList>
                     </Command>
                 </PopoverContent>

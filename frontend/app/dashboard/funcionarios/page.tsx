@@ -176,11 +176,11 @@ export default function FuncionariosPage() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Funcionários</h1>
-          <p className="text-muted-foreground">Gerencie os funcionários da {user?.secretaria_nome || "secretaria"}</p>
+          <h1 className="text-3xl font-bold tracking-tight text-blue-900">Funcionários</h1>
+          <p className="text-blue-700">Gerencie os funcionários da {user?.secretaria_nome || "secretaria"}</p>
         </div>
         {user?.papel !== "gestor" && (
-          <Button className="text-white dark:bg-white dark:text-black" onClick={() => setShowCadastroModal(true)}>
+          <Button className="text-white bg-blue-700 hover:bg-blue-800 dark:bg-white dark:text-black" onClick={() => setShowCadastroModal(true)}>
             <Plus className="mr-2 h-4 w-4 " /> Novo Funcionário
           </Button>
         )}
@@ -188,26 +188,26 @@ export default function FuncionariosPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Lista de Funcionários</CardTitle>
-          <CardDescription>Total de {funcionarios.length} funcionários cadastrados</CardDescription>
+          <CardTitle className="text-blue-900">Lista de Funcionários</CardTitle>
+          <CardDescription className="text-blue-700">Total de {funcionarios.length} funcionários cadastrados</CardDescription>
         </CardHeader>
         <CardContent>
-            <div className="mb-4 flex items-center gap-2">
+          <div className="mb-4 flex items-center gap-2">
             <div className="relative w-full max-w-sm">
               <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <Search className="h-4 w-4 text-muted-foreground" />
+                <Search className="h-4 w-4 text-blue-700" />
               </span>
               <Input
-              placeholder="Buscar funcionário..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value)
-                setCurrentPage(1)
-              }}
-              className="pl-10"
+                placeholder="Buscar funcionário..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value)
+                  setCurrentPage(1)
+                }}
+                className="pl-10"
               />
             </div>
-            </div>
+          </div>
 
           {loading ? (
             <div className="flex items-center justify-center py-8">
@@ -218,13 +218,13 @@ export default function FuncionariosPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Avatar</TableHead>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>CPF</TableHead>
-                    <TableHead>Cargo</TableHead>
-                    <TableHead>Unidade</TableHead>
-                    <TableHead>Matrícula</TableHead>
-                    {user?.papel !== "gestor" && <TableHead className="text-right">Ações</TableHead>}
+                    <TableHead className="text-blue-700">Avatar</TableHead>
+                    <TableHead className="text-blue-700">Nome</TableHead>
+                    <TableHead className="text-blue-700">CPF</TableHead>
+                    <TableHead className="text-blue-700">Cargo</TableHead>
+                    <TableHead className="text-blue-700">Unidade</TableHead>
+                    <TableHead className="text-blue-700">Matrícula</TableHead>
+                    {user?.papel !== "gestor" && <TableHead className="text-right text-blue-700">Ações</TableHead>}
                   </TableRow>
                 </TableHeader>
 
@@ -242,19 +242,19 @@ export default function FuncionariosPage() {
                               {`${nome.charAt(0)}${sobrenome.charAt(0)}`.toUpperCase()}
                             </div>
                           </TableCell>
-                          <TableCell className="font-medium">
+                          <TableCell className="font-medium text-blue-900">
                             {nome} {sobrenome}
                           </TableCell>
-                          <TableCell>{funcionario.cpf || "-"}</TableCell>
-                          <TableCell>{funcionario.cargo}</TableCell>
-                          <TableCell>{funcionario.unidade_nome || "-"}</TableCell>
-                          <TableCell>{funcionario.matricula || "-"}</TableCell>
+                          <TableCell className="text-blue-700">{funcionario.cpf || "-"}</TableCell>
+                          <TableCell className="text-blue-700">{funcionario.cargo}</TableCell>
+                          <TableCell className="text-blue-700">{funcionario.unidade_nome || "-"}</TableCell>
+                          <TableCell className="text-blue-700">{funcionario.matricula || "-"}</TableCell>
 
                           {user?.papel !== "gestor" && (
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-2">
                                 <Button variant="ghost" size="icon" onClick={() => abrirModalEditar(funcionario)}>
-                                  <Edit className="h-4 w-4" />
+                                  <Edit className="h-4 w-4 text-blue-700" />
                                   <span className="sr-only">Editar</span>
                                 </Button>
                                 <Button
@@ -262,7 +262,7 @@ export default function FuncionariosPage() {
                                   size="icon"
                                   onClick={() => handleDelete(funcionario.id, funcionario.nome)}
                                 >
-                                  <Trash2 className="h-4 w-4" />
+                                  <Trash2 className="h-4 w-4 text-blue-700" />
                                   <span className="sr-only">Excluir</span>
                                 </Button>
                               </div>
@@ -275,7 +275,7 @@ export default function FuncionariosPage() {
                     <TableRow>
                       <TableCell
                         colSpan={user?.papel !== "gestor" ? 7 : 6}
-                        className="text-center font-medium text-muted-foreground"
+                        className="text-center font-medium text-blue-700"
                       >
                         Nenhum funcionário encontrado.
                       </TableCell>
@@ -288,7 +288,7 @@ export default function FuncionariosPage() {
         </CardContent>
         {!loading && filteredFuncionarios.length > 0 && (
           <CardFooter className="flex justify-between items-center border-t px-6 py-4">
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-blue-700">
               Mostrando {startIndex + 1}-{Math.min(endIndex, filteredFuncionarios.length)} de{" "}
               {filteredFuncionarios.length} funcionários
             </div>
@@ -298,7 +298,7 @@ export default function FuncionariosPage() {
                 size="icon"
                 onClick={() => changePage(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="border-gray-300 text-black dark:text-white dark:border-white"
+                className="border-blue-200 text-blue-900 dark:text-blue-100 dark:border-blue-200 hover:bg-blue-50 dark:hover:bg-blue-900"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -309,14 +309,11 @@ export default function FuncionariosPage() {
                   variant={currentPage === page ? "default" : "outline"}
                   size="sm"
                   onClick={() => changePage(page)}
-                  className={`
-                    w-8 h-8 p-0
-                    ${
-                      currentPage === page
-                        ? "bg-blue-600 text-white dark:bg-white dark:text-black"
-                        : "border-gray-300 text-black dark:text-white dark:border-white"
-                    }
-                  `}
+                  className={`w-8 h-8 p-0 ${
+                    currentPage === page
+                      ? "bg-blue-700 text-white dark:bg-white dark:text-blue-900"
+                      : "border-blue-200 text-blue-900 dark:text-blue-100 dark:border-blue-200 hover:bg-blue-50 dark:hover:bg-blue-900"
+                  }`}
                 >
                   {page}
                 </Button>
@@ -327,7 +324,7 @@ export default function FuncionariosPage() {
                 size="icon"
                 onClick={() => changePage(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="border-gray-300 text-black dark:text-white dark:border-white"
+                className="border-blue-200 text-blue-900 dark:text-blue-100 dark:border-blue-200 hover:bg-blue-50 dark:hover:bg-blue-900"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>

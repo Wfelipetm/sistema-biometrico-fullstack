@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -10,12 +9,10 @@ import {
 	Building2,
 	CalendarClock,
 	ClipboardList,
-	Home,
 	LayoutDashboard,
 	Users,
-	UserCog,
-	FileText,
 	Monitor,
+	Menu,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
@@ -28,15 +25,14 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export default function Sidebar({ className }: SidebarProps) {
 	const pathname = usePathname();
-	const { theme, setTheme } = useTheme();
+	const { theme } = useTheme();
 	const { user } = useAuth();
-	const [secretariaNome, setSecretariaNome] = useState<string>("");
-	const isAdmin = user?.papel === "admin";
 	const isGestor = user?.papel === "gestor";
 	const isQuiosque = pathname.startsWith("/dashboard/quiosque");
+	const [isOpen, setIsOpen] = useState(true);
 
 	const routes = [
-		// Só mostra "Secretaria" se NÃO for gestor
+		
 		...(!isGestor
 			? [
 				{
@@ -71,7 +67,6 @@ export default function Sidebar({ className }: SidebarProps) {
 			href: "/dashboard/relatorios",
 			active: pathname.startsWith("/dashboard/relatorios"),
 		},
-		// Apenas para usuários com papel "quiosque"
 		...(user?.papel === "quiosque"
 			? [
 				{
@@ -84,52 +79,49 @@ export default function Sidebar({ className }: SidebarProps) {
 			: []),
 	];
 
-	// Rota de secretarias para administradores
-	// if (isAdmin) {
-	// 	routes.splice(1, 0, {
-	// 		label: "Secretarias",
-	// 		icon: FileText,
-	// 		href: "/dashboard/secretarias",
-	// 		active: pathname.startsWith("/dashboard/secretarias"),
-	// 	});
-	// }
-
-	// // Rota de usuários apenas para administradores
-	// if (isAdmin) {
-	// 	routes.push({
-	// 		label: "Usuários",
-	// 		icon: UserCog,
-	// 		href: "/dashboard/usuarios",
-	// 		active: pathname.startsWith("/dashboard/usuarios"),
-	// 	});
-	// }
-
 	return (
 		<div
 			className={cn(
-				"flex flex-col h-full border-r bg-background transition-all duration-300",
-				isQuiosque ? "w-0 min-w-0 overflow-hidden p-0 border-none" : "w-64",
+				"flex flex-col h-full border-r transition-all duration-300",
+				"bg-gradient-to-t from-blue-50 via-white to-white", // Azul MUITO claro para branco de baixo pra cima
+				isQuiosque
+					? "w-0 min-w-0 overflow-hidden p-0 border-none"
+					: isOpen
+					? "w-64"
+					: "w-14",
 				className,
 			)}
+			style={{ minWidth: isOpen ? 256 : 56 }}
 		>
-			{!isQuiosque && (
+			{/* Botão hamburguer só aparece quando o sidebar está fechado */}
+			{!isOpen && (
+				<button
+					className="mt-4 mb-2 ml-2 p-0 bg-transparent border-none outline-none focus:outline-none"
+					onClick={() => setIsOpen(true)}
+					aria-label="Abrir menu"
+					type="button"
+				>
+					<Menu className="w-7 h-7 text-gray-700 dark:text-gray-200" />
+				</button>
+			)}
+
+			{!isQuiosque && isOpen && (
 				<>
 					<div className="py-4 justify-center flex items-center border-b h-24">
 						<Link
 							href={isGestor ? "/dashboard/unidades" : "/dashboard"}
 							className="flex items-center gap-1 font-semibold"
+							onClick={() => setIsOpen(false)} // Fecha o sidebar ao clicar na imagem
 						>
 							<div className="flex flex-1 justify-center">
 								<Image
 									src={theme === "light" ? logoLight : logoDark}
-									alt="Logo Prefeitura Itaguaí"								
-									style={{ height: 70, width: 350, marginLeft: 40 }}
-									className="object-contain"
+									alt="Logo Prefeitura Itaguaí"
+									style={{ height: 90, width: 450, marginLeft: 80, marginTop: -10 }}
+									className="object-contain cursor-pointer"
 									priority
 								/>
 							</div>
-							{/* <Home className="h-5 w-9" />
-							<span>Sistema de Biometria</span> */}
 						</Link>
 					</div>
 					<ScrollArea className="flex-1 py-2">
@@ -138,11 +130,12 @@ export default function Sidebar({ className }: SidebarProps) {
 								<Link
 									key={route.label}
 									href={route.href}
+									onClick={() => setIsOpen(false)}
 									className={cn(
-										"flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors",
+										"flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
 										route.active
-											? "bg-accent text-accent-foreground"
-											: "text-muted-foreground",
+											? "bg-blue-100 text-blue-900"
+											: "text-blue-700 hover:bg-blue-100 hover:text-blue-900"
 									)}
 								>
 									<route.icon className="h-5 w-5" />
@@ -151,12 +144,11 @@ export default function Sidebar({ className }: SidebarProps) {
 							))}
 						</nav>
 					</ScrollArea>
-					<div className="mt-auto p-4 border-t">
-						<p className="text-xs text-center text-gray-500 dark:text-white">
-							© 2025 Sistema de Biometria. Desenvolvido por SMCTIC.
-						</p>
-
-					</div>
+					<div className="mt-auto p-4 border-t border-blue-100">
+    <p className="text-xs text-center text-blue-700 dark:text-blue-200">
+        © 2025 Sistema de Biometria. Desenvolvido por SMCTIC.
+    </p>
+</div>
 				</>
 			)}
 		</div>

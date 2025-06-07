@@ -293,71 +293,71 @@ function DashboardPage() {
 	return (
 		<div className="space-y-6">
 			<div>
-				<h1 className="text-3xl font-bold tracking-tight">Secretaria</h1>
-				<p className="text-muted-foreground">
-					Bem-vindo, {user?.nome}! Aqui está um resumo da{" "}
-					{secretariaNome || "sua secretaria"}.
+				<h1 className="text-3xl font-bold tracking-tight text-blue-900">Secretaria</h1>
+				<p className="text-blue-700">
+					Bem-vindo, {user?.nome}!<br />
+					Aqui está um resumo da {secretariaNome || "sua secretaria"}.
 				</p>
 			</div>
 
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-				<Card>
+				<Card className="transition-shadow hover:shadow-lg hover:border-blue-200 hover:bg-blue-50">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Unidades</CardTitle>
-						<Building2 className="h-4 w-4 text-muted-foreground" />
+						<CardTitle className="text-sm font-medium text-blue-900">Unidades</CardTitle>
+						<Building2 className="h-4 w-4 text-blue-400" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">{stats.unidades.length}</div>
-						<p className="text-xs text-muted-foreground">
+						<div className="text-2xl font-bold text-blue-900">{stats.unidades.length}</div>
+						<p className="text-xs text-blue-700">
 							Total de unidades na secretaria
 						</p>
 					</CardContent>
 				</Card>
 
-				<Card>
+				<Card className="transition-shadow hover:shadow-lg hover:border-blue-200 hover:bg-blue-50">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Funcionários</CardTitle>
-						<Users className="h-4 w-4 text-muted-foreground" />
+						<CardTitle className="text-sm font-medium text-blue-900">Funcionários</CardTitle>
+						<Users className="h-4 w-4 text-blue-400" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">
+						<div className="text-2xl font-bold text-blue-900">
 							{stats.funcionarios?.total_funcionarios ?? 0}
 						</div>
-						<p className="text-xs text-muted-foreground">
+						<p className="text-xs text-blue-700">
 							Total de funcionários na secretaria
 						</p>
 					</CardContent>
 				</Card>
 
-				<Card>
+				<Card className="transition-shadow hover:shadow-lg hover:border-blue-200 hover:bg-blue-50">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">
+						<CardTitle className="text-sm font-medium text-blue-900">
 							Registros Hoje
 						</CardTitle>
-						<Clock className="h-4 w-4 text-muted-foreground" />
+						<Clock className="h-4 w-4 text-blue-400" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">
+						<div className="text-2xl font-bold text-blue-900">
 							{stats.registrosHoje?.total_registros_hoje ?? 0}
 						</div>
-						<p className="text-xs text-muted-foreground">
+						<p className="text-xs text-blue-700">
 							Registros de ponto realizados hoje
 						</p>
 					</CardContent>
 				</Card>
 
-				<Card>
+				<Card className="transition-shadow hover:shadow-lg hover:border-blue-200 hover:bg-blue-50">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">
+						<CardTitle className="text-sm font-medium text-blue-900">
 							Registros no Mês
 						</CardTitle>
-						<CalendarClock className="h-4 w-4 text-muted-foreground" />
+						<CalendarClock className="h-4 w-4 text-blue-400" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">
+						<div className="text-2xl font-bold text-blue-900">
 							{stats.registrosMes?.total_registros ?? 0}
 						</div>
-						<p className="text-xs text-muted-foreground">
+						<p className="text-xs text-blue-700">
 							Total de registros no mês atual
 						</p>
 					</CardContent>
@@ -367,8 +367,8 @@ function DashboardPage() {
 			<div className="grid gap-4 md:grid-cols-2">
 				<Card className="col-span-1">
 					<CardHeader>
-						<CardTitle>Unidades da Secretaria</CardTitle>
-						<CardDescription>
+						<CardTitle className="text-blue-900">Unidades da Secretaria</CardTitle>
+						<CardDescription className="text-blue-700">
 							Unidades vinculadas à sua secretaria
 						</CardDescription>
 					</CardHeader>
@@ -381,17 +381,17 @@ function DashboardPage() {
 											key={unidade.id}
 											className="flex items-center justify-between border-b pb-2"
 										>
-											<span className="font-medium">{unidade.nome}</span>
+											<span className="font-medium text-blue-900">{unidade.nome}</span>
 										</li>
 									))}
 									{stats.unidades.length > 5 && (
-										<li className="text-sm text-muted-foreground text-center pt-2">
+										<li className="text-sm text-blue-700 text-center pt-2">
 											+ {stats.unidades.length - 5} outras unidades
 										</li>
 									)}
 								</ul>
 							) : (
-								<p className="text-sm text-muted-foreground">
+								<p className="text-sm text-blue-700">
 									Nenhuma unidade encontrada
 								</p>
 							)}
@@ -401,8 +401,8 @@ function DashboardPage() {
 
 				<Card className="col-span-1">
 					<CardHeader>
-						<CardTitle>Funcionários Recentes</CardTitle>
-						<CardDescription>Últimos funcionários cadastrados</CardDescription>
+						<CardTitle className="text-blue-900">Funcionários Recentes</CardTitle>
+						<CardDescription className="text-blue-700">Últimos funcionários cadastrados</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<div className="space-y-4">
@@ -415,18 +415,18 @@ function DashboardPage() {
 												key={funcionario.id}
 												className="flex items-center justify-between border-b pb-2"
 											>
-												<span className="font-medium">{funcionario.nome}</span>
+												<span className="font-medium text-blue-900">{funcionario.nome}</span>
 											</li>
 										))}
 									{stats.funcionariosRecentes.length > 5 && (
-										<li className="text-sm text-muted-foreground text-center pt-2">
+										<li className="text-sm text-blue-700 text-center pt-2">
 											+ {stats.funcionariosRecentes.length - 5} outros
 											funcionários
 										</li>
 									)}
 								</ul>
 							) : (
-								<p className="text-sm text-muted-foreground">
+								<p className="text-sm text-blue-700">
 									Nenhum funcionário encontrado
 								</p>
 							)}
@@ -438,14 +438,14 @@ function DashboardPage() {
 			<Card className="col-span-2 mt-4">
 				<CardHeader className="flex flex-row items-center justify-between">
 					<div>
-						<CardTitle className="text-xl">
+						<CardTitle className="text-xl text-blue-900">
 							Registros de Ponto Diários
 						</CardTitle>
-						<CardDescription>
+						<CardDescription className="text-blue-700">
 							Monitoramento de presenças por dia em {mesAtual}
 						</CardDescription>
 					</div>
-					<BarChart3 className="h-5 w-5 text-muted-foreground" />
+					<BarChart3 className="h-5 w-5 text-blue-400" />
 				</CardHeader>
 				<CardContent>
 					<div className="overflow-x-auto">
@@ -479,14 +479,14 @@ function DashboardPage() {
 										<CartesianGrid
 											strokeDasharray="3 3"
 											vertical={false}
-											stroke="hsl(var(--muted))"
+											stroke="#c7d2fe" // azul claro
 										/>
 										<XAxis
 											dataKey="dia"
 											axisLine={false}
 											tickLine={false}
 											tick={{
-												fill: "hsl(var(--muted-foreground))",
+												fill: "#1e3a8a", // azul marinho
 												fontSize: 12,
 											}}
 											padding={{ left: 10, right: 10 }}
@@ -495,7 +495,7 @@ function DashboardPage() {
 											axisLine={false}
 											tickLine={false}
 											tick={{
-												fill: "hsl(var(--muted-foreground))",
+												fill: "#1e3a8a", // azul marinho
 												fontSize: 12,
 											}}
 											width={40}
@@ -504,21 +504,21 @@ function DashboardPage() {
 										<Area
 											type="monotone"
 											dataKey="total"
-											stroke="hsl(var(--primary))"
+											stroke="#1e3a8a" // azul marinho
 											strokeWidth={2}
 											fillOpacity={1}
 											fill="url(#colorTotal)"
 											activeDot={{
 												r: 6,
 												strokeWidth: 0,
-												fill: "hsl(var(--primary))",
+												fill: "#1e3a8a", // azul marinho
 											}}
 										/>
 									</AreaChart>
 								</ResponsiveContainer>
 							) : (
 								<div className="flex items-center justify-center h-full">
-									<p className="text-muted-foreground">
+									<p className="text-blue-700">
 										Nenhum dado disponível para o período
 									</p>
 								</div>

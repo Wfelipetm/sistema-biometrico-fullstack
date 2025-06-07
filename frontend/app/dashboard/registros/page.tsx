@@ -298,8 +298,8 @@ export default function RegistrosPage() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Registros de Ponto</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold tracking-tight text-blue-900">Registros de Ponto</h1>
+          <p className="text-blue-700">
             Gerencie os registros de ponto da {user?.secretaria_nome || "secretaria"}
           </p>
         </div>
@@ -312,8 +312,10 @@ export default function RegistrosPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Lista de Registros</CardTitle>
-          <CardDescription>Total de {filteredRegistros.length} registros de ponto</CardDescription>
+          <CardTitle className="text-blue-900">Lista de Registros</CardTitle>
+          <CardDescription className="text-blue-700">
+            Total de {filteredRegistros.length} registros de ponto
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex flex-col md:flex-row items-center gap-2">
@@ -327,7 +329,7 @@ export default function RegistrosPage() {
                 }}
                 className="max-w-xs pl-8"
               />
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-700 pointer-events-none" />
             </div>
             {user?.papel !== "gestor" && (
               <div className="relative flex items-center gap-2">
@@ -340,7 +342,7 @@ export default function RegistrosPage() {
                   }}
                   className="max-w-xs pl-8"
                 />
-                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-700 pointer-events-none" />
               </div>
             )}
           </div>
@@ -355,34 +357,34 @@ export default function RegistrosPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Funcionário</TableHead>
-                      <TableHead>Unidade</TableHead>
-                      <TableHead>Escala</TableHead>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Entrada</TableHead>
-                      <TableHead>Saída</TableHead>
-                      <TableHead>Hora Extra</TableHead>
-                      <TableHead>Hora Desconto</TableHead>
-                      {user?.papel !== "gestor" && <TableHead className="text-right">Ações</TableHead>}
+                      <TableHead className="text-blue-700">Funcionário</TableHead>
+                      <TableHead className="text-blue-700">Unidade</TableHead>
+                      <TableHead className="text-blue-700">Escala</TableHead>
+                      <TableHead className="text-blue-700">Data</TableHead>
+                      <TableHead className="text-blue-700">Entrada</TableHead>
+                      <TableHead className="text-blue-700">Saída</TableHead>
+                      <TableHead className="text-blue-700">Hora Extra</TableHead>
+                      <TableHead className="text-blue-700">Hora Desconto</TableHead>
+                      {user?.papel !== "gestor" && <TableHead className="text-right text-blue-700">Ações</TableHead>}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {pagedRegistros.length > 0 ? (
                       pagedRegistros.map((registro) => (
                         <TableRow key={registro.id}>
-                          <TableCell className="font-medium">{registro.funcionario_nome}</TableCell>
-                          <TableCell>{registro.unidade_nome}</TableCell>
-                          <TableCell>{registro.tipo_escala || "-"}</TableCell>
-                          <TableCell>{formatDate(registro.data_hora)}</TableCell>
-                          <TableCell>{registro.hora_entrada || "-"}</TableCell>
-                          <TableCell>{registro.hora_saida || "-"}</TableCell>
-                          <TableCell>{formatInterval(registro.hora_extra)}</TableCell>
-                          <TableCell>{formatInterval(registro.hora_desconto)}</TableCell>
+                          <TableCell className="font-medium text-blue-900">{registro.funcionario_nome}</TableCell>
+                          <TableCell className="text-blue-700">{registro.unidade_nome}</TableCell>
+                          <TableCell className="text-blue-700">{registro.tipo_escala || "-"}</TableCell>
+                          <TableCell className="text-blue-700">{formatDate(registro.data_hora)}</TableCell>
+                          <TableCell className="text-blue-700">{registro.hora_entrada || "-"}</TableCell>
+                          <TableCell className="text-blue-700">{registro.hora_saida || "-"}</TableCell>
+                          <TableCell className="text-blue-700">{formatInterval(registro.hora_extra)}</TableCell>
+                          <TableCell className="text-blue-700">{formatInterval(registro.hora_desconto)}</TableCell>
                           {user?.papel !== "gestor" && (
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-2">
                                 <Button variant="ghost" size="icon" onClick={() => handleEditarRegistro(registro)}>
-                                  <Edit className="h-4 w-4" />
+                                  <Edit className="h-4 w-4 text-blue-700" />
                                   <span className="sr-only">Editar</span>
                                 </Button>
                                 <Button
@@ -390,7 +392,7 @@ export default function RegistrosPage() {
                                   size="icon"
                                   onClick={() => handleDelete(registro.id, registro.funcionario_nome)}
                                 >
-                                  <Trash2 className="h-4 w-4" />
+                                  <Trash2 className="h-4 w-4 text-blue-700" />
                                   <span className="sr-only">Excluir</span>
                                 </Button>
                               </div>
@@ -400,7 +402,7 @@ export default function RegistrosPage() {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={user?.papel !== "gestor" ? 9 : 8} className="h-24 text-center">
+                        <TableCell colSpan={user?.papel !== "gestor" ? 9 : 8} className="h-24 text-center text-blue-700">
                           Nenhum registro encontrado.
                         </TableCell>
                       </TableRow>
@@ -416,7 +418,7 @@ export default function RegistrosPage() {
                     size="sm"
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage(currentPage - 1)}
-                    className="mt-4 border-gray-300 text-black dark:text-white dark:border-white"
+                    className="mt-4 border-blue-200 text-blue-900 dark:text-blue-100 dark:border-blue-200 hover:bg-blue-50 dark:hover:bg-blue-900"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
@@ -434,8 +436,8 @@ export default function RegistrosPage() {
                         onClick={() => setCurrentPage(pageNumber)}
                         className={`${
                           pageNumber === currentPage
-                            ? "bg-blue-600 text-white dark:bg-white dark:text-black"
-                            : "border-gray-300 text-black dark:text-white dark:border-white"
+                            ? "bg-blue-700 text-white dark:bg-white dark:text-blue-900"
+                            : "border-blue-200 text-blue-900 dark:text-blue-100 dark:border-blue-200 hover:bg-blue-50 dark:hover:bg-blue-900"
                         }`}
                       >
                         {pageNumber}
@@ -448,7 +450,7 @@ export default function RegistrosPage() {
                     size="sm"
                     disabled={currentPage === totalPages}
                     onClick={() => setCurrentPage(currentPage + 1)}
-                    className="border-gray-300 text-black dark:text-white dark:border-white"
+                    className="border-blue-200 text-blue-900 dark:text-blue-100 dark:border-blue-200 hover:bg-blue-50 dark:hover:bg-blue-900"
                   >
                     <ChevronRight className="h-4 w-4" />
                   </Button>

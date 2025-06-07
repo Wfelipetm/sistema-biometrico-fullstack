@@ -117,8 +117,10 @@ export default function RelatoriosPage() {
 		<div className="space-y-6">
 			{/* Header */}
 			<div>
-				<h1 className="text-3xl font-bold tracking-tight">Relatórios</h1>
-				<p className="text-muted-foreground">
+				<h1 className="text-3xl font-bold tracking-tight text-blue-900">
+					Relatórios
+				</h1>
+				<p className="text-blue-700">
 					Gere relatórios de ponto dos funcionários em formato PDF
 				</p>
 			</div>
@@ -126,11 +128,11 @@ export default function RelatoriosPage() {
 			{/* Main Card */}
 			<Card>
 				<CardHeader>
-					<CardTitle className="flex items-center gap-2">
-						<FileDown className="h-5 w-5" />
+					<CardTitle className="flex items-center gap-2 text-blue-900">
+						<FileDown className="h-5 w-5 text-blue-700" />
 						Relatório de Ponto
 					</CardTitle>
-					<CardDescription>
+					<CardDescription className="text-blue-700">
 						Selecione um funcionário e o período para gerar o relatório em PDF
 					</CardDescription>
 				</CardHeader>
@@ -138,13 +140,13 @@ export default function RelatoriosPage() {
 				<CardContent className="space-y-6">
 					{/* Form */}
 					<div className="grid gap-5 items-center md:grid-cols-4">
-					<FuncionarioSearch
-									selectedFuncionario={selectedFuncionario}
-									onSelect={handleSelectFuncionario}
-									recentFuncionarios={recentFuncionarios}
-									loading={loadingFuncionarios}
-									error={errorFuncionarios}
-								/>
+						<FuncionarioSearch
+							selectedFuncionario={selectedFuncionario}
+							onSelect={handleSelectFuncionario}
+							recentFuncionarios={recentFuncionarios}
+							loading={loadingFuncionarios}
+							error={errorFuncionarios}
+						/>
 
 						<PeriodoSelector
 							mes={mes}
@@ -157,7 +159,7 @@ export default function RelatoriosPage() {
 							<Button
 								onClick={handleGerarRelatorio}
 								disabled={!isFormValid || loadingPDF}
-								className="w-80 text-white dark:bg-white dark:text-black hover:bg-blue-500 dark:hover:bg-gray-700"
+								className="w-80 text-white bg-blue-700 hover:bg-blue-800 dark:bg-white dark:text-blue-900 dark:hover:bg-gray-200"
 								size="default"
 							>
 								{loadingPDF ? (
@@ -178,7 +180,7 @@ export default function RelatoriosPage() {
 					{/* Error Display */}
 					{hasError && (
 						<Alert variant="destructive">
-							<AlertDescription>
+							<AlertDescription className="text-blue-700">
 								{errorFuncionarios || errorPDF}
 							</AlertDescription>
 						</Alert>
@@ -192,11 +194,11 @@ export default function RelatoriosPage() {
 									<CardContent className="pt-6">
 										<div className="flex items-center justify-between">
 											<div>
-												<p className="font-medium">{func.nome}</p>
-												<p className="text-xs text-muted-foreground">
+												<p className="font-medium text-blue-900">{func.nome}</p>
+												<p className="text-xs text-blue-700">
 													Consultado em: {formatarData(func.dataConsulta)}
 												</p>
-												<p className="text-sm text-muted-foreground">
+												<p className="text-sm text-blue-700">
 													{selectedFuncionario?.id === func.id
 														? `Período: ${mes.padStart(2, "0")}/${ano}`
 														: "Funcionário recente"}
@@ -206,11 +208,10 @@ export default function RelatoriosPage() {
 												variant="outline"
 												size="sm"
 												onClick={() => handleLimparFuncionario(func.id)}
-												className="bg-blue-600 border-gray-300 text-white dark:text-black dark:bg-white dark:border-white hover:bg-gray-100 dark:hover:bg-gray-700"
+												className="bg-blue-600 border-blue-200 text-white dark:text-blue-900 dark:bg-white dark:border-white hover:bg-blue-100 dark:hover:bg-gray-200"
 											>
 												Limpar
 											</Button>
-
 										</div>
 									</CardContent>
 								</Card>
