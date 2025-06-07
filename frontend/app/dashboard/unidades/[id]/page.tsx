@@ -213,25 +213,24 @@ export default function UnidadeDetalhesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-lg rounded-xl bg-white/80 backdrop-blur-md p-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-black dark:text-white">Dashboard da Unidade</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-blue-900">Dashboard da Unidade</h1>
         </div>
         {user?.papel !== "gestor" && (
           <Button
             onClick={() => setShowCadastroFeriasModal(true)}
-            className="bg-blue-600 text-white dark:bg-white dark:text-black hover:bg-blue-700 dark:hover:bg-gray-200"
+            className="bg-blue-700 text-white hover:bg-blue-900"
           >
             + Cadastrar Férias
           </Button>
         )}
       </div>
 
-      <Card>
+      <Card className="shadow-xl rounded-xl bg-white/80 backdrop-blur-md">
         <CardHeader>
-          <CardTitle>{unidade.nome}</CardTitle>
+          <CardTitle className="text-blue-900">{unidade.nome}</CardTitle>
         </CardHeader>
-
         <CardContent>
           <div className="flex flex-col md:flex-row gap-6">
             {/* Imagem da unidade */}
@@ -242,29 +241,28 @@ export default function UnidadeDetalhesPage() {
                 className="w-full h-[400px] rounded-md object-contain border shadow"
               />
             </div>
-
             {/* Últimos Funcionários Cadastrados */}
             {ultimosFuncionarios.length > 0 && (
-              <Card className="w-full">
+              <Card className="w-full shadow-lg rounded-xl bg-white/80 backdrop-blur-md">
                 <CardHeader>
-                  <CardTitle>Últimos Funcionários Cadastrados</CardTitle>
+                  <CardTitle className="text-blue-900">Últimos Funcionários Cadastrados</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
                     {ultimosFuncionarios.slice(0, 4).map((funcionario) => (
                       <div key={funcionario.matricula} className="flex items-center justify-between pb-2">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                            <span className="text-gray-500 font-medium">{funcionario.nome.charAt(0)}</span>
+                          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                            <span className="text-blue-700 font-medium">{funcionario.nome.charAt(0)}</span>
                           </div>
                           <div>
-                            <p className="font-medium">{funcionario.nome}</p>
-                            <p className="text-sm text-gray-500">{funcionario.cargo || "-"}</p>
+                            <p className="font-medium text-blue-900">{funcionario.nome}</p>
+                            <p className="text-sm text-blue-700">{funcionario.cargo || "-"}</p>
                           </div>
                         </div>
                         <div>
-                          <p className="font-medium">Matricula</p>
-                          <p className="text-xs text-gray-400">{funcionario.matricula}</p>
+                          <p className="font-medium text-blue-900">Matrícula</p>
+                          <p className="text-xs text-blue-700">{funcionario.matricula}</p>
                         </div>
                       </div>
                     ))}
@@ -277,69 +275,71 @@ export default function UnidadeDetalhesPage() {
       </Card>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        {/* 1º Card - Aura azul */}
+        <Card className="transition-all duration-200 hover:shadow-lg hover:-translate-y-1 hover:border-blue-400 hover:bg-blue-50 ring-2 ring-blue-100 shadow-lg rounded-xl bg-white/80 backdrop-blur-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Funcionários</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-blue-900">Total de Funcionários</CardTitle>
+            <Users className="h-4 w-4 text-blue-700" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalFuncionarios}</div>
-            <p className="text-xs text-muted-foreground">Ativos na unidade</p>
+            <div className="text-2xl font-bold text-blue-900">{stats.totalFuncionarios}</div>
+            <p className="text-xs text-blue-700">Ativos na unidade</p>
           </CardContent>
         </Card>
 
-        <Card>
+        {/* 2º Card - Aura azul */}
+        <Card className="transition-all duration-200 hover:shadow-lg hover:-translate-y-1 hover:border-blue-400 hover:bg-blue-50 ring-2 ring-blue-100 shadow-lg rounded-xl bg-white/80 backdrop-blur-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Presença Hoje</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-blue-900">Presença Hoje</CardTitle>
+            <Calendar className="h-4 w-4 text-blue-700" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.presencaHoje}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.totalFuncionarios > 0 ? Math.round((stats.presencaHoje / stats.totalFuncionarios) * 100) : 0}% de
-              presença
+            <div className="text-2xl font-bold text-blue-900">{stats.presencaHoje}</div>
+            <p className="text-xs text-blue-700">
+              {stats.totalFuncionarios > 0 ? Math.round((stats.presencaHoje / stats.totalFuncionarios) * 100) : 0}% de presença
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        {/* 3º Card - Aura verde */}
+        <Card className="transition-all duration-200 hover:shadow-lg hover:-translate-y-1 hover:border-green-400 hover:bg-green-50 ring-2 ring-green-100 shadow-lg rounded-xl bg-white/80 backdrop-blur-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Férias Agendadas</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-blue-900">Férias Agendadas</CardTitle>
+            <FileText className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.feriasAgendadas}</div>
-            <p className="text-xs text-muted-foreground">Próximos 30 dias</p>
+            <div className="text-2xl font-bold text-blue-900">{stats.feriasAgendadas}</div>
+            <p className="text-xs text-blue-700">Próximos 30 dias</p>
           </CardContent>
         </Card>
 
-        <Card>
+        {/* 4º Card - Aura vermelha */}
+        <Card className="transition-all duration-200 hover:shadow-lg hover:-translate-y-1 hover:border-red-400 hover:bg-red-50 ring-2 ring-red-100 shadow-lg rounded-xl bg-white/80 backdrop-blur-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Horas Faltantes</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-blue-900">Horas Faltantes</CardTitle>
+            <Clock className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.horasFaltantes}h</div>
-            <p className="text-xs text-muted-foreground">No mês atual</p>
+            <div className="text-2xl font-bold text-blue-900">{stats.horasFaltantes}h</div>
+            <p className="text-xs text-blue-700">No mês atual</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Gráfico de Barras */}
-      <h2 className="text-xl font-semibold text-slate-700">Gráfico Resumo</h2>
-      <Card>
+      <h2 className="text-xl font-semibold text-blue-900">Gráfico Resumo</h2>
+      <Card className="shadow-xl rounded-xl bg-white/80 backdrop-blur-md">
         <CardHeader>
-          <CardTitle>Presença de Funcionários no Mês</CardTitle>
+          <CardTitle className="text-blue-900">Presença de Funcionários no Mês</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="w-full h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={dadosGrafico} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="dia" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 12 }} />
+                <XAxis dataKey="dia" tick={{ fontSize: 12, fill: "#1e3a8a" }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 12, fill: "#1e3a8a" }} />
                 <Tooltip content={<TooltipPersonalizado />} />
-
                 <Area type="monotone" dataKey="presentes" stroke="#0ea5e9" fill="#bae6fd" name="presentes" />
                 <Area type="monotone" dataKey="faltantes" stroke="#ef4444" fill="#fecaca" name="faltantes" />
                 <Area type="monotone" dataKey="ferias" stroke="#22c55e" fill="#bbf7d0" name="ferias" />
@@ -348,14 +348,14 @@ export default function UnidadeDetalhesPage() {
           </div>
         </CardContent>
       </Card>
-     {showCadastroFeriasModal && (
-				<CadastrarFeriasModal
-					funcionarios={funcionarios}
-					unidadeId={Number(id)}
-					onClose={() => setShowCadastroFeriasModal(false)}
-					open={showCadastroFeriasModal}
-				/>
-			)}
+      {showCadastroFeriasModal && (
+        <CadastrarFeriasModal
+          funcionarios={funcionarios}
+          unidadeId={Number(id)}
+          onClose={() => setShowCadastroFeriasModal(false)}
+          open={showCadastroFeriasModal}
+        />
+      )}
     </div>
   )
 }

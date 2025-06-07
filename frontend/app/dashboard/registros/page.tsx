@@ -296,7 +296,7 @@ export default function RegistrosPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-lg rounded-xl bg-white/80 backdrop-blur-md p-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-blue-900">Registros de Ponto</h1>
           <p className="text-blue-700">
@@ -310,7 +310,7 @@ export default function RegistrosPage() {
         </div>
       </div>
 
-      <Card>
+      <Card className="shadow-xl rounded-xl bg-white/80 backdrop-blur-md">
         <CardHeader>
           <CardTitle className="text-blue-900">Lista de Registros</CardTitle>
           <CardDescription className="text-blue-700">
@@ -327,7 +327,7 @@ export default function RegistrosPage() {
                   setFiltroFuncionario(e.target.value)
                   setCurrentPage(1)
                 }}
-                className="max-w-xs pl-8"
+                className="max-w-xs pl-8 text-blue-900 placeholder:text-blue-700 border-blue-300 focus:border-blue-500 focus:ring-blue-200"
               />
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-700 pointer-events-none" />
             </div>
@@ -340,7 +340,7 @@ export default function RegistrosPage() {
                     setFiltroUnidade(e.target.value)
                     setCurrentPage(1)
                   }}
-                  className="max-w-xs pl-8"
+                  className="max-w-xs pl-8 text-blue-900 placeholder:text-blue-700"
                 />
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-700 pointer-events-none" />
               </div>
@@ -371,43 +371,46 @@ export default function RegistrosPage() {
                   <TableBody>
                     {pagedRegistros.length > 0 ? (
                       pagedRegistros.map((registro) => (
-                        <TableRow key={registro.id}>
-                          <TableCell className="font-medium text-blue-900">{registro.funcionario_nome}</TableCell>
-                          <TableCell className="text-blue-700">{registro.unidade_nome}</TableCell>
-                          <TableCell className="text-blue-700">{registro.tipo_escala || "-"}</TableCell>
-                          <TableCell className="text-blue-700">{formatDate(registro.data_hora)}</TableCell>
-                          <TableCell className="text-blue-700">{registro.hora_entrada || "-"}</TableCell>
-                          <TableCell className="text-blue-700">{registro.hora_saida || "-"}</TableCell>
-                          <TableCell className="text-blue-700">{formatInterval(registro.hora_extra)}</TableCell>
-                          <TableCell className="text-blue-700">{formatInterval(registro.hora_desconto)}</TableCell>
-                          {user?.papel !== "gestor" && (
-                            <TableCell className="text-right">
-                              <div className="flex justify-end gap-2">
-                                <Button variant="ghost" size="icon" onClick={() => handleEditarRegistro(registro)}>
-                                  <Edit className="h-4 w-4 text-blue-700" />
-                                  <span className="sr-only">Editar</span>
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleDelete(registro.id, registro.funcionario_nome)}
-                                >
-                                  <Trash2 className="h-4 w-4 text-blue-700" />
-                                  <span className="sr-only">Excluir</span>
-                                </Button>
-                              </div>
-                            </TableCell>
-                          )}
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={user?.papel !== "gestor" ? 9 : 8} className="h-24 text-center text-blue-700">
-                          Nenhum registro encontrado.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
+                        <TableRow
+        key={registro.id}
+        className="hover:bg-blue-50 transition-colors"
+      >
+        <TableCell className="font-medium text-blue-900">{registro.funcionario_nome}</TableCell>
+        <TableCell className="text-blue-700">{registro.unidade_nome}</TableCell>
+        <TableCell className="text-blue-700">{registro.tipo_escala || "-"}</TableCell>
+        <TableCell className="text-blue-700">{formatDate(registro.data_hora)}</TableCell>
+        <TableCell className="text-blue-700">{registro.hora_entrada || "-"}</TableCell>
+        <TableCell className="text-blue-700">{registro.hora_saida || "-"}</TableCell>
+        <TableCell className="text-blue-700">{formatInterval(registro.hora_extra)}</TableCell>
+        <TableCell className="text-blue-700">{formatInterval(registro.hora_desconto)}</TableCell>
+        {user?.papel !== "gestor" && (
+          <TableCell className="text-right">
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" size="icon" onClick={() => handleEditarRegistro(registro)}>
+                <Edit className="h-4 w-4 text-blue-700" />
+                <span className="sr-only">Editar</span>
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleDelete(registro.id, registro.funcionario_nome)}
+              >
+                <Trash2 className="h-4 w-4 text-blue-700" />
+                <span className="sr-only">Excluir</span>
+              </Button>
+            </div>
+          </TableCell>
+        )}
+      </TableRow>
+    ))
+  ) : (
+    <TableRow>
+      <TableCell colSpan={user?.papel !== "gestor" ? 9 : 8} className="h-24 text-center text-blue-700">
+        Nenhum registro encontrado.
+      </TableCell>
+    </TableRow>
+  )}
+</TableBody>
                 </Table>
               </div>
 

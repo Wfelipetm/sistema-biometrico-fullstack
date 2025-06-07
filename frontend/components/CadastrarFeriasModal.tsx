@@ -262,15 +262,15 @@ export default function CadastrarFeriasModal({
           Cadastrar Férias
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-blue-50">
         <DialogHeader className="space-y-3">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 shadow-sm">
-              <CalendarDays className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+            <div className="p-2 rounded-lg bg-blue-100 shadow-sm">
+              <CalendarDays className="w-6 h-6 text-blue-700" />
             </div>
             <div>
-              <DialogTitle className="text-2xl font-bold">Gerenciar Férias</DialogTitle>
-              <DialogDescription className="text-gray-600 dark:text-gray-400">
+              <DialogTitle className="text-2xl font-bold text-blue-900">Gerenciar Férias</DialogTitle>
+              <DialogDescription className="text-blue-700">
                 Cadastre e gerencie as solicitações de férias dos funcionários.
               </DialogDescription>
             </div>
@@ -281,14 +281,14 @@ export default function CadastrarFeriasModal({
           {/* Formulário de Cadastro */}
           <div className="space-y-6">
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-2">
+              <h3 className="text-lg font-semibold text-blue-900 border-b border-blue-100 pb-2">
                 Nova Solicitação
               </h3>
 
               {error && (
                 <Alert
                   variant="destructive"
-                  className="border-red-200 bg-red-50 dark:bg-red-900/20 animate-in slide-in-from-top-2 duration-300"
+                  className="border-red-200 bg-red-50 animate-in slide-in-from-top-2 duration-300"
                 >
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>{error}</AlertDescription>
@@ -297,24 +297,24 @@ export default function CadastrarFeriasModal({
 
               {/* Funcionário */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium flex items-center gap-2">
-                  <User className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                <Label className="text-sm font-medium flex items-center gap-2 text-blue-900">
+                  <User className="w-4 h-4 text-blue-700" />
                   Funcionário
                 </Label>
                 <Select value={funcionarioId} onValueChange={setFuncionarioId} disabled={isSalvando}>
-                  <SelectTrigger className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400 focus:ring-gray-200 dark:focus:ring-gray-600 text-gray-700 dark:text-gray-300">
+                  <SelectTrigger className="h-12 border-blue-300 focus:border-blue-500 focus:ring-blue-200 text-blue-900">
                     <SelectValue placeholder="Selecione um funcionário" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+                  <SelectContent className="bg-white text-blue-900 border border-blue-100">
                     {funcionariosDisponiveis.map((f) => (
-                      <SelectItem key={f.id} value={String(f.id)} className="hover:bg-gray-100 dark:hover:bg-gray-800">
+                      <SelectItem key={f.id} value={String(f.id)} className="hover:bg-blue-50">
                         {f.nome}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 {funcionariosDisponiveis.length === 0 && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-sm text-blue-700">
                     Todos os funcionários já possuem férias cadastradas
                   </p>
                 )}
@@ -322,8 +322,8 @@ export default function CadastrarFeriasModal({
 
               {/* Data de Início */}
               <div className="space-y-2">
-                <Label htmlFor="data-inicio" className="text-sm font-medium flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                <Label htmlFor="data-inicio" className="text-sm font-medium flex items-center gap-2 text-blue-900">
+                  <Calendar className="w-4 h-4 text-blue-700" />
                   Data de Início
                 </Label>
                 <Input
@@ -332,10 +332,10 @@ export default function CadastrarFeriasModal({
                   value={dataInicio}
                   onChange={(e) => setDataInicio(e.target.value)}
                   disabled={isSalvando}
-                  className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400 focus:ring-gray-200 dark:focus:ring-gray-600"
+                  className="h-12 border-blue-300 focus:border-blue-500 focus:ring-blue-200 text-blue-900"
                 />
                 {validationErrors.dataInicio && (
-                  <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                  <p className="text-sm text-red-600 flex items-center gap-1">
                     <AlertCircle className="w-3 h-3" />
                     {validationErrors.dataInicio}
                   </p>
@@ -344,8 +344,8 @@ export default function CadastrarFeriasModal({
 
               {/* Data de Fim */}
               <div className="space-y-2">
-                <Label htmlFor="data-fim" className="text-sm font-medium flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                <Label htmlFor="data-fim" className="text-sm font-medium flex items-center gap-2 text-blue-900">
+                  <Calendar className="w-4 h-4 text-blue-700" />
                   Data de Fim
                 </Label>
                 <Input
@@ -354,10 +354,10 @@ export default function CadastrarFeriasModal({
                   value={dataFim}
                   onChange={(e) => setDataFim(e.target.value)}
                   disabled={isSalvando}
-                  className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400 focus:ring-gray-200 dark:focus:ring-gray-600"
+                  className="h-12 border-blue-300 focus:border-blue-500 focus:ring-blue-200 text-blue-900"
                 />
                 {validationErrors.dataFim && (
-                  <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                  <p className="text-sm text-red-600 flex items-center gap-1">
                     <AlertCircle className="w-3 h-3" />
                     {validationErrors.dataFim}
                   </p>
@@ -366,11 +366,11 @@ export default function CadastrarFeriasModal({
 
               {/* Informação de dias */}
               {calcularDias() > 0 && (
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                  <div className="flex items-center gap-2 text-sm text-blue-700">
                     <CalendarDays className="w-4 h-4" />
                     <span>
-                      <strong>{calcularDias()} dias</strong> de férias serão solicitados
+                      <strong className="text-blue-900">{calcularDias()} dias</strong> de férias serão solicitados
                     </span>
                   </div>
                 </div>
@@ -380,23 +380,23 @@ export default function CadastrarFeriasModal({
               {isSalvando && (
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Salvando solicitação...</span>
+                    <span className="text-blue-700">Salvando solicitação...</span>
                     <span className="font-medium">{uploadProgress}%</span>
                   </div>
                   <Progress value={uploadProgress} className="h-2" />
                 </div>
               )}
 
-              {/* Botão de Cadastrar - Movido para dentro do formulário */}
+              {/* Botão de Cadastrar */}
               <Button
                 onClick={cadastrarFerias}
                 disabled={isSalvando || !isFormValid()}
                 className={`w-full h-12 font-medium transition-all duration-300 ${
                   isSalvando
-                    ? "bg-gray-400 dark:bg-gray-600 cursor-not-allowed"
+                    ? "bg-blue-200 cursor-not-allowed"
                     : isFormValid()
-                      ? "bg-gray-800 hover:bg-gray-900 dark:bg-white dark:hover:bg-gray-200 dark:text-gray-800 text-white"
-                      : "bg-gray-300 dark:bg-gray-700 cursor-not-allowed text-gray-500 dark:text-gray-400"
+                      ? "bg-blue-700 hover:bg-blue-900 text-white"
+                      : "bg-blue-100 cursor-not-allowed text-blue-400"
                 }`}
               >
                 {isSalvando ? (
@@ -417,12 +417,12 @@ export default function CadastrarFeriasModal({
           {/* Lista de Férias Cadastradas */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-2">
+              <h3 className="text-lg font-semibold text-blue-900 border-b border-blue-100 pb-2">
                 Férias Cadastradas
               </h3>
               <Badge
                 variant="outline"
-                className="text-gray-600 dark:text-gray-400 border-gray-400 dark:border-gray-600"
+                className="text-blue-700 border-blue-300"
               >
                 {feriasCadastradas.length} solicitações
               </Badge>
@@ -433,19 +433,19 @@ export default function CadastrarFeriasModal({
                 {feriasCadastradas.map((f) => (
                   <div
                     key={f.id}
-                    className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-200"
+                    className="bg-white border border-blue-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-200"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
-                          <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                            <User className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                            <User className="w-4 h-4 text-blue-700" />
                           </div>
-                          <h4 className="font-medium text-gray-900 dark:text-white truncate">{f.nome_funcionario}</h4>
+                          <h4 className="font-medium text-blue-900 truncate">{f.nome_funcionario}</h4>
                         </div>
 
                         <div className="space-y-1">
-                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                          <div className="flex items-center gap-2 text-sm text-blue-700">
                             <Calendar className="w-3 h-3" />
                             <span>
                               {f.data_inicio
@@ -473,8 +473,8 @@ export default function CadastrarFeriasModal({
                               variant={f.status_ferias === "aprovada" ? "default" : "secondary"}
                               className={`text-xs ${
                                 f.status_ferias === "aprovada"
-                                  ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                                  : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-yellow-100 text-yellow-800"
                               }`}
                             >
                               {f.status_ferias === "aprovada" ? (
@@ -508,7 +508,7 @@ export default function CadastrarFeriasModal({
                           variant="outline"
                           disabled={loadingExcluir === f.id}
                           onClick={() => excluirFerias(f.id, f.nome_funcionario)}
-                          className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20 h-8 px-3"
+                          className="border-red-300 text-red-600 hover:bg-red-50 h-8 px-3"
                         >
                           {loadingExcluir === f.id ? (
                             <Loader2 className="w-3 h-3 animate-spin" />
@@ -522,7 +522,7 @@ export default function CadastrarFeriasModal({
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400">
+              <div className="flex flex-col items-center justify-center py-12 text-blue-700">
                 <CalendarDays className="w-12 h-12 mb-3 opacity-50" />
                 <p className="text-sm font-medium">Nenhuma solicitação de férias</p>
                 <p className="text-xs">Cadastre a primeira solicitação ao lado</p>

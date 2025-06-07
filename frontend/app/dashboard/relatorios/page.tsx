@@ -116,7 +116,7 @@ export default function RelatoriosPage() {
 	return (
 		<div className="space-y-6">
 			{/* Header */}
-			<div>
+			<div className="shadow-lg rounded-xl bg-white/80 backdrop-blur-md p-6">
 				<h1 className="text-3xl font-bold tracking-tight text-blue-900">
 					Relatórios
 				</h1>
@@ -126,7 +126,7 @@ export default function RelatoriosPage() {
 			</div>
 
 			{/* Main Card */}
-			<Card>
+			<Card className="shadow-xl rounded-xl bg-white/80 backdrop-blur-md">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2 text-blue-900">
 						<FileDown className="h-5 w-5 text-blue-700" />
@@ -179,7 +179,7 @@ export default function RelatoriosPage() {
 
 					{/* Error Display */}
 					{hasError && (
-						<Alert variant="destructive">
+						<Alert variant="destructive" className="shadow-lg rounded-xl bg-white/80 backdrop-blur-md">
 							<AlertDescription className="text-blue-700">
 								{errorFuncionarios || errorPDF}
 							</AlertDescription>
@@ -190,7 +190,7 @@ export default function RelatoriosPage() {
 					{recentFuncionarios.length > 0 && (
 						<div className="flex flex-col gap-2">
 							{recentFuncionarios.map((func) => (
-								<Card key={func.id} className="bg-muted/50">
+								<Card key={func.id} className="bg-muted/50 shadow-lg rounded-xl bg-white/80 backdrop-blur-md">
 									<CardContent className="pt-6">
 										<div className="flex items-center justify-between">
 											<div>

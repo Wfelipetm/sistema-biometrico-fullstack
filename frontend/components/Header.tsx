@@ -96,8 +96,8 @@ export default function Header() {
 				{user.papel !== "quiosque" || liberado ? (
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
-							<button type="button" className="relative h-8 w-8 rounded-full">
-								<Avatar className="h-8 w-8">
+							<button type="button" className="relative h-12 w-12 rounded-full">
+								<Avatar className="h-12 w-12">
 									<AvatarFallback>{getInitials(user?.nome)}</AvatarFallback>
 								</Avatar>
 							</button>
@@ -120,10 +120,10 @@ export default function Header() {
 				) : (
 					<button
 						type="button"
-						className="relative h-8 w-8 rounded-full"
+						className="relative h-12 w-12 rounded-full"
 						onClick={() => setModalOpen(true)}
 					>
-						<Avatar className="h-8 w-8">
+						<Avatar className="h-12 w-12">
 							<AvatarFallback>{getInitials(user?.nome)}</AvatarFallback>
 						</Avatar>
 					</button>

@@ -290,34 +290,64 @@ function DashboardPage() {
 		);
 	}
 
+	// Função para corrigir acentuação de nomes de secretarias mais comuns
+	function corrigeAcentosSecretaria(nome: string) {
+		if (!nome) return "";
+		return nome
+			.replace(/\bsecretaria\b/gi, "Secretaria")
+			.replace(/\beducacao\b/gi, "Educação")
+			.replace(/\bsaude\b/gi, "Saúde")
+			.replace(/\badministracao\b/gi, "Administração")
+			.replace(/\bassistencia\b/gi, "Assistência")
+			.replace(/\bgestao\b/gi, "Gestão")
+			.replace(/\bseguranca\b/gi, "Segurança")
+			.replace(/\bmeio ambiente\b/gi, "Meio Ambiente")
+			.replace(/\bfinancas\b/gi, "Finanças")
+			.replace(/\bfazenda\b/gi, "Fazenda")
+			.replace(/\bciencia\b/gi, "Ciência")
+			.replace(/\btecnologia\b/gi, "Tecnologia")
+			.replace(/\bcultura\b/gi, "Cultura")
+			.replace(/\besporte\b/gi, "Esporte")
+			.replace(/\blazer\b/gi, "Lazer")
+			.replace(/\bplanejamento\b/gi, "Planejamento")
+			.replace(/\burbanismo\b/gi, "Urbanismo")
+			.replace(/\bdesenvolvimento\b/gi, "Desenvolvimento")
+			.replace(/\bsocial\b/gi, "Social")
+			.replace(/\bobras\b/gi, "Obras")
+			.replace(/\btransporte\b/gi, "Transporte")
+			.replace(/\bhigiene\b/gi, "Higiene");
+	}
+
 	return (
 		<div className="space-y-6">
-			<div>
+			<div className="shadow-lg rounded-xl bg-white/80 backdrop-blur-md p-6">
 				<h1 className="text-3xl font-bold tracking-tight text-blue-900">Secretaria</h1>
 				<p className="text-blue-700">
-					Bem-vindo, {user?.nome}!<br />
-					Aqui está um resumo da {secretariaNome || "sua secretaria"}.
+					Aqui está um resumo da{" "}
+					<span className="lowercase">
+						<b>{corrigeAcentosSecretaria(secretariaNome?.toLowerCase() || "sua secretaria")}</b>
+					</span>.
 				</p>
 			</div>
 
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-				<Card className="transition-shadow hover:shadow-lg hover:border-blue-200 hover:bg-blue-50">
+				<Card className="transition-shadow hover:shadow-lg hover:border-yellow-300 hover:bg-yellow-50 ring-2 ring-yellow-100 border-yellow-200 shadow-lg rounded-xl bg-white/80 backdrop-blur-md">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium text-blue-900">Unidades</CardTitle>
-						<Building2 className="h-4 w-4 text-blue-400" />
+						<CardTitle className="text-sm font-medium text-yellow-800">Unidades</CardTitle>
+						<Building2 className="h-4 w-4 text-yellow-500" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold text-blue-900">{stats.unidades.length}</div>
-						<p className="text-xs text-blue-700">
+						<div className="text-2xl font-bold text-yellow-800">{stats.unidades.length}</div>
+						<p className="text-xs text-yellow-700">
 							Total de unidades na secretaria
 						</p>
 					</CardContent>
 				</Card>
 
-				<Card className="transition-shadow hover:shadow-lg hover:border-blue-200 hover:bg-blue-50">
+				<Card className="transition-shadow hover:shadow-lg hover:border-blue-300 hover:bg-blue-50 ring-2 ring-blue-100 border-blue-200 shadow-lg rounded-xl bg-white/80 backdrop-blur-md">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="text-sm font-medium text-blue-900">Funcionários</CardTitle>
-						<Users className="h-4 w-4 text-blue-400" />
+						<Users className="h-4 w-4 text-blue-700" />
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold text-blue-900">
@@ -329,35 +359,31 @@ function DashboardPage() {
 					</CardContent>
 				</Card>
 
-				<Card className="transition-shadow hover:shadow-lg hover:border-blue-200 hover:bg-blue-50">
+				<Card className="transition-shadow hover:shadow-lg hover:border-green-300 hover:bg-green-50 ring-2 ring-green-100 border-green-200 shadow-lg rounded-xl bg-white/80 backdrop-blur-md">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium text-blue-900">
-							Registros Hoje
-						</CardTitle>
-						<Clock className="h-4 w-4 text-blue-400" />
+						<CardTitle className="text-sm font-medium text-green-900">Registros Hoje</CardTitle>
+						<Clock className="h-4 w-4 text-green-600" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold text-blue-900">
+						<div className="text-2xl font-bold text-green-900">
 							{stats.registrosHoje?.total_registros_hoje ?? 0}
 						</div>
-						<p className="text-xs text-blue-700">
+						<p className="text-xs text-green-700">
 							Registros de ponto realizados hoje
 						</p>
 					</CardContent>
 				</Card>
 
-				<Card className="transition-shadow hover:shadow-lg hover:border-blue-200 hover:bg-blue-50">
+				<Card className="transition-shadow hover:shadow-lg hover:border-red-300 hover:bg-red-50 ring-2 ring-red-100 border-red-200 shadow-lg rounded-xl bg-white/80 backdrop-blur-md">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium text-blue-900">
-							Registros no Mês
-						</CardTitle>
-						<CalendarClock className="h-4 w-4 text-blue-400" />
+						<CardTitle className="text-sm font-medium text-red-900">Registros no Mês</CardTitle>
+						<CalendarClock className="h-4 w-4 text-red-500" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold text-blue-900">
+						<div className="text-2xl font-bold text-red-900">
 							{stats.registrosMes?.total_registros ?? 0}
 						</div>
-						<p className="text-xs text-blue-700">
+						<p className="text-xs text-red-700">
 							Total de registros no mês atual
 						</p>
 					</CardContent>
@@ -365,7 +391,7 @@ function DashboardPage() {
 			</div>
 
 			<div className="grid gap-4 md:grid-cols-2">
-				<Card className="col-span-1">
+				<Card className="col-span-1 ring-2 ring-blue-100 shadow-lg rounded-xl bg-white/80 backdrop-blur-md">
 					<CardHeader>
 						<CardTitle className="text-blue-900">Unidades da Secretaria</CardTitle>
 						<CardDescription className="text-blue-700">
@@ -399,7 +425,7 @@ function DashboardPage() {
 					</CardContent>
 				</Card>
 
-				<Card className="col-span-1">
+				<Card className="col-span-1 ring-2 ring-blue-100 shadow-lg rounded-xl bg-white/80 backdrop-blur-md">
 					<CardHeader>
 						<CardTitle className="text-blue-900">Funcionários Recentes</CardTitle>
 						<CardDescription className="text-blue-700">Últimos funcionários cadastrados</CardDescription>
@@ -435,7 +461,7 @@ function DashboardPage() {
 				</Card>
 			</div>
 
-			<Card className="col-span-2 mt-4">
+			<Card className="col-span-2 mt-4 ring-2 ring-blue-100 shadow-xl rounded-xl bg-white/80 backdrop-blur-md">
 				<CardHeader className="flex flex-row items-center justify-between">
 					<div>
 						<CardTitle className="text-xl text-blue-900">
@@ -479,14 +505,14 @@ function DashboardPage() {
 										<CartesianGrid
 											strokeDasharray="3 3"
 											vertical={false}
-											stroke="#c7d2fe" // azul claro
+											stroke="#c7d2fe"
 										/>
 										<XAxis
 											dataKey="dia"
 											axisLine={false}
 											tickLine={false}
 											tick={{
-												fill: "#1e3a8a", // azul marinho
+												fill: "#1e3a8a",
 												fontSize: 12,
 											}}
 											padding={{ left: 10, right: 10 }}
@@ -495,7 +521,7 @@ function DashboardPage() {
 											axisLine={false}
 											tickLine={false}
 											tick={{
-												fill: "#1e3a8a", // azul marinho
+												fill: "#1e3a8a",
 												fontSize: 12,
 											}}
 											width={40}
@@ -504,14 +530,14 @@ function DashboardPage() {
 										<Area
 											type="monotone"
 											dataKey="total"
-											stroke="#1e3a8a" // azul marinho
+											stroke="#1e3a8a"
 											strokeWidth={2}
 											fillOpacity={1}
 											fill="url(#colorTotal)"
 											activeDot={{
 												r: 6,
 												strokeWidth: 0,
-												fill: "#1e3a8a", // azul marinho
+												fill: "#1e3a8a",
 											}}
 										/>
 									</AreaChart>

@@ -131,7 +131,7 @@ export default function UnidadesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-lg rounded-xl bg-white/80 backdrop-blur-md p-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-blue-900">Unidades</h1>
           <p className="text-blue-700">Gerencie as unidades da {user?.secretaria_nome || "secretaria"}</p>
@@ -157,7 +157,7 @@ export default function UnidadesPage() {
         />
       )}
 
-      <Card>
+      <Card className="shadow-xl rounded-xl bg-white/80 backdrop-blur-md">
         <CardHeader>
           <CardTitle className="text-blue-900">Lista de Unidades</CardTitle>
           <CardDescription className="text-blue-700">Total de {unidades.length} unidades cadastradas</CardDescription>
@@ -166,18 +166,18 @@ export default function UnidadesPage() {
           {user?.papel !== "gestor" && (
             <div className="mb-4 flex items-center gap-2">
               <div className="relative w-full max-w-sm">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <Search className="h-4 w-4 text-muted-foreground" />
-              </span>
-              <Input
-                placeholder="Buscar unidade..."
-                value={searchTerm}
-                onChange={(e) => {
-                setSearchTerm(e.target.value)
-                setCurrentPage(1)
-                }}
-                className="pl-10"
-              />
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <Search className="h-4 w-4 text-blue-700" />
+                </span>
+                <Input
+                  placeholder="Buscar unidade..."
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value)
+                    setCurrentPage(1)
+                  }}
+                  className="pl-10 text-blue-900 placeholder:text-blue-700"
+                />
               </div>
             </div>
           )}

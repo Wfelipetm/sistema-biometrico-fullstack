@@ -210,15 +210,15 @@ export default function ModalCadastroUnidade({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-blue-50">
         <DialogHeader className="space-y-3">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 shadow-sm">
-              <Building2 className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+            <div className="p-2 rounded-lg bg-blue-50 shadow-sm">
+              <Building2 className="w-6 h-6 text-blue-700" />
             </div>
             <div>
-              <DialogTitle className="text-2xl font-bold">{dialogTitle}</DialogTitle>
-              <DialogDescription className="text-gray-600 dark:text-gray-400">
+              <DialogTitle className="text-2xl font-bold text-blue-900">{dialogTitle}</DialogTitle>
+              <DialogDescription className="text-blue-700">
                 Preencha os dados para cadastrar uma nova unidade na secretaria.
               </DialogDescription>
             </div>
@@ -227,12 +227,12 @@ export default function ModalCadastroUnidade({
 
         {success ? (
           <div className="flex flex-col items-center justify-center py-12 space-y-4">
-            <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-              <Check className="w-8 h-8 text-gray-700 dark:text-gray-300" />
+            <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center">
+              <Check className="w-8 h-8 text-blue-700" />
             </div>
             <div className="text-center">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Unidade Cadastrada!</h3>
-              <p className="text-gray-600 dark:text-gray-400">A unidade foi criada com sucesso.</p>
+              <h3 className="text-lg font-semibold text-blue-900">Unidade Cadastrada!</h3>
+              <p className="text-blue-700">A unidade foi criada com sucesso.</p>
             </div>
           </div>
         ) : (
@@ -240,17 +240,17 @@ export default function ModalCadastroUnidade({
             {error && (
               <Alert
                 variant="destructive"
-                className="border-red-200 bg-red-50 dark:bg-red-900/20 animate-in slide-in-from-top-2 duration-300"
+                className="border-red-200 bg-red-50 animate-in slide-in-from-top-2 duration-300"
               >
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
+                <AlertCircle className="h-4 w-4 text-blue-700" />
+                <AlertDescription className="text-blue-700">{error}</AlertDescription>
               </Alert>
             )}
 
             {/* Nome da Unidade */}
             <div className="space-y-2">
-              <Label htmlFor="nome" className="text-sm font-medium flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+              <Label htmlFor="nome" className="text-sm font-medium flex items-center gap-2 text-blue-900">
+                <Building2 className="w-4 h-4 text-blue-700" />
                 Nome da Unidade
               </Label>
               <div className="relative">
@@ -261,34 +261,28 @@ export default function ModalCadastroUnidade({
                   placeholder="Ex: Centro de Saúde Central"
                   required
                   autoFocus
-                  className={`pl-4 pr-10 h-12 transition-all duration-200 ${
-                    validationErrors.nome
-                      ? "border-red-300 focus:border-red-500 focus:ring-red-200"
-                      : nome.length >= 3
-                        ? "border-gray-300 focus:border-gray-500 focus:ring-gray-200"
-                        : "border-gray-300 focus:border-gray-500 focus:ring-gray-200"
-                  }`}
+                  className={`pl-4 pr-10 h-12 transition-all duration-200 border-blue-300 focus:border-blue-500 focus:ring-blue-200 text-blue-900 placeholder:text-blue-700`}
                 />
                 {nome.length >= 3 && !validationErrors.nome && (
-                  <Check className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-gray-400" />
+                  <Check className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-blue-700" />
                 )}
               </div>
               {validationErrors.nome && (
-                <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                <p className="text-sm text-red-600 flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" />
                   {validationErrors.nome}
                 </p>
               )}
-              <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+              <div className="flex justify-between text-xs text-blue-700">
                 <span>Mínimo 3 caracteres</span>
-                <span className={nome.length > 50 ? "text-red-500 dark:text-red-400" : ""}>{nome.length}/50</span>
+                <span className={nome.length > 50 ? "text-red-500" : ""}>{nome.length}/50</span>
               </div>
             </div>
 
             {/* Localização */}
             <div className="space-y-2">
-              <Label htmlFor="localizacao" className="text-sm font-medium flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+              <Label htmlFor="localizacao" className="text-sm font-medium flex items-center gap-2 text-blue-900">
+                <MapPin className="w-4 h-4 text-blue-700" />
                 Localização
               </Label>
               <div className="relative">
@@ -298,27 +292,21 @@ export default function ModalCadastroUnidade({
                   onChange={(e) => setLocalizacao(e.target.value)}
                   placeholder="Ex: Rua das Flores, 123 - Centro"
                   required
-                  className={`pl-4 pr-10 h-12 transition-all duration-200 ${
-                    validationErrors.localizacao
-                      ? "border-red-300 focus:border-red-500 focus:ring-red-200"
-                      : localizacao.length >= 5
-                        ? "border-gray-300 focus:border-gray-500 focus:ring-gray-200"
-                        : "border-gray-300 focus:border-gray-500 focus:ring-gray-200"
-                  }`}
+                  className={`pl-4 pr-10 h-12 transition-all duration-200 border-blue-300 focus:border-blue-500 focus:ring-blue-200 text-blue-900 placeholder:text-blue-700`}
                 />
                 {localizacao.length >= 5 && !validationErrors.localizacao && (
-                  <Check className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-gray-400" />
+                  <Check className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-blue-700" />
                 )}
               </div>
               {validationErrors.localizacao && (
-                <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                <p className="text-sm text-red-600 flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" />
                   {validationErrors.localizacao}
                 </p>
               )}
-              <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+              <div className="flex justify-between text-xs text-blue-700">
                 <span>Mínimo 5 caracteres</span>
-                <span className={localizacao.length > 100 ? "text-red-500 dark:text-red-400" : ""}>
+                <span className={localizacao.length > 100 ? "text-red-500" : ""}>
                   {localizacao.length}/100
                 </span>
               </div>
@@ -326,8 +314,8 @@ export default function ModalCadastroUnidade({
 
             {/* Upload de Foto */}
             <div className="space-y-3">
-              <Label className="text-sm font-medium flex items-center gap-2">
-                <Camera className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+              <Label className="text-sm font-medium flex items-center gap-2 text-blue-900">
+                <Camera className="w-4 h-4 text-blue-700" />
                 Foto da Unidade
               </Label>
 
@@ -335,8 +323,8 @@ export default function ModalCadastroUnidade({
                 <div
                   className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 cursor-pointer ${
                     isDragOver
-                      ? "border-gray-500 bg-gray-50 dark:bg-gray-800 scale-105"
-                      : "border-gray-300 hover:border-gray-400 dark:border-gray-700 dark:hover:border-gray-600"
+                      ? "border-blue-500 bg-blue-50 scale-105"
+                      : "border-blue-300 hover:border-blue-400"
                   }`}
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
@@ -344,20 +332,20 @@ export default function ModalCadastroUnidade({
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <div className="space-y-4">
-                    <div className="mx-auto w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                      <Upload className="w-8 h-8 text-gray-600 dark:text-gray-400" />
+                    <div className="mx-auto w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center">
+                      <Upload className="w-8 h-8 text-blue-700" />
                     </div>
                     <div>
-                      <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
+                      <p className="text-lg font-medium text-blue-900">
                         Arraste uma imagem aqui ou clique para selecionar
                       </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      <p className="text-sm text-blue-700 mt-1">
                         Formatos aceitos: JPG, PNG, GIF (máx. 5MB)
                       </p>
                     </div>
                     <Badge
                       variant="outline"
-                      className="text-gray-600 dark:text-gray-400 border-gray-400 dark:border-gray-600"
+                      className="text-blue-700 border-blue-400"
                     >
                       <FileImage className="w-3 h-3 mr-1" />
                       Obrigatório
@@ -376,7 +364,7 @@ export default function ModalCadastroUnidade({
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <div className="relative rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-lg">
+                  <div className="relative rounded-xl overflow-hidden border border-blue-200 shadow-lg">
                     <Image
                       src={previewUrl || "/placeholder.svg"}
                       alt="Preview da unidade"
@@ -388,7 +376,7 @@ export default function ModalCadastroUnidade({
                     <button
                       type="button"
                       onClick={removeImage}
-                      className="absolute top-2 right-2 p-1 rounded-full bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+                      className="absolute top-2 right-2 p-1 rounded-full bg-blue-700 text-white hover:bg-blue-900 transition-colors"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -401,7 +389,7 @@ export default function ModalCadastroUnidade({
                     type="button"
                     variant="outline"
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-full"
+                    className="w-full border-blue-300 text-blue-700 hover:bg-blue-50"
                   >
                     <Upload className="w-4 h-4 mr-2" />
                     Alterar Imagem
@@ -420,7 +408,7 @@ export default function ModalCadastroUnidade({
               )}
 
               {validationErrors.foto && (
-                <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                <p className="text-sm text-red-600 flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" />
                   {validationErrors.foto}
                 </p>
@@ -430,8 +418,8 @@ export default function ModalCadastroUnidade({
             {/* Progress Bar durante upload */}
             {loading && (
               <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600 dark:text-gray-400">Enviando dados...</span>
+                <div className="flex justify-between text-sm text-blue-700">
+                  <span>Enviando dados...</span>
                   <span className="font-medium">{uploadProgress}%</span>
                 </div>
                 <Progress value={uploadProgress} className="h-2" />
@@ -439,7 +427,7 @@ export default function ModalCadastroUnidade({
             )}
 
             {/* Botões de Ação */}
-            <div className="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex justify-end gap-3 pt-6 border-t border-blue-100">
               <Button
                 variant="outline"
                 type="button"
@@ -448,7 +436,7 @@ export default function ModalCadastroUnidade({
                   onOpenChange(false)
                 }}
                 disabled={loading}
-                className="px-6 h-11 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+                className="px-6 h-11 border-blue-300 text-blue-700 hover:bg-blue-50 transition-all duration-200"
               >
                 Cancelar
               </Button>
@@ -458,10 +446,10 @@ export default function ModalCadastroUnidade({
                 disabled={loading || !isFormValid()}
                 className={`px-8 h-11 font-medium transition-all duration-300 ${
                   loading
-                    ? "bg-gray-400 dark:bg-gray-600 cursor-not-allowed"
+                    ? "bg-blue-200 cursor-not-allowed text-blue-700"
                     : isFormValid()
-                      ? "bg-gray-800 hover:bg-gray-900 dark:bg-white dark:hover:bg-gray-200 dark:text-gray-800 text-white"
-                      : "bg-gray-300 dark:bg-gray-700 cursor-not-allowed text-gray-500 dark:text-gray-400"
+                      ? "bg-blue-700 hover:bg-blue-900 text-white"
+                      : "bg-blue-100 cursor-not-allowed text-blue-400"
                 }`}
               >
                 {loading ? (
