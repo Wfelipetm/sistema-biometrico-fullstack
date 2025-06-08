@@ -174,9 +174,14 @@ export default function Sidebar({ className }: SidebarProps) {
                     </ScrollArea>
                     {/* Rodapé */}
                     <div className="mt-auto p-4 border-t border-blue-100">
-                        <p className="text-xs text-center text-blue-700 dark:text-blue-200">
-                            © 2025 Sistema de Biometria. Desenvolvido por SMCTIC.
-                        </p>
+                        <div className="flex flex-col items-start">
+                            <span className="text-xs text-blue-700 dark:text-blue-200">
+                                © 2025 Sistema de Biometria. Desenvolvido por SMCTIC.
+                            </span>
+                            <span className="text-[10px] text-blue-400 mt-1">
+                                Versão 1.0.0
+                            </span>
+                        </div>
                     </div>
                 </>
             )}

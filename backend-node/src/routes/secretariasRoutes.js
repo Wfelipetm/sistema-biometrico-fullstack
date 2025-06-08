@@ -29,6 +29,6 @@ router.get('/grafico-reg-secre-mes-todo/:id', secretariasController.getRegistros
 
 router.get('/:id/total-funcionarios', secretariasController.getTotalFuncionariosPorSecretaria);
 
-
+router.get('/:id/ultimos-funcionarios', secretariasController.getUltimosFuncionariosBySecretaria);
 
 module.exports = router;

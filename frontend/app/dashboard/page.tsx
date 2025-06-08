@@ -48,6 +48,7 @@ type Unidade = {
 type funcionariosRecentes = {
 	id: string;
 	nome: string;
+	created_at: string;
 };
 
 type Registro = {
@@ -161,7 +162,7 @@ function DashboardPage() {
 		const urls = {
 			unidades: `${API_URL}/secre/${user.secretaria_id}/unidades`,
 			funcionarios: `${API_URL}/secre/${user.secretaria_id}/total-funcionarios`,
-			funcionariosRecentes: `${API_URL}/unid/${user.unidade_id}/funcionarios`,
+			funcionariosRecentes: `${API_URL}/secre/${user.secretaria_id}/ultimos-funcionarios`, // <-- aqui!
 			registrosHoje: `${API_URL}/secre/reg-hoje-por-secre/${user.secretaria_id}`,
 			registrosMes: `${API_URL}/secre/${user.secretaria_id}/registros-mensais`,
 			registrosDiarios: `${API_URL}/secre/grafico-reg-secre-mes-todo/${user.secretaria_id}`,
@@ -436,12 +437,13 @@ function DashboardPage() {
 								<ul className="space-y-2">
 									{stats.funcionariosRecentes
 										.slice(0, 5)
-										.map((funcionario: funcionariosRecentes) => (
+										.map((funcionario) => (
 											<li
 												key={funcionario.id}
 												className="flex items-center justify-between border-b pb-2"
 											>
 												<span className="font-medium text-blue-900">{funcionario.nome}</span>
+												<span className="text-xs text-blue-700">{new Date(funcionario.created_at).toLocaleDateString("pt-BR")}</span>
 											</li>
 										))}
 									{stats.funcionariosRecentes.length > 5 && (

@@ -223,6 +223,47 @@ module.exports = {
         }
     },
 
+    // ---> Retorna os últimos funcionários cadastrados vinculados à uma secretaria específica
+    async getUltimosFuncionariosBySecretaria(req, res) {
+        const { id } = req.params; // id da secretaria
+        const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+
+        if (!id) {
+            return res.status(400).json({ error: 'secretaria_id é obrigatório' });
+        }
+
+        try {
+            const query = `
+            SELECT
+                f.*,
+                s.nome AS secretaria_nome,
+                u.nome AS unidade_nome
+            FROM
+                funcionarios f
+            JOIN
+                unidades u ON f.unidade_id = u.id
+            JOIN
+                secretarias s ON u.secretaria_id = s.id
+            WHERE
+                s.id = $1
+            ORDER BY
+                f.created_at DESC
+            LIMIT $2
+        `;
+            const values = [id, limit];
+            const { rows } = await db.query(query, values);
+
+            if (rows.length === 0) {
+                return res.status(404).json({ error: 'Nenhum funcionário encontrado para essa secretaria.' });
+            }
+
+            return res.status(200).json(rows);
+        } catch (error) {
+            console.error('Erro ao buscar últimos funcionários por secretaria:', error);
+            return res.status(500).json({ error: 'Erro interno do servidor' });
+        }
+    },
+
     async listarFuncionariosPorSecretaria(req, res) {
         const { id } = req.params; // id da secretaria
 
