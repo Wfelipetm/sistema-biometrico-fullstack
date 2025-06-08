@@ -304,7 +304,7 @@ export default function RegistrosPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button className="text-white dark:bg-white dark:text-black" onClick={handleEscolhaRegistro}>
+          <Button className="text-white  bg-blue-500 hover:bg-blue-700 dark:bg-white dark:text-black" onClick={handleEscolhaRegistro}>
             <Plus className="mr-2 h-4 w-4" /> Novo Registro
           </Button>
         </div>
@@ -357,15 +357,17 @@ export default function RegistrosPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-blue-700">Funcionário</TableHead>
-                      <TableHead className="text-blue-700">Unidade</TableHead>
-                      <TableHead className="text-blue-700">Escala</TableHead>
-                      <TableHead className="text-blue-700">Data</TableHead>
-                      <TableHead className="text-blue-700">Entrada</TableHead>
-                      <TableHead className="text-blue-700">Saída</TableHead>
-                      <TableHead className="text-blue-700">Hora Extra</TableHead>
-                      <TableHead className="text-blue-700">Hora Desconto</TableHead>
-                      {user?.papel !== "gestor" && <TableHead className="text-right text-blue-700">Ações</TableHead>}
+                      <TableHead className="text-blue-700 font-bold">Funcionário</TableHead>
+                      <TableHead className="text-blue-700 font-bold">Unidade</TableHead>
+                      <TableHead className="text-blue-700 font-bold">Escala</TableHead>
+                      <TableHead className="text-blue-700 font-bold">Data</TableHead>
+                      <TableHead className="text-blue-700 font-bold">Entrada</TableHead>
+                      <TableHead className="text-blue-700 font-bold">Saída</TableHead>
+                      <TableHead className="text-blue-700 font-bold">Hora Extra</TableHead>
+                      <TableHead className="text-blue-700 font-bold">Hora Desconto</TableHead>
+                      {user?.papel !== "gestor" && (
+                        <TableHead className="text-right text-blue-700 font-bold">Ações</TableHead>
+                      )}
                     </TableRow>
                   </TableHeader>
                   <TableBody>

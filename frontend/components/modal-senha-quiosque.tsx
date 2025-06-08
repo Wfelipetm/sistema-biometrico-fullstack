@@ -77,29 +77,28 @@ export default function ModalSenhaAdmin({ open, onOpenChange, onSuccess }: Modal
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[400px] p-0 gap-0 overflow-hidden">
+      <DialogContent className="max-w-[480px] w-full p-0 gap-0 overflow-hidden bg-blue-100 shadow-2xl shadow-blue-200/60 border border-blue-200 rounded-2xl">
         {/* Header com X para fechar */}
-        <div className="relative bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 p-6 pb-4">
-          <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-            <X className="h-4 w-4" />
+        <div className="relative bg-blue-100 p-8 pb-4">
+          <DialogClose className="absolute right-4 top-4 rounded-full opacity-80 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2">
+            <X className="h-5 w-5 text-blue-900" />
             <span className="sr-only">Fechar</span>
           </DialogClose>
 
           <DialogHeader className="space-y-2">
-            <DialogTitle className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+            <DialogTitle className="text-2xl font-bold text-blue-900">
               Confirmação de Identidade
             </DialogTitle>
-            <DialogDescription className="text-slate-600 dark:text-slate-400">
-              Digite seu <span className="font-medium text-slate-800 dark:text-slate-200">email</span> para sair do modo
-              quiosque
+            <DialogDescription className="text-blue-700 text-base">
+              Digite seu <span className="font-semibold text-blue-900">email</span> para sair do modo quiosque
             </DialogDescription>
           </DialogHeader>
         </div>
 
         {/* Conteúdo principal */}
-        <div className="p-6 pt-4 space-y-4">
+        <div className="p-8 pt-4 space-y-6 bg-blue-100">
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+            <Label htmlFor="email" className="text-base font-semibold text-blue-800">
               Email
             </Label>
             <div className="relative">
@@ -111,31 +110,33 @@ export default function ModalSenhaAdmin({ open, onOpenChange, onSuccess }: Modal
                 onChange={handleChange}
                 disabled={loading}
                 autoFocus
-                className={`pr-10 transition-all duration-200 ${getInputBorderColor()}`}
+                className={`pr-12 py-3 text-lg rounded-lg bg-blue-200 border-blue-300 text-blue-900 placeholder:text-blue-400 focus:ring-2 focus:ring-blue-400 focus:border-blue-500 ${getInputBorderColor()}`}
               />
-              {getInputIcon() && <div className="absolute right-3 top-1/2 -translate-y-1/2">{getInputIcon()}</div>}
+              {getInputIcon() && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">{getInputIcon()}</div>
+              )}
             </div>
           </div>
 
           {/* Feedback visual */}
           {loading && (
-            <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
-              <Loader2 className="h-3 w-3 animate-spin" />
+            <div className="flex items-center gap-2 text-base text-blue-700">
+              <Loader2 className="h-4 w-4 animate-spin" />
               <span>Validando acesso...</span>
             </div>
           )}
 
           {email.trim() !== "" && !isValid && !loading && (
-            <div className="text-sm text-slate-500 dark:text-slate-400">Continue digitando seu email...</div>
+            <div className="text-base text-blue-500">Continue digitando seu email...</div>
           )}
         </div>
 
         {/* Footer com dica */}
-        <div className="bg-slate-50 dark:bg-slate-800/50 px-6 py-3 border-t border-slate-200 dark:border-slate-700">
-          <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
-            A confirmação será automática quando o email estiver correto
+        {/* <div className="bg-blue-200 px-8 py-4 border-t border-blue-200">
+          <p className="text-sm text-blue-00 text-center  border-blue-200">
+            A confirmação será automática quando o email estiver correto.
           </p>
-        </div>
+        </div> */}
       </DialogContent>
     </Dialog>
   )

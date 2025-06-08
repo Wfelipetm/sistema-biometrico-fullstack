@@ -155,11 +155,11 @@ export default function RelatoriosPage() {
 							onAnoChange={setAno}
 						/>
 
-						<div className="flex justify-center md:justify-end mt-5">
+						<div className="flex justify-center md:justify-end mt-5 ">
 							<Button
 								onClick={handleGerarRelatorio}
 								disabled={!isFormValid || loadingPDF}
-								className="w-80 text-white bg-blue-700 hover:bg-blue-800 dark:bg-white dark:text-blue-900 dark:hover:bg-gray-200"
+								className="w-80 text-white bg-blue-500 hover:bg-blue-700 dark:bg-white dark:text-blue-900 dark:hover:bg-gray-200"
 								size="default"
 							>
 								{loadingPDF ? (

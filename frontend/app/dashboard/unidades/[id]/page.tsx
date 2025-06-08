@@ -220,7 +220,7 @@ export default function UnidadeDetalhesPage() {
         {user?.papel !== "gestor" && (
           <Button
             onClick={() => setShowCadastroFeriasModal(true)}
-            className="bg-blue-700 text-white hover:bg-blue-900"
+            className="bg-blue-500 text-white hover:bg-blue-700"
           >
             + Cadastrar Férias
           </Button>

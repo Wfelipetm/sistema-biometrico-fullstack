@@ -104,7 +104,7 @@ export default function Sidebar({ className }: SidebarProps) {
                             aria-label="Abrir menu"
                             type="button"
                         >
-                            <Fingerprint className="w-9 h-9 text-blue-700 dark:text-blue-200" />
+                            <Fingerprint className="w-9 h-9 text-blue-700 mt-5 dark:text-blue-200" />
                         </button>
                     </div>
                     {/* Espaço flexível para centralizar o Menu */}
@@ -138,7 +138,14 @@ export default function Sidebar({ className }: SidebarProps) {
                                 <Image
                                     src={theme === "light" ? logoLight : logoDark}
                                     alt="Logo Prefeitura Itaguaí"
-                                    style={{ height: 100, width: 280, marginTop: -10, marginLeft: 80 }}
+                                    style={{
+                                        height: 100,
+                                        width: 280,
+                                        marginTop: -10,
+                                        marginLeft: 80,
+                                        filter: "brightness(0) saturate(100%) invert(11%) sepia(98%) saturate(7499%) hue-rotate(210deg) brightness(90%) contrast(110%)"
+                                        // Filtro ajustado para aproximar do azul-900 do Tailwind
+                                    }}
                                     className="object-contain cursor-pointer"
                                     priority
                                 />

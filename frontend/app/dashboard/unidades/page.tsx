@@ -137,7 +137,7 @@ export default function UnidadesPage() {
           <p className="text-blue-700">Gerencie as unidades da {user?.secretaria_nome || "secretaria"}</p>
         </div>
         {user?.papel !== "gestor" && (
-          <Button onClick={() => setIsModalOpen(true)} className="text-white bg-blue-700 hover:bg-blue-800 dark:bg-white dark:text-black">
+          <Button onClick={() => setIsModalOpen(true)} className="text-white bg-blue-500 hover:bg-blue-700 dark:bg-white dark:text-black">
             <Plus className="mr-2 h-4 w-4" /> Nova Unidade
           </Button>
         )}

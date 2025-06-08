@@ -8,6 +8,8 @@ import { toast } from "@/components/ui/toast-custom";
 import ModalSenhaAdmin from "@/components/modal-senha-quiosque";
 import { ModalBiometria } from "@/components/ModalBiometria";
 import { useAuth } from "@/contexts/AuthContext";
+import Header from "@/components/Header";
+import { cn } from "@/lib/utils";
 
 function Relogio() {
 	const [hora, setHora] = useState(() =>
@@ -36,6 +38,12 @@ function Relogio() {
 			{hora}
 		</div>
 	);
+}
+
+interface HeaderProps {
+	logoMarginLeft?: string;
+	className?: string;
+	// ...
 }
 
 export default function KioskPage() {
@@ -125,40 +133,46 @@ export default function KioskPage() {
 	};
 
 	return (
-		<div className="flex flex-col items-center justify-center min-h-[80vh] gap-8 bg-background relative">
-			{/* Modal de senha de administrador */}
-			<ModalSenhaAdmin
-				open={modalOpen}
-				onOpenChange={setModalOpen}
-				onSuccess={() => router.push("/dashboard/unidades")}
+		<>
+			<Header
+				logoMarginLeft="-10px"
+				className="absolute top-0 left-0 right-0 z-20"
 			/>
+			<div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-8 bg-blue-100 shadow-2xl">
+				{/* Modal de senha de administrador */}
+				<ModalSenhaAdmin
+					open={modalOpen}
+					onOpenChange={setModalOpen}
+					onSuccess={() => router.push("/dashboard/unidades")}
+				/>
 
-			{/* Botão X no canto superior direito */}
-			<button
-				type="button"
-				onClick={handleExitKiosk}
-				className="absolute top-4 right-4 z-10 p-2 rounded-full hover:bg-muted/70 transition"
-				aria-label="Sair do modo Kiosk"
-				style={{ opacity: 0.5 }}
-				disabled={!user?.email}
-			>
-				<X className="w-8 h-8 text-background" />
-			</button>
+				{/* Botão X no canto superior direito */}
+				<button
+					type="button"
+					onClick={handleExitKiosk}
+					className="absolute top-4 right-4 z-30 p-2 rounded-full hover:bg-muted/70 transition"
+					aria-label="Sair do modo Kiosk"
+					style={{ opacity: 0.5 }}
+					disabled={!user?.email}
+				>
+					<X className="w-8 h-8 text-background" />
+				</button>
 
-			<Relogio />
-			<h1 className="text-3xl font-bold text-center">Bata seu ponto</h1>
-			<Fingerprint className="w-48 h-48 text-primary animate-pulse" />
-			<Button
-				type="button"
-				size="lg"
-				className="text-lg flex items-center gap-4 px-8 py-6"
-				onClick={handleNovoRegistro}
-				disabled={loading}
-			>
-				<RefreshCcw className={`w-6 h-6 ${loading ? "animate-spin" : ""}`} />
-				{loading ? "Registrando..." : "Registrar Ponto"}
-			</Button>
-			<ModalBiometria open={showBiometriaModal} />
-		</div>
+				<Relogio />
+				<h1 className="text-3xl font-bold text-center">Bata seu ponto</h1>
+				<Fingerprint className="w-48 h-48 text-primary animate-pulse" />
+				<Button
+					type="button"
+					size="lg"
+					className="text-lg flex items-center gap-4 px-8 py-6"
+					onClick={handleNovoRegistro}
+					disabled={loading}
+				>
+					<RefreshCcw className={`w-6 h-6 ${loading ? "animate-spin" : ""}`} />
+					{loading ? "Registrando..." : "Registrar Ponto"}
+				</Button>
+				<ModalBiometria open={showBiometriaModal} />
+			</div>
+		</>
 	);
 }

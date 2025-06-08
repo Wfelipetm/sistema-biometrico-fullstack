@@ -180,7 +180,7 @@ export default function FuncionariosPage() {
           <p className="text-blue-700">Gerencie os funcionários da {user?.secretaria_nome || "secretaria"}</p>
         </div>
         {user?.papel !== "gestor" && (
-          <Button className="text-white bg-blue-700 hover:bg-blue-800 dark:bg-white dark:text-black" onClick={() => setShowCadastroModal(true)}>
+          <Button className="text-white bg-blue-500 hover:bg-blue-700 dark:bg-white dark:text-black" onClick={() => setShowCadastroModal(true)}>
             <Plus className="mr-2 h-4 w-4 " /> Novo Funcionário
           </Button>
         )}
