@@ -327,7 +327,7 @@ export default function RegistrosPage() {
                   setFiltroFuncionario(e.target.value)
                   setCurrentPage(1)
                 }}
-                className="max-w-xs pl-8 text-blue-900 placeholder:text-blue-700 border-blue-300 focus:border-blue-500 focus:ring-blue-200"
+                className="max-w-xs pl-8 text-blue-900 placeholder:text-blue-700"
               />
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-700 pointer-events-none" />
             </div>

@@ -41,10 +41,21 @@ export function FuncionarioSearch({
 
     useEffect(() => {
         const fetchFuncionarios = async () => {
-            if (!user?.secretaria_id) return;
+            if (!user) return;
             try {
                 setLoading(true);
-                const response = await api.get(`/secre/${user.secretaria_id}/funcionarios`);
+                let response;
+                if (user.papel === "gestor" && user.unidade_id) {
+                    // Busca funcionários da unidade específica para gestor
+                    response = await api.get(`/funci/unidade/${user.unidade_id}/funcionarios`);
+                } else if (user.secretaria_id) {
+                    // Busca padrão por secretaria
+                    response = await api.get(`/secre/${user.secretaria_id}/funcionarios`);
+                } else {
+                    setFuncionarios([]);
+                    setError("Usuário sem secretaria ou unidade vinculada.");
+                    return;
+                }
                 setFuncionarios(response.data);
                 setError(null);
             } catch (err) {
@@ -54,7 +65,7 @@ export function FuncionarioSearch({
             }
         };
         fetchFuncionarios();
-    }, [user?.secretaria_id]);
+    }, [user?.secretaria_id, user?.unidade_id, user?.papel]);
 
     return (
         <div className="grid gap-2">
@@ -74,6 +85,24 @@ export function FuncionarioSearch({
                         <CommandInput
                             placeholder="Buscar funcionário..."
                             className="border-blue-300 focus:border-blue-500 focus:ring-blue-500 text-blue-900 placeholder:text-blue-700"
+                            onValueChange={(value) => {
+                                // Filtra apenas funcionários da unidade do gestor logado
+                                if (user?.papel === "gestor" && user.unidade_id) {
+                                    setFuncionarios((prev) =>
+                                        prev.filter(
+                                            (func) =>
+                                                func.unidade_id === user.unidade_id &&
+                                                func.nome.toLowerCase().includes(value.toLowerCase())
+                                        )
+                                    );
+                                } else {
+                                    setFuncionarios((prev) =>
+                                        prev.filter((func) =>
+                                            func.nome.toLowerCase().includes(value.toLowerCase())
+                                        )
+                                    );
+                                }
+                            }}
                         />
                         <CommandList>
                             <CommandGroup heading="Todos">

@@ -49,7 +49,7 @@ export function PeriodoSelector({
 					Mês
 				</Label>
 				<Select value={mes} onValueChange={onMesChange}>
-					<SelectTrigger className="border-blue-300 focus:border-blue-500 focus:ring-blue-500 text-blue-900 placeholder:text-blue-700">
+					<SelectTrigger className="border-blue-300 text-blue-900 placeholder:text-blue-700">
 						<SelectValue
 							placeholder="Selecione o mês"
 							className="text-blue-900 placeholder:text-blue-700"
@@ -74,7 +74,7 @@ export function PeriodoSelector({
 					Ano
 				</Label>
 				<Select value={ano} onValueChange={onAnoChange}>
-					<SelectTrigger className="border-blue-300 focus:border-blue-500 focus:ring-blue-500 text-blue-900 placeholder:text-blue-700">
+					<SelectTrigger className="border-blue-300 text-blue-900 placeholder:text-blue-700">
 						<SelectValue
 							placeholder="Selecione o ano"
 							className="text-blue-900 placeholder:text-blue-700"

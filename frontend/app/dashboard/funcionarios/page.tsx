@@ -218,13 +218,13 @@ export default function FuncionariosPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-blue-700">Avatar</TableHead>
-                    <TableHead className="text-blue-700">Nome</TableHead>
-                    <TableHead className="text-blue-700">CPF</TableHead>
-                    <TableHead className="text-blue-700">Cargo</TableHead>
-                    <TableHead className="text-blue-700">Unidade</TableHead>
-                    <TableHead className="text-blue-700">Matrícula</TableHead>
-                    {user?.papel !== "gestor" && <TableHead className="text-right text-blue-700">Ações</TableHead>}
+                    <TableHead className="text-blue-700 font-bold">Avatar</TableHead>
+                    <TableHead className="text-blue-700 font-bold">Nome</TableHead>
+                    <TableHead className="text-blue-700 font-bold">CPF</TableHead>
+                    <TableHead className="text-blue-700 font-bold">Cargo</TableHead>
+                    <TableHead className="text-blue-700 font-bold">Unidade</TableHead>
+                    <TableHead className="text-blue-700 font-bold">Matrícula</TableHead>
+                    {user?.papel !== "gestor" && <TableHead className="text-right text-blue-700 font-bold">Ações</TableHead>}
                   </TableRow>
                 </TableHeader>
 

@@ -105,6 +105,7 @@ export default function ModalSenhaAdmin({ open, onOpenChange, onSuccess }: Modal
               <Input
                 id="email"
                 type="email"
+                autoComplete="off"
                 placeholder="Digite seu email..."
                 value={email}
                 onChange={handleChange}
