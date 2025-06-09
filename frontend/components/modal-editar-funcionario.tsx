@@ -229,16 +229,17 @@ export default function ModalEditarFuncionario({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-blue-50">
         <DialogHeader className="space-y-3">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 shadow-sm">
-              <User className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+            <div className="p-2 rounded-lg bg-blue-100 shadow-sm">
+              <User className="w-6 h-6 text-blue-700" />
             </div>
             <div>
-              <DialogTitle className="text-2xl font-bold">Editar Funcionário</DialogTitle>
-              <DialogDescription className="text-gray-600 dark:text-gray-400">
-                Atualize os dados do funcionário {funcionario.nome}.
+              <DialogTitle className="text-2xl font-bold text-blue-900">Editar Funcionário</DialogTitle>
+              <DialogDescription className="text-blue-700">
+                Atualize os dados do funcionário{" "}
+                <span className="font-semibold text-blue-900">{funcionario.nome}</span>.
               </DialogDescription>
             </div>
           </div>
@@ -246,12 +247,12 @@ export default function ModalEditarFuncionario({
 
         {success ? (
           <div className="flex flex-col items-center justify-center py-12 space-y-4">
-            <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-              <Check className="w-8 h-8 text-gray-700 dark:text-gray-300" />
+            <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
+              <Check className="w-8 h-8 text-blue-700" />
             </div>
             <div className="text-center">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Funcionário Atualizado!</h3>
-              <p className="text-gray-600 dark:text-gray-400">As alterações foram salvas com sucesso.</p>
+              <h3 className="text-lg font-semibold text-blue-900">Funcionário Atualizado!</h3>
+              <p className="text-blue-700">As alterações foram salvas com sucesso.</p>
             </div>
           </div>
         ) : (
@@ -259,24 +260,24 @@ export default function ModalEditarFuncionario({
             {error && (
               <Alert
                 variant="destructive"
-                className="border-red-200 bg-red-50 dark:bg-red-900/20 animate-in slide-in-from-top-2 duration-300"
+                className="border-blue-200 bg-blue-100 animate-in slide-in-from-top-2 duration-300"
               >
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
+                <AlertCircle className="h-4 w-4 text-blue-700" />
+                <AlertDescription className="text-blue-700">{error}</AlertDescription>
               </Alert>
             )}
 
             {/* Dados Pessoais */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-2">
+              <h3 className="text-lg font-semibold text-blue-900 border-b border-blue-200 pb-2">
                 Dados Pessoais
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Nome */}
                 <div className="space-y-2">
-                  <Label htmlFor="nome" className="text-sm font-medium flex items-center gap-2">
-                    <User className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  <Label htmlFor="nome" className="text-sm font-medium flex items-center gap-2 text-blue-800">
+                    <User className="w-4 h-4 text-blue-700" />
                     Nome Completo
                   </Label>
                   <Input
@@ -285,24 +286,24 @@ export default function ModalEditarFuncionario({
                     onChange={(e) => setNome(e.target.value)}
                     placeholder="Ex: João Silva Santos"
                     required
-                    className="pl-4 h-12 border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400 focus:ring-gray-200 dark:focus:ring-gray-600"
+                    className="pl-4 h-12 border-blue-300 focus:border-blue-500 focus:ring-blue-200 text-blue-900 bg-blue-100 placeholder:text-blue-400"
                   />
                   {validationErrors.nome && (
-                    <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                    <p className="text-sm text-blue-600 flex items-center gap-1">
                       <AlertCircle className="w-3 h-3" />
                       {validationErrors.nome}
                     </p>
                   )}
-                  <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                  <div className="flex justify-between text-xs text-blue-500">
                     <span>Mínimo 2 caracteres</span>
-                    <span className={nome.length > 100 ? "text-red-500 dark:text-red-400" : ""}>{nome.length}/100</span>
+                    <span className={nome.length > 100 ? "text-red-500" : ""}>{nome.length}/100</span>
                   </div>
                 </div>
 
                 {/* CPF */}
                 <div className="space-y-2">
-                  <Label htmlFor="cpf" className="text-sm font-medium flex items-center gap-2">
-                    <CreditCard className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  <Label htmlFor="cpf" className="text-sm font-medium flex items-center gap-2 text-blue-800">
+                    <CreditCard className="w-4 h-4 text-blue-700" />
                     CPF
                   </Label>
                   <Input
@@ -311,17 +312,17 @@ export default function ModalEditarFuncionario({
                     onChange={(e) => setCpf(formatCPF(e.target.value))}
                     placeholder="12345678901"
                     required
-                    className="pl-4 h-12 border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400 focus:ring-gray-200 dark:focus:ring-gray-600"
+                    className="pl-4 h-12 border-blue-300 focus:border-blue-500 focus:ring-blue-200 text-blue-900 bg-blue-100 placeholder:text-blue-400"
                   />
                   {validationErrors.cpf && (
-                    <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                    <p className="text-sm text-blue-600 flex items-center gap-1">
                       <AlertCircle className="w-3 h-3" />
                       {validationErrors.cpf}
                     </p>
                   )}
-                  <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                  <div className="flex justify-between text-xs text-blue-500">
                     <span>Apenas números</span>
-                    <span className={cpf.length !== 11 && cpf.length > 0 ? "text-red-500 dark:text-red-400" : ""}>
+                    <span className={cpf.length !== 11 && cpf.length > 0 ? "text-red-500" : ""}>
                       {cpf.length}/11
                     </span>
                   </div>
@@ -330,8 +331,8 @@ export default function ModalEditarFuncionario({
             </div>
             {/* Email */}
             <div className="space-y-2">
-              <Label htmlFor="nome" className="text-sm font-medium flex items-center gap-2">
-                <MailIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+              <Label htmlFor="email" className="text-sm font-medium flex items-center gap-2 text-blue-800">
+                <MailIcon className="w-4 h-4 text-blue-700" />
                 Email
               </Label>
               <Input
@@ -340,31 +341,31 @@ export default function ModalEditarFuncionario({
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Ex: joao.silva@example.com"
                 required
-                className="pl-4 h-12 border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400 focus:ring-gray-200 dark:focus:ring-gray-600"
+                className="pl-4 h-12 border-blue-300 focus:border-blue-500 focus:ring-blue-200 text-blue-900 bg-blue-100 placeholder:text-blue-400"
               />
               {validationErrors.email && (
-                <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                <p className="text-sm text-blue-600 flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" />
                   {validationErrors.email}
                 </p>
               )}
-              <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+              <div className="flex justify-between text-xs text-blue-500">
                 <span>Mínimo 2 caracteres</span>
-                <span className={email.length > 100 ? "text-red-500 dark:text-red-400" : ""}>{email.length}/100</span>
+                <span className={email.length > 100 ? "text-red-500" : ""}>{email.length}/100</span>
               </div>
             </div>
 
             {/* Dados Profissionais */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-2">
+              <h3 className="text-lg font-semibold text-blue-900 border-b border-blue-200 pb-2">
                 Dados Profissionais
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Cargo */}
                 <div className="space-y-2">
-                  <Label htmlFor="cargo" className="text-sm font-medium flex items-center gap-2">
-                    <Briefcase className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  <Label htmlFor="cargo" className="text-sm font-medium flex items-center gap-2 text-blue-800">
+                    <Briefcase className="w-4 h-4 text-blue-700" />
                     Cargo
                   </Label>
                   <Input
@@ -373,10 +374,10 @@ export default function ModalEditarFuncionario({
                     onChange={(e) => setCargo(e.target.value)}
                     placeholder="Ex: Enfermeiro"
                     required
-                    className="pl-4 h-12 border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400 focus:ring-gray-200 dark:focus:ring-gray-600"
+                    className="pl-4 h-12 border-blue-300 focus:border-blue-500 focus:ring-blue-200 text-blue-900 bg-blue-100 placeholder:text-blue-400"
                   />
                   {validationErrors.cargo && (
-                    <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                    <p className="text-sm text-blue-600 flex items-center gap-1">
                       <AlertCircle className="w-3 h-3" />
                       {validationErrors.cargo}
                     </p>
@@ -385,8 +386,8 @@ export default function ModalEditarFuncionario({
 
                 {/* Matrícula */}
                 <div className="space-y-2">
-                  <Label htmlFor="matricula" className="text-sm font-medium flex items-center gap-2">
-                    <Hash className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  <Label htmlFor="matricula" className="text-sm font-medium flex items-center gap-2 text-blue-800">
+                    <Hash className="w-4 h-4 text-blue-700" />
                     Matrícula
                   </Label>
                   <Input
@@ -394,7 +395,7 @@ export default function ModalEditarFuncionario({
                     value={matricula}
                     onChange={(e) => setMatricula(e.target.value.replace(/\D/g, ""))}
                     placeholder="123456"
-                    className="pl-4 h-12 border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400 focus:ring-gray-200 dark:focus:ring-gray-600"
+                    className="pl-4 h-12 border-blue-300 focus:border-blue-500 focus:ring-blue-200 text-blue-900 bg-blue-100 placeholder:text-blue-400"
                   />
                 </div>
               </div>
@@ -402,20 +403,20 @@ export default function ModalEditarFuncionario({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Tipo de Escala */}
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  <Label className="text-sm font-medium flex items-center gap-2 text-blue-800">
+                    <Clock className="w-4 h-4 text-blue-700" />
                     Tipo de Escala
                   </Label>
                   <Select value={tipoEscala} onValueChange={setTipoEscala} required>
-                    <SelectTrigger className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400 focus:ring-gray-200 dark:focus:ring-gray-600 text-gray-700 dark:text-gray-300">
+                    <SelectTrigger className="h-12 border-blue-300 focus:border-blue-500 focus:ring-blue-200 text-blue-700">
                       <SelectValue placeholder="Selecione a escala" />
                     </SelectTrigger>
-                    <SelectContent className="bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+                    <SelectContent className="bg-blue-50 text-blue-700 border border-blue-200">
                       {ESCALAS.map((escala) => (
                         <SelectItem
                           key={escala.value}
                           value={escala.value}
-                          className="hover:bg-gray-100 dark:hover:bg-gray-800"
+                          className="hover:bg-blue-100"
                         >
                           {escala.label}
                         </SelectItem>
@@ -426,8 +427,8 @@ export default function ModalEditarFuncionario({
 
                 {/* Data de Admissão */}
                 <div className="space-y-2">
-                  <Label htmlFor="dataAdmissao" className="text-sm font-medium flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  <Label htmlFor="dataAdmissao" className="text-sm font-medium flex items-center gap-2 text-blue-800">
+                    <Calendar className="w-4 h-4 text-blue-700" />
                     Data de Admissão
                   </Label>
                   <Input
@@ -436,7 +437,7 @@ export default function ModalEditarFuncionario({
                     value={dataAdmissao}
                     onChange={(e) => setDataAdmissao(e.target.value)}
                     required
-                    className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400 focus:ring-gray-200 dark:focus:ring-gray-600"
+                    className="h-12 border-blue-300 focus:border-blue-500 focus:ring-blue-200 text-blue-900 bg-blue-100 placeholder:text-blue-400"
                   />
                 </div>
               </div>
@@ -444,15 +445,15 @@ export default function ModalEditarFuncionario({
 
             {/* Contato */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-2">
+              <h3 className="text-lg font-semibold text-blue-900 border-b border-blue-200 pb-2">
                 Contato
               </h3>
 
               <div className="grid grid-cols-1 gap-4">
                 {/* Telefone */}
                 <div className="space-y-2">
-                  <Label htmlFor="telefone" className="text-sm font-medium flex items-center gap-2">
-                    <Phone className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  <Label htmlFor="telefone" className="text-sm font-medium flex items-center gap-2 text-blue-800">
+                    <Phone className="w-4 h-4 text-blue-700" />
                     Telefone
                   </Label>
                   <Input
@@ -460,10 +461,10 @@ export default function ModalEditarFuncionario({
                     value={telefone}
                     onChange={(e) => setTelefone(formatPhone(e.target.value))}
                     placeholder="11987654321"
-                    className="pl-4 h-12 border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400 focus:ring-gray-200 dark:focus:ring-gray-600"
+                    className="pl-4 h-12 border-blue-300 focus:border-blue-500 focus:ring-blue-200 text-blue-900 bg-blue-100 placeholder:text-blue-400"
                   />
                   {validationErrors.telefone && (
-                    <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                    <p className="text-sm text-blue-600 flex items-center gap-1">
                       <AlertCircle className="w-3 h-3" />
                       {validationErrors.telefone}
                     </p>
@@ -476,21 +477,21 @@ export default function ModalEditarFuncionario({
             {loading && (
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600 dark:text-gray-400">Atualizando dados...</span>
+                  <span className="text-blue-700">Atualizando dados...</span>
                   <span className="font-medium">{uploadProgress}%</span>
                 </div>
-                <Progress value={uploadProgress} className="h-2" />
+                <Progress value={uploadProgress} className="h-2 bg-blue-200" />
               </div>
             )}
 
             {/* Botões de Ação */}
-            <div className="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex justify-end gap-3 pt-6 border-t border-blue-200">
               <Button
                 variant="outline"
                 type="button"
                 onClick={() => onOpenChange(false)}
                 disabled={loading}
-                className="px-6 h-11 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+                className="px-6 h-11 border-blue-300 text-blue-700 hover:bg-blue-100 transition-all duration-200"
               >
                 Cancelar
               </Button>
@@ -498,12 +499,13 @@ export default function ModalEditarFuncionario({
               <Button
                 onClick={handleSubmit}
                 disabled={loading || !isFormValid() || !hasChanges()}
-                className={`px-8 h-11 font-medium transition-all duration-300 ${loading
-                    ? "bg-gray-400 dark:bg-gray-600 cursor-not-allowed"
+                className={`px-8 h-11 font-medium transition-all duration-300 ${
+                  loading
+                    ? "bg-blue-400 cursor-not-allowed"
                     : isFormValid() && hasChanges()
-                      ? "bg-gray-800 hover:bg-gray-900 dark:bg-white dark:hover:bg-gray-200 dark:text-gray-800 text-white"
-                      : "bg-gray-300 dark:bg-gray-700 cursor-not-allowed text-gray-500 dark:text-gray-400"
-                  }`}
+                      ? "bg-blue-800 hover:bg-blue-900 text-white"
+                      : "bg-blue-300 cursor-not-allowed text-blue-500"
+                }`}
               >
                 {loading ? (
                   <div className="flex items-center gap-2">

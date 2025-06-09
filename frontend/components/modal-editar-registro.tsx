@@ -153,16 +153,17 @@ export default function ModalEditarRegistroPonto({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-blue-50">
         <DialogHeader className="space-y-3">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 shadow-sm">
-              <Clock className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+            <div className="p-2 rounded-lg bg-blue-100 shadow-sm">
+              <Clock className="w-6 h-6 text-blue-700" />
             </div>
             <div>
-              <DialogTitle className="text-2xl font-bold">Editar Registro de Ponto</DialogTitle>
-              <DialogDescription className="text-gray-600 dark:text-gray-400">
-                Atualize os horários de entrada e saída do funcionário {registro?.funcionario_nome || ""}.
+              <DialogTitle className="text-2xl font-bold text-blue-900">Editar Registro de Ponto</DialogTitle>
+              <DialogDescription className="text-blue-700">
+                Atualize os horários de entrada e saída do funcionário{" "}
+                <span className="font-semibold text-blue-900">{registro?.funcionario_nome || ""}</span>.
               </DialogDescription>
             </div>
           </div>
@@ -170,12 +171,12 @@ export default function ModalEditarRegistroPonto({
 
         {success ? (
           <div className="flex flex-col items-center justify-center py-12 space-y-4">
-            <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-              <Check className="w-8 h-8 text-gray-700 dark:text-gray-300" />
+            <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
+              <Check className="w-8 h-8 text-blue-700" />
             </div>
             <div className="text-center">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Registro Atualizado!</h3>
-              <p className="text-gray-600 dark:text-gray-400">Os horários foram atualizados com sucesso.</p>
+              <h3 className="text-lg font-semibold text-blue-900">Registro Atualizado!</h3>
+              <p className="text-blue-700">Os horários foram atualizados com sucesso.</p>
             </div>
           </div>
         ) : (
@@ -183,24 +184,24 @@ export default function ModalEditarRegistroPonto({
             {error && (
               <Alert
                 variant="destructive"
-                className="border-red-200 bg-red-50 dark:bg-red-900/20 animate-in slide-in-from-top-2 duration-300"
+                className="border-blue-200 bg-blue-100 animate-in slide-in-from-top-2 duration-300"
               >
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
+                <AlertCircle className="h-4 w-4 text-blue-700" />
+                <AlertDescription className="text-blue-700">{error}</AlertDescription>
               </Alert>
             )}
 
             {/* Informações do Registro */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-2">
+              <h3 className="text-lg font-semibold text-blue-900 border-b border-blue-200 pb-2">
                 Informações do Registro
               </h3>
 
               <div className="grid grid-cols-1 gap-4">
                 {/* Data */}
                 <div className="space-y-2">
-                  <Label htmlFor="data" className="text-sm font-medium flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  <Label htmlFor="data" className="text-sm font-medium flex items-center gap-2 text-blue-800">
+                    <Calendar className="w-4 h-4 text-blue-700" />
                     Data do Registro
                   </Label>
                   <Input
@@ -209,7 +210,7 @@ export default function ModalEditarRegistroPonto({
                     value={dataFormatada}
                     disabled
                     readOnly
-                    className="pl-4 h-12 bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600 cursor-not-allowed text-gray-500 dark:text-gray-400"
+                    className="pl-4 h-12 bg-blue-100 border-blue-300 cursor-not-allowed text-blue-500"
                   />
                 </div>
               </div>
@@ -217,15 +218,15 @@ export default function ModalEditarRegistroPonto({
 
             {/* Horários */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-2">
+              <h3 className="text-lg font-semibold text-blue-900 border-b border-blue-200 pb-2">
                 Horários
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Hora de Entrada */}
                 <div className="space-y-2">
-                  <Label htmlFor="horaEntrada" className="text-sm font-medium flex items-center gap-2">
-                    <LogIn className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  <Label htmlFor="horaEntrada" className="text-sm font-medium flex items-center gap-2 text-blue-800">
+                    <LogIn className="w-4 h-4 text-blue-700" />
                     Hora de Entrada
                   </Label>
                   <Input
@@ -234,10 +235,10 @@ export default function ModalEditarRegistroPonto({
                     value={horaEntrada}
                     onChange={(e) => setHoraEntrada(padHora(e.target.value))}
                     disabled={!registro || loading}
-                    className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400 focus:ring-gray-200 dark:focus:ring-gray-600"
+                    className="h-12 border-blue-300 focus:border-blue-500 focus:ring-blue-200 text-blue-900 bg-blue-100 placeholder:text-blue-400"
                   />
                   {validationErrors.horaEntrada && (
-                    <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                    <p className="text-sm text-blue-600 flex items-center gap-1">
                       <AlertCircle className="w-3 h-3" />
                       {validationErrors.horaEntrada}
                     </p>
@@ -246,8 +247,8 @@ export default function ModalEditarRegistroPonto({
 
                 {/* Hora de Saída */}
                 <div className="space-y-2">
-                  <Label htmlFor="horaSaida" className="text-sm font-medium flex items-center gap-2">
-                    <LogOut className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  <Label htmlFor="horaSaida" className="text-sm font-medium flex items-center gap-2 text-blue-800">
+                    <LogOut className="w-4 h-4 text-blue-700" />
                     Hora de Saída
                   </Label>
                   <Input
@@ -256,10 +257,10 @@ export default function ModalEditarRegistroPonto({
                     value={horaSaida}
                     onChange={(e) => setHoraSaida(padHora(e.target.value))}
                     disabled={!registro || loading}
-                    className="h-12 border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-400 focus:ring-gray-200 dark:focus:ring-gray-600"
+                    className="h-12 border-blue-300 focus:border-blue-500 focus:ring-blue-200 text-blue-900 bg-blue-100 placeholder:text-blue-400"
                   />
                   {validationErrors.horaSaida && (
-                    <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                    <p className="text-sm text-blue-600 flex items-center gap-1">
                       <AlertCircle className="w-3 h-3" />
                       {validationErrors.horaSaida}
                     </p>
@@ -268,8 +269,8 @@ export default function ModalEditarRegistroPonto({
               </div>
 
               {/* Informação adicional */}
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+              <div className="bg-blue-100 rounded-lg p-4 border border-blue-200">
+                <div className="flex items-center gap-2 text-sm text-blue-700">
                   <Clock className="w-4 h-4" />
                   <span>
                     {horaEntrada && horaSaida && horaEntrada < horaSaida
@@ -291,21 +292,21 @@ export default function ModalEditarRegistroPonto({
             {loading && (
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600 dark:text-gray-400">Atualizando registro...</span>
+                  <span className="text-blue-700">Atualizando registro...</span>
                   <span className="font-medium">{uploadProgress}%</span>
                 </div>
-                <Progress value={uploadProgress} className="h-2" />
+                <Progress value={uploadProgress} className="h-2 bg-blue-200" />
               </div>
             )}
 
             {/* Botões de Ação */}
-            <div className="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex justify-end gap-3 pt-6 border-t border-blue-200">
               <Button
                 variant="outline"
                 type="button"
                 onClick={() => onOpenChange(false)}
                 disabled={loading}
-                className="px-6 h-11 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+                className="px-6 h-11 border-blue-300 text-blue-700 hover:bg-blue-100 transition-all duration-200"
               >
                 Cancelar
               </Button>
@@ -315,10 +316,10 @@ export default function ModalEditarRegistroPonto({
                 disabled={loading || !isFormValid() || !hasChanges()}
                 className={`px-8 h-11 font-medium transition-all duration-300 ${
                   loading
-                    ? "bg-gray-400 dark:bg-gray-600 cursor-not-allowed"
+                    ? "bg-blue-400 cursor-not-allowed"
                     : isFormValid() && hasChanges()
-                      ? "bg-gray-800 hover:bg-gray-900 dark:bg-white dark:hover:bg-gray-200 dark:text-gray-800 text-white"
-                      : "bg-gray-300 dark:bg-gray-700 cursor-not-allowed text-gray-500 dark:text-gray-400"
+                      ? "bg-blue-800 hover:bg-blue-900 text-white"
+                      : "bg-blue-300 cursor-not-allowed text-blue-500"
                 }`}
               >
                 {loading ? (
