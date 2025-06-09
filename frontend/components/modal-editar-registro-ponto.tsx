@@ -80,9 +80,11 @@ export default function ModalEditarUnidade({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent>
+			<DialogContent className="bg-blue-50 max-w-lg">
 				<DialogHeader>
-					<DialogTitle>Editar Unidade</DialogTitle>
+					<DialogTitle className="text-2xl font-bold text-blue-900">
+						Editar Unidade
+					</DialogTitle>
 				</DialogHeader>
 
 				<div className="space-y-4">
@@ -90,17 +92,19 @@ export default function ModalEditarUnidade({
 						placeholder="Nome da unidade"
 						value={nome}
 						onChange={(e) => setNome(e.target.value)}
+						className="text-blue-900 bg-blue-100 border-blue-300 placeholder:text-blue-400 focus:border-blue-500 focus:ring-blue-200"
 					/>
 					<Input
 						placeholder="Localização"
 						value={localizacao}
 						onChange={(e) => setLocalizacao(e.target.value)}
+						className="text-blue-900 bg-blue-100 border-blue-300 placeholder:text-blue-400 focus:border-blue-500 focus:ring-blue-200"
 					/>
 
 					<div>
 						{/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
 						<label
-							className="block w-full cursor-pointer text-sm font-medium text-blue-600 hover:underline"
+							className="block w-full cursor-pointer text-sm font-medium text-blue-700 hover:underline"
 							onClick={() => document.getElementById("fotoInput")?.click()}
 							onKeyDown={(e) => {
 								if (e.key === "Enter" || e.key === " ") {
@@ -122,7 +126,7 @@ export default function ModalEditarUnidade({
 							<img
 								src={previewUrl}
 								alt="Preview"
-								className="mt-2 h-32 rounded object-cover border shadow"
+								className="mt-2 h-32 rounded object-cover border border-blue-200 shadow"
 							/>
 						)}
 					</div>
@@ -131,12 +135,11 @@ export default function ModalEditarUnidade({
 						<Button
 							onClick={handleSubmit}
 							disabled={loading}
-							className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+							className="bg-blue-800 text-white hover:bg-blue-900 transition-all duration-200"
 						>
 							{loading ? "Salvando..." : "Salvar"}
 						</Button>
 					</div>
-
 				</div>
 			</DialogContent>
 		</Dialog>
