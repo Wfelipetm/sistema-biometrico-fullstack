@@ -175,40 +175,27 @@ const Sidebar = React.forwardRef<
     },
     ref
   ) => {
-    const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+    const { isMobile, state } = useSidebar()
 
-    if (collapsible === "none") {
-      return (
-        <div
-          className={cn(
-            "flex h-full w-[--sidebar-width] flex-col bg-sidebar text-sidebar-foreground",
-            className
-          )}
-          ref={ref}
-          {...props}
-        >
-          {children}
-        </div>
-      )
-    }
-
+    // NOVO: No mobile, mostra apenas os ícones, sem Sheet/drawer
     if (isMobile) {
       return (
-        <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
-          <SheetContent
-            data-sidebar="sidebar"
-            data-mobile="true"
-            className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
-            style={
-              {
-                "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
-              } as React.CSSProperties
-            }
-            side={side}
-          >
-            <div className="flex h-full w-full flex-col">{children}</div>
-          </SheetContent>
-        </Sheet>
+        <div
+          ref={ref}
+          className={cn(
+            "flex h-full w-[--sidebar-width-icon] flex-col bg-sidebar text-sidebar-foreground",
+            className
+          )}
+          style={
+            {
+              "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
+            } as React.CSSProperties
+          }
+          {...props}
+        >
+          {/* Aqui você pode renderizar apenas os ícones de navegação */}
+          {children}
+        </div>
       )
     }
 

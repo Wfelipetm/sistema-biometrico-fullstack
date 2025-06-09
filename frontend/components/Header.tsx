@@ -60,20 +60,6 @@ export default function Header({ logoMarginLeft, className }: HeaderProps) {
 
 	return (
 		<header className={cn("sticky top-0 z-10 flex h-24 items-center gap-4 border-b px-4 md:px-6 bg-gradient-to-l from-blue-50 via-white to-white", className)}>
-			{user.papel !== "quiosque" && (
-				<Sheet>
-					<SheetTrigger asChild>
-						<Button variant="outline" size="icon" className="md:hidden">
-							<Menu className="h-5 w-5" />
-							<span className="sr-only">Toggle Menu</span>
-						</Button>
-					</SheetTrigger>
-					<SheetContent side="left" className="p-0">
-						<Sidebar />
-					</SheetContent>
-				</Sheet>
-			)}
-
 			{/* Centro: logo */}
 			<div className="flex flex-1 justify-center">
 				<Image
