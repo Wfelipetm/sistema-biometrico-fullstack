@@ -12,6 +12,12 @@ export const metadata: Metadata = {
 	title: "Sistema de Biometria",
 	description: "Sistema de gerenciamento de ponto biométrico para funcionários",
 	generator: "codecity",
+	icons: {
+		icon: [
+			{ url: "/favicon/favicon light/favicon-light-96x96.png", media: "(prefers-color-scheme: light)" },
+			{ url: "/favicon/favicon dark/favicon-dark-96x96.png", media: "(prefers-color-scheme: dark)" },
+		],
+	},
 };
 
 export default function RootLayout({
