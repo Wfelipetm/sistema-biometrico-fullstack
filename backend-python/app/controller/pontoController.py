@@ -6,11 +6,11 @@ import requests
 
 # Função para enviar e-mail via backend Node.js
 
-#http://localhost:3001
-#http://biometrico.itaguai.rj.gov.br:3001
+# http://localhost:3001
+# http://biometrico.itaguai.rj.gov.br:3001
 def send_email(subject, recipient, body):
     try:
-        response = requests.post("http://localhost:3001/api/enviar-email", json={
+        response = requests.post("http://biometrico.itaguai.rj.gov.br:3001/api/enviar-email", json={
             "subject": subject,
             "recipient": recipient,
             "body": body
@@ -94,15 +94,14 @@ def register_ponto():
             """, (funcionario_id, unidade_id, data_hora, hora_entrada, hora_saida, id_biometrico))
 
             mensagem = (
-                        f"Registro de entrada realizado com sucesso para funcionario: {user_name}\n"
-                        f"Comprovante enviado para o e-mail {email}"
-                    )
-
+                f"Registro de entrada realizado com sucesso para funcionario: {user_name}\n"
+                f"Comprovante enviado para o e-mail {email}"
+            )
 
             send_email(
                 subject="Registro de Entrada - Ponto Registrado",
                 recipient=email,
-                body = f"""
+                body=f"""
                         Prezado(a) {user_name},
 
                         Este e-mail confirma o registro de seu ponto conforme as informações abaixo:
@@ -121,20 +120,32 @@ def register_ponto():
 
         elif ultimo_ponto[1] is not None and ultimo_ponto[2] is None:
             # Registro de saída
-            hora_saida = data_hora.strftime("%H:%M:%S")
+            hora_entrada_time = ultimo_ponto[1]
+            data_entrada = datetime.combine(data_atual, hora_entrada_time)
+            agora = datetime.now()
+            diff = (agora - data_entrada).total_seconds() / 60  # diferença em minutos
+
+            if diff < 60:
+                cursor.close()
+                conn.close()
+                return jsonify({
+                    "message": f"{user_name}, você só pode bater a saída após 1 hora da entrada. Caso seja uma urgência, comunique o RH para ajustar sua saída."
+                }), 400
+
+            hora_saida = agora.strftime("%H:%M:%S")
             cursor.execute("""
                 UPDATE registros_ponto
                 SET hora_saida = %s
                 WHERE id = %s
             """, (hora_saida, ultimo_ponto[0]))
             mensagem = (
-                        f"Registro de saida realizado com sucesso para funcionario: {user_name}\n"
-                        f"Comprovante enviado para o e-mail {email}"
-                    )
+                f"Registro de saida realizado com sucesso para funcionario: {user_name}\n"
+                f"Comprovante enviado para o e-mail {email}"
+            )
             send_email(
                 subject="Registro de Saída - Ponto Registrado",
                 recipient=email,
-                body = f"""
+                body=f"""
                         Prezado(a) {user_name},
 
                         Este e-mail confirma o registro de sua saída conforme as informações abaixo:
@@ -142,7 +153,7 @@ def register_ponto():
                         Saída registrada com sucesso.
 
                         Profissional: {user_name}
-                        Data/Hora: {data_hora.strftime('%d/%m/%Y %H:%M:%S')}
+                        Data/Hora: {agora.strftime('%d/%m/%Y %H:%M:%S')}
 
                         Se precisar de suporte ou tiver dúvidas, entre em contato com a Prefeitura de Itaguaí.
 
