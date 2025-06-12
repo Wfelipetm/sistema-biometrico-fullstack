@@ -443,7 +443,12 @@ function DashboardPage() {
 												className="flex items-center justify-between border-b pb-2"
 											>
 												<span className="font-medium text-blue-900">{funcionario.nome}</span>
-												<span className="text-xs text-blue-700">{new Date(funcionario.created_at).toLocaleDateString("pt-BR")}</span>
+												<span className="text-xs text-blue-700">
+													{(() => {
+														const [dia, mes, ano] = funcionario.created_at.split("/");
+														return `${dia.padStart(2, "0")}/${mes.padStart(2, "0")}/${ano}`;
+													})()}
+												</span>
 											</li>
 										))}
 									{stats.funcionariosRecentes.length > 5 && (

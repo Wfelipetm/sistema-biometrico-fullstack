@@ -45,7 +45,11 @@ export default function RegistrosPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [filtroFuncionario, setFiltroFuncionario] = useState("")
   const [filtroUnidade, setFiltroUnidade] = useState("")
-  const [filtroData, setFiltroData] = useState("")
+  const [filtroEscala, setFiltroEscala] = useState("")
+  const hoje = new Date();
+const pad = (n: number) => n.toString().padStart(2, "0");
+const hojeStr = `${hoje.getFullYear()}-${pad(hoje.getMonth() + 1)}-${pad(hoje.getDate())}`;
+const [filtroData, setFiltroData] = useState(hojeStr);
   const router = useRouter()
   const { user } = useAuth()
   const [currentPage, setCurrentPage] = useState(1)
@@ -242,6 +246,7 @@ export default function RegistrosPage() {
   const filteredRegistros = registros.filter((registro) => {
     const funcionarioOk = (registro.funcionario_nome?.toLowerCase() || "").includes(filtroFuncionario.toLowerCase())
     const unidadeOk = (registro.unidade_nome?.toLowerCase() || "").includes(filtroUnidade.toLowerCase())
+    const escalaOk = (registro.tipo_escala?.toLowerCase() || "").includes(filtroEscala.toLowerCase())
     const searchOk =
       (registro.funcionario_nome?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
       (registro.unidade_nome?.toLowerCase() || "").includes(searchTerm.toLowerCase())
@@ -249,15 +254,16 @@ export default function RegistrosPage() {
     let dataOk = true
     if (filtroData) {
       try {
-        const filtroDate = parseISO(filtroData)
-        const registroDate = new Date(registro.data_hora)
-        dataOk = isSameDay(filtroDate, registroDate)
+        // Pegue só a parte da data (yyyy-MM-dd) para ambos
+        const filtroDateStr = filtroData
+        const registroDateStr = registro.data_hora.slice(0, 10)
+        dataOk = filtroDateStr === registroDateStr
       } catch {
         dataOk = true
       }
     }
 
-    return funcionarioOk && unidadeOk && searchOk && dataOk
+    return funcionarioOk && unidadeOk && escalaOk && searchOk && dataOk
   })
 
   const totalPages = Math.ceil(filteredRegistros.length / itemsPerPage)
@@ -345,6 +351,31 @@ export default function RegistrosPage() {
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-700 pointer-events-none" />
               </div>
             )}
+            <div className="relative flex items-center gap-2">
+              <Input
+                placeholder="Filtrar por escala"
+                value={filtroEscala}
+                onChange={(e) => {
+                  setFiltroEscala(e.target.value)
+                  setCurrentPage(1)
+                }}
+                className="max-w-xs pl-8 text-blue-900 placeholder:text-blue-700"
+              />
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-700 pointer-events-none" />
+            </div>
+            <div className="relative flex items-center gap-2">
+              <Input
+                type="date"
+                placeholder="Filtrar por data"
+                value={filtroData}
+                onChange={(e) => {
+                  setFiltroData(e.target.value)
+                  setCurrentPage(1)
+                }}
+                className="max-w-xs pl-8 text-blue-900 placeholder:text-blue-700"
+              />
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-700 pointer-events-none" />
+            </div>
           </div>
 
           {loading ? (
