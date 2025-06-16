@@ -5,9 +5,11 @@ from app.services.biometric import IndexSearch, identify_user
 import requests
 import json
 
+#http://localhost:3001
+#http://biometrico.itaguai.rj.gov.br:3001
 def send_email(subject, recipient, body):
     try:
-        response = requests.post("http://localhost:3001/api/enviar-email", json={
+        response = requests.post("http://biometrico.itaguai.rj.gov.br:3001/api/enviar-email", json={
             "subject": subject,
             "recipient": recipient,
             "body": body
@@ -93,7 +95,7 @@ def register_ponto():
             print("Payload enviado para Node.js:")
             print(json.dumps(payload, indent=2))
             try:
-                response = requests.post("http://localhost:3001/reg/calcular-registro-ponto", json=payload, timeout=10)
+                response = requests.post("http://biometrico.itaguai.rj.gov.br:3001/reg/calcular-registro-ponto", json=payload, timeout=10)
                 print("Status code Node.js:", response.status_code)
                 print("Resposta Node.js:", response.text)
                 response.raise_for_status()
@@ -140,7 +142,7 @@ def register_ponto():
                 "id_biometrico": id_biometrico
             }
             try:
-                response = requests.post("http://localhost:3001/reg/calcular-registro-ponto", json=payload, timeout=10)
+                response = requests.post("http://biometrico.itaguai.rj.gov.br:3001/reg/calcular-registro-ponto", json=payload, timeout=10)
                 response.raise_for_status()
             except requests.RequestException as e:
                 print('[ERRO] Falha ao criar registro de ponto:', e)
