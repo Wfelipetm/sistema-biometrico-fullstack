@@ -28,7 +28,7 @@ router.get('/pontos-unidade', registroPontoController.listarPontosMesUnidade);
 router.get('/:unidade_id/dia', registroPontoController.getRegistrosDoDia);
 
 
-
+router.post('/calcular-registro-ponto', registroPontoController.calcularERegistrarPonto)
 
 //
 router.get('/pontos-mes', registroPontoController.listarPontosMes);// não é bom

@@ -3,14 +3,11 @@ from flask import jsonify
 from app.db.database import get_db_connection
 from app.services.biometric import IndexSearch, identify_user
 import requests
+import json
 
-# Função para enviar e-mail via backend Node.js
-
-# http://localhost:3001
-# http://biometrico.itaguai.rj.gov.br:3001
 def send_email(subject, recipient, body):
     try:
-        response = requests.post("http://biometrico.itaguai.rj.gov.br:3001/api/enviar-email", json={
+        response = requests.post("http://localhost:3001/api/enviar-email", json={
             "subject": subject,
             "recipient": recipient,
             "body": body
@@ -53,7 +50,6 @@ def register_ponto():
         if not user_data:
             return jsonify({"message": "Usuário não encontrado no banco de dados."}), 404
 
-       # ...
         funcionario_id, user_name, cpf, unidade_id, matricula, cargo, id_biometrico, email = user_data
         data_atual = datetime.now().date()
 
@@ -81,17 +77,29 @@ def register_ponto():
         ultimo_ponto = cursor.fetchone()
 
         data_hora = datetime.now()
-        hora_entrada = None
-        hora_saida = None
         mensagem = ""
 
         if not ultimo_ponto:
             # Registro de entrada
             hora_entrada = data_hora.strftime("%H:%M:%S")
-            cursor.execute("""
-                INSERT INTO registros_ponto (funcionario_id, unidade_id, data_hora, hora_entrada, hora_saida, id_biometrico)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """, (funcionario_id, unidade_id, data_hora, hora_entrada, hora_saida, id_biometrico))
+            payload = {
+                "funcionario_id": funcionario_id,
+                "unidade_id": unidade_id,
+                "data": data_atual.strftime("%Y-%m-%d"),
+                "hora_entrada": hora_entrada,
+                "hora_saida": None,
+                "id_biometrico": id_biometrico
+            }
+            print("Payload enviado para Node.js:")
+            print(json.dumps(payload, indent=2))
+            try:
+                response = requests.post("http://localhost:3001/reg/calcular-registro-ponto", json=payload, timeout=10)
+                print("Status code Node.js:", response.status_code)
+                print("Resposta Node.js:", response.text)
+                response.raise_for_status()
+            except requests.RequestException as e:
+                print("Erro ao registrar ponto no backend Node.js:", str(e))
+                return jsonify({"error": f"Erro ao registrar ponto no backend Node.js: {str(e)}"}), 500
 
             mensagem = (
                 f"Registro de entrada realizado com sucesso para funcionario: {user_name}\n"
@@ -122,22 +130,22 @@ def register_ponto():
             # Registro de saída
             hora_entrada_time = ultimo_ponto[1]
             data_entrada = datetime.combine(data_atual, hora_entrada_time)
-            agora = datetime.now()
-            diff = (agora - data_entrada).total_seconds() / 60  # diferença em minutos
+            hora_saida = datetime.now().strftime("%H:%M:%S")
+            payload = {
+                "funcionario_id": funcionario_id,
+                "unidade_id": unidade_id,
+                "data": data_atual.strftime("%Y-%m-%d"),
+                "hora_entrada": hora_entrada_time.strftime("%H:%M:%S"),
+                "hora_saida": hora_saida,
+                "id_biometrico": id_biometrico
+            }
+            try:
+                response = requests.post("http://localhost:3001/reg/calcular-registro-ponto", json=payload, timeout=10)
+                response.raise_for_status()
+            except requests.RequestException as e:
+                print('[ERRO] Falha ao criar registro de ponto:', e)
+                return jsonify({"error": "Erro ao registrar ponto. Contate o suporte."}), 500
 
-            if diff < 60:
-                cursor.close()
-                conn.close()
-                return jsonify({
-                    "message": f"{user_name}, você só pode bater a saída após 1 hora da entrada. Caso seja uma urgência, comunique o RH para ajustar sua saída."
-                }), 400
-
-            hora_saida = agora.strftime("%H:%M:%S")
-            cursor.execute("""
-                UPDATE registros_ponto
-                SET hora_saida = %s
-                WHERE id = %s
-            """, (hora_saida, ultimo_ponto[0]))
             mensagem = (
                 f"Registro de saida realizado com sucesso para funcionario: {user_name}\n"
                 f"Comprovante enviado para o e-mail {email}"
@@ -153,7 +161,7 @@ def register_ponto():
                         Saída registrada com sucesso.
 
                         Profissional: {user_name}
-                        Data/Hora: {agora.strftime('%d/%m/%Y %H:%M:%S')}
+                        Data/Hora: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}
 
                         Se precisar de suporte ou tiver dúvidas, entre em contato com a Prefeitura de Itaguaí.
 
@@ -173,11 +181,7 @@ def register_ponto():
             "cpf": cpf,
             "cargo": cargo,
             "unidade_id": unidade_id,
-            "matricula": matricula,
-            "registro_ponto": {
-                "data_hora": data_hora.strftime("%d/%m/%Y %H:%M:%S"),
-                "hora_entrada": hora_entrada,
-                "hora_saida": hora_saida,
-                "id_biometrico": id_biometrico
-            }
+            "matricula": matricula
         }), 200
+
+    return jsonify({"message": "Usuário não identificado. Tente novamente."}), 401
