@@ -39,6 +39,8 @@ type Registro = {
   unidade_nome: string
 }
 
+type Unidade = { id: string;};
+
 export default function RegistrosPage() {
   const [registros, setRegistros] = useState<Registro[]>([])
   const [loading, setLoading] = useState(true)
@@ -58,34 +60,40 @@ const [filtroData, setFiltroData] = useState(hojeStr);
   const [showEditarModal, setShowEditarModal] = useState(false)
   const [registroParaEditar, setRegistroParaEditar] = useState<Registro | null>(null)
   const [showBiometriaModal, setShowBiometriaModal] = useState(false)
+  const [page, setPage] = useState(1);
+const [limit, setLimit] = useState(20);
 
-  const fetchRegistros = useCallback(async () => {
-    if (!user?.secretaria_id) return
-    setLoading(true)
-    try {
-      const unidadesResponse = await fetch(`${API_URL}/secre/${user.secretaria_id}/unidades`)
-
-      if (!unidadesResponse.ok) {
-        throw new Error("Falha ao buscar unidades")
-      }
-
-      const unidades = await unidadesResponse.json()
-
-      const registrosPromises = unidades.map((unidade: { id: string }) => api.get(`/unid/${unidade.id}/registros`))
-      const registrosResponses = await Promise.all(registrosPromises)
-      let todosRegistros = registrosResponses.flatMap((res) => res.data)
-      if (user.papel === "gestor" && user.unidade_id) {
-        todosRegistros = todosRegistros.filter((registro) => registro.unidade_id === user.unidade_id)
-      }
-
-      setRegistros(todosRegistros)
-    } catch (error) {
-      console.error("Erro ao buscar registros:", error)
-      toast.error("Erro ao carregar registros", "Não foi possível carregar a lista de registros de ponto.")
-    } finally {
-      setLoading(false)
+const fetchRegistros = useCallback(async () => {
+  if (!user?.secretaria_id) return;
+  setLoading(true);
+  try {
+    const unidadesResponse = await fetch(`${API_URL}/secre/${user.secretaria_id}/unidades`);
+    if (!unidadesResponse.ok) {
+      throw new Error("Falha ao buscar unidades");
     }
-  }, [user?.secretaria_id, user?.papel, user?.unidade_id])
+    const unidades = await unidadesResponse.json();
+
+    // Agora, cada requisição de registros é paginada
+    const registrosPromises = unidades.map((unidade: Unidade) =>
+      api.get(`/unid/${unidade.id}/registros?page=${page}&limit=${limit}`)
+    );
+    const registrosResponses = await Promise.all(registrosPromises);
+    let todosRegistros = registrosResponses.flatMap((res) => res.data);
+
+    if (user.papel === "gestor" && user.unidade_id) {
+      todosRegistros = todosRegistros.filter((registro) => registro.unidade_id === user.unidade_id);
+    }
+
+    setRegistros(todosRegistros);
+    // Se o back-end retornar total, salve aqui: setTotal(res.data.total)
+  } catch (error) {
+    console.error("Erro ao buscar registros:", error);
+    toast.error("Erro ao carregar registros", "Não foi possível carregar a lista de registros de ponto.");
+  } finally {
+    setLoading(false);
+  }
+}, [user?.secretaria_id, user?.papel, user?.unidade_id, page, limit]);
+
 
   useEffect(() => {
     fetchRegistros()
@@ -194,31 +202,36 @@ const [filtroData, setFiltroData] = useState(hojeStr);
   }
 }
 
-  const handleDelete = async (id: number, funcionarioNome: string) => {
-    const dataRegistro = registros.find((r) => r.id === id)?.data_hora
-    const dataFormatada = dataRegistro ? formatDate(dataRegistro) : ""
+const handleDelete = async (id: number, funcionarioNome: string) => {
+  const dataRegistro = registros.find((r) => r.id === id)?.data_hora
+  const dataFormatada = dataRegistro ? formatDate(dataRegistro) : ""
 
-    toast.confirm(
-      "Excluir Registro de Ponto",
-      `Tem certeza que deseja excluir o registro de "${funcionarioNome}" do dia ${dataFormatada}? Esta ação não pode ser desfeita.`,
-      async () => {
-        try {
-          await api.delete(`/reg/registros-ponto/${id}`)
-          setRegistros((old) => old.filter((registro) => registro.id !== id))
-          toast.success("Registro excluído!", "O registro de ponto foi removido com sucesso.")
-          await fetchRegistros()
-        } catch (error) {
-          console.error("Erro ao excluir registro:", error)
-          toast.error("Erro ao excluir", "Não foi possível excluir o registro. Tente novamente.")
-        }
-      },
-      {
-        confirmText: "Excluir",
-        cancelText: "Cancelar",
-        variant: "danger",
-      },
-    )
-  }
+  toast.confirm(
+    "Excluir Registro de Ponto",
+    `Tem certeza que deseja excluir o registro de "${funcionarioNome}" do dia ${dataFormatada}? Esta ação não pode ser desfeita.`,
+    async () => {
+      try {
+        // Use a variável de ambiente API_URL com fetch
+        const response = await fetch(`${API_URL}/reg/registros-ponto/${id}`, {
+          method: "DELETE",
+        });
+        if (!response.ok) throw new Error("Erro ao excluir registro");
+
+        setRegistros((old) => old.filter((registro) => registro.id !== id));
+        toast.success("Registro excluído!", "O registro de ponto foi removido com sucesso.");
+        await fetchRegistros();
+      } catch (error) {
+        console.error("Erro ao excluir registro:", error);
+        toast.error("Erro ao excluir", "Não foi possível excluir o registro. Tente novamente.");
+      }
+    },
+    {
+      confirmText: "Excluir",
+      cancelText: "Cancelar",
+      variant: "danger",
+    },
+  );
+};
 
   // Função para abrir o modal de edição
   const handleEditarRegistro = (registro: Registro) => {

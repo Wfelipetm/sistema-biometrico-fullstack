@@ -255,7 +255,7 @@ export default function LoginPage() {
             </Button>
 
             {/* Register Link */}
-            {/* <div className="text-center text-sm">
+            <div className="text-center text-sm">
                   <span className="text-gray-500 dark:text-gray-400">Não tem uma conta? </span>
                   <Link
                     href="/cadastro"
@@ -263,7 +263,7 @@ export default function LoginPage() {
                   >
                     Cadastre-se
                   </Link>
-                </div> */}
+                </div>
           </form>
         <div className="text-center space-y-4 pt-6 border-t border-itaguai-100">
           <div className="flex items-center justify-center space-x-2 text-sm text-itaguai-600">

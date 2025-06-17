@@ -251,10 +251,7 @@ module.exports = {
                 u.id AS unidade_id,
                 u.nome AS unidade_nome,
                 COUNT(r.id) FILTER (
-                    WHERE r.data_hora AT TIME ZONE 'UTC' 
-                          AT TIME ZONE 'America/Sao_Paulo' >= date_trunc('day', now() AT TIME ZONE 'America/Sao_Paulo')
-                      AND r.data_hora AT TIME ZONE 'UTC' 
-                          AT TIME ZONE 'America/Sao_Paulo' < date_trunc('day', now() AT TIME ZONE 'America/Sao_Paulo') + INTERVAL '1 day'
+                    WHERE r.data_hora::date = (now() AT TIME ZONE 'America/Sao_Paulo')::date
                 ) AS total_registros_hoje
             FROM
                 unidades u
@@ -389,17 +386,19 @@ module.exports = {
     }
     ,
 
+    // --> Listar registros de ponto de uma unidade com filtros de data e paginação
     async listarRegistrosDaUnidade(req, res) {
         const { id } = req.params;
-        const { data_inicio, data_fim } = req.query;
+        const { data_inicio, data_fim, page = 1, limit = 20 } = req.query;
 
         try {
             const params = [id];
+            let paramIndex = 2;
             let query = `
         SELECT 
             r.*, 
             f.nome AS funcionario_nome, 
-            f.tipo_escala AS tipo_escala,         -- <-- Adicione esta linha!
+            f.tipo_escala AS tipo_escala,
             u.nome AS unidade_nome
         FROM registros_ponto r
         INNER JOIN funcionarios f ON r.funcionario_id = f.id
@@ -408,11 +407,17 @@ module.exports = {
         `;
 
             if (data_inicio && data_fim) {
-                query += ` AND r.data_hora::date BETWEEN $2 AND $3`;
+                query += ` AND r.data_hora::date BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
                 params.push(data_inicio, data_fim);
+                paramIndex += 2;
             }
 
             query += ` ORDER BY r.data_hora DESC`;
+
+            // Paginação
+            const offset = (parseInt(page) - 1) * parseInt(limit);
+            query += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+            params.push(parseInt(limit), offset);
 
             const result = await db.query(query, params);
             res.status(200).json(result.rows);
