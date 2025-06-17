@@ -61,28 +61,32 @@ const [filtroData, setFiltroData] = useState(hojeStr);
   const [registroParaEditar, setRegistroParaEditar] = useState<Registro | null>(null)
   const [showBiometriaModal, setShowBiometriaModal] = useState(false)
   const [page, setPage] = useState(1);
-const [limit, setLimit] = useState(20);
+const [limit, setLimit] = useState(2000);
 
 const fetchRegistros = useCallback(async () => {
   if (!user?.secretaria_id) return;
   setLoading(true);
   try {
+    // Busca as unidades da secretaria (mantido)
     const unidadesResponse = await fetch(`${API_URL}/secre/${user.secretaria_id}/unidades`);
     if (!unidadesResponse.ok) {
       throw new Error("Falha ao buscar unidades");
     }
     const unidades = await unidadesResponse.json();
 
-    // Agora, cada requisição de registros é paginada
-    const registrosPromises = unidades.map((unidade: Unidade) =>
-      api.get(`/unid/${unidade.id}/registros?page=${page}&limit=${limit}`)
-    );
-    const registrosResponses = await Promise.all(registrosPromises);
-    let todosRegistros = registrosResponses.flatMap((res) => res.data);
+    let registrosResponses = [];
 
     if (user.papel === "gestor" && user.unidade_id) {
-      todosRegistros = todosRegistros.filter((registro) => registro.unidade_id === user.unidade_id);
+      // Gestor: busca apenas da unidade dele
+      const res = await api.get(`/unid/${user.unidade_id}/registros?page=${page}&limit=${limit}`);
+      registrosResponses = [res];
+    } else {
+      // Admin: busca todos da secretaria
+      const res = await api.get(`/secre/${user.secretaria_id}/registros?page=${page}&limit=${limit}`);
+      registrosResponses = [res];
     }
+
+    let todosRegistros = registrosResponses.flatMap((res) => res.data);
 
     setRegistros(todosRegistros);
     // Se o back-end retornar total, salve aqui: setTotal(res.data.total)
@@ -93,7 +97,6 @@ const fetchRegistros = useCallback(async () => {
     setLoading(false);
   }
 }, [user?.secretaria_id, user?.papel, user?.unidade_id, page, limit]);
-
 
   useEffect(() => {
     fetchRegistros()

@@ -150,6 +150,46 @@ module.exports = {
         }
     },
 
+    async listarRegistrosDaSecretaria(req, res) {
+        const { id } = req.params; // id da secretaria
+        const { data_inicio, data_fim, page = 1, limit = 80 } = req.query;
+
+        try {
+            const params = [id];
+            let paramIndex = 2;
+            let query = `
+            SELECT 
+                r.*, 
+                f.nome AS funcionario_nome, 
+                f.tipo_escala AS tipo_escala,
+                u.nome AS unidade_nome
+            FROM registros_ponto r
+            INNER JOIN funcionarios f ON r.funcionario_id = f.id
+            INNER JOIN unidades u ON f.unidade_id = u.id
+            WHERE u.secretaria_id = $1
+        `;
+
+            if (data_inicio && data_fim) {
+                query += ` AND r.data_hora::date BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+                params.push(data_inicio, data_fim);
+                paramIndex += 2;
+            }
+
+            query += ` ORDER BY r.data_hora DESC`;
+
+            // Paginação
+            const offset = (parseInt(page) - 1) * parseInt(limit);
+            query += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+            params.push(parseInt(limit), offset);
+
+            const result = await db.query(query, params);
+            res.status(200).json(result.rows);
+        } catch (error) {
+            console.error("Erro ao listar registros da secretaria:", error);
+            res.status(500).json({ error: "Erro ao listar registros da secretaria" });
+        }
+    },
+
     // ---> 
     async getRegistrosDiariosPorSecretaria(req, res) {
         const { id } = req.params;

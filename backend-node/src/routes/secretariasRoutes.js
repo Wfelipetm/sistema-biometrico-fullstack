@@ -26,6 +26,7 @@ router.get('/:id/registros-mensais', secretariasController.getTotalRegistrosMesP
 
 router.get('/grafico-reg-secre-mes-todo/:id', secretariasController.getRegistrosDiariosPorSecretaria);
 
+router.get('/:id/registros', secretariasController.listarRegistrosDaSecretaria);
 
 router.get('/:id/total-funcionarios', secretariasController.getTotalFuncionariosPorSecretaria);
 
