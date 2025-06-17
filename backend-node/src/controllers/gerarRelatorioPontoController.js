@@ -155,7 +155,7 @@ module.exports = {
 
             const funcionario = result.rows[0];
 
-            // Totais
+            // Totais em segundos
             let totalHorasNormais = 0;
             let totalHorasExtras = 0;
             let totalHorasDesconto = 0;
@@ -171,22 +171,21 @@ module.exports = {
             }
 
             const registros = result.rows.map(row => {
-                // Converte os campos interval do Postgres para string
-                const horas_normais = intervalToString(row.total_trabalhado);
+                const horas_normais = intervalToString(row.horas_normais);
                 const horas_extras = intervalToString(row.hora_extra);
                 const horas_desconto = intervalToString(row.hora_desconto);
 
-                totalHorasNormais += timeToDecimal(horas_normais);
-                totalHorasExtras += timeToDecimal(horas_extras);
-                totalHorasDesconto += timeToDecimal(horas_desconto);
+                if (horas_normais !== '--') totalHorasNormais += timeToSeconds(horas_normais);
+                if (horas_extras !== '--') totalHorasExtras += timeToSeconds(horas_extras);
+                if (horas_desconto !== '--') totalHorasDesconto += timeToSeconds(horas_desconto);
 
                 return {
                     data: format(new Date(row.data), 'dd/MM/yyyy'),
                     hora_entrada: row.hora_entrada || '--',
                     hora_saida: row.hora_saida || '--',
-                    horas_normais: horas_normais,
-                    horas_extras: horas_extras,
-                    horas_desconto: horas_desconto,
+                    horas_normais,
+                    horas_extras,
+                    horas_desconto,
                     justificativa: ' ',
                 };
             });
@@ -201,9 +200,9 @@ module.exports = {
                     mes_ano: `${mes}/${ano}`,
                 },
                 totais: {
-                    total_total_trabalhado: decimalToHora(totalHorasNormais),
-                    total_horas_extras: decimalToHora(totalHorasExtras),
-                    total_horas_desconto: decimalToHora(totalHorasDesconto),
+                    total_horas_normais: totalHorasNormais > 0 ? secondsToHora(totalHorasNormais) : '--',
+                    total_horas_extras: totalHorasExtras > 0 ? secondsToHora(totalHorasExtras) : '--',
+                    total_horas_desconto: totalHorasDesconto > 0 ? secondsToHora(totalHorasDesconto) : '--',
                 },
                 registros,
             });
@@ -214,17 +213,16 @@ module.exports = {
     }
 }
 
-// Função utilitária:
-function timeToDecimal(timeStr) {
+// Funções utilitárias corretas:
+function timeToSeconds(timeStr) {
     if (!timeStr || timeStr === '--' || timeStr === '00:00:00') return 0;
     const [h, m, s] = timeStr.split(':').map(Number);
-    return h + m / 60 + s / 3600;
+    return h * 3600 + m * 60 + s;
 }
 
-function decimalToHora(decimal) {
-    if (!decimal) return '--';
-    const horas = Math.floor(decimal);
-    const minutos = Math.floor((decimal - horas) * 60);
-    const segundos = Math.round((((decimal - horas) * 60) - minutos) * 60);
-    return `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
+function secondsToHora(totalSeconds) {
+    const h = Math.floor(totalSeconds / 3600);
+    const m = Math.floor((totalSeconds % 3600) / 60);
+    const s = totalSeconds % 60;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
