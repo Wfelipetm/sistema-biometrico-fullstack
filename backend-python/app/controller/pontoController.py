@@ -10,6 +10,8 @@ import json
 # http://localhost:3001
 
 
+#http://localhost:3001
+#http://biometrico.itaguai.rj.gov.br:3001
 def send_email(subject, recipient, body):
     try:
         response = requests.post("http://biometrico.itaguai.rj.gov.br:3001/api/enviar-email", json={
