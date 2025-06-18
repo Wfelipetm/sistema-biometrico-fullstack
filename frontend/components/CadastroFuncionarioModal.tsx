@@ -208,7 +208,7 @@ export default function ModalCadastroFuncionarios({
       })
     }, 200)
 
-    const response = await fetch("https://127.0.0.1:5000/register", {
+    const response = await fetch("https://leitor.itaguai.rj.gov.br:5000/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

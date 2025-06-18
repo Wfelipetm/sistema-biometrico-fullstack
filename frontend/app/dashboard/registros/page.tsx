@@ -146,7 +146,7 @@ const fetchRegistros = useCallback(async () => {
   }
 
   try {
-    const response = await fetch("https://127.0.0.1:5000/register_ponto", {
+    const response = await fetch("https://leitor.itaguai.rj.gov.br:5000/register_ponto", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
