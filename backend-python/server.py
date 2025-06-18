@@ -4,12 +4,10 @@ from app.services.mail import mail, init_mail
 import os
 from flask_cors import CORS
 
-
 app = create_app()
 init_mail(app)
 
-
-# Ativando CORS somente para o domínio específico e com suporte a cookies
+# Ativando CORS se necessário
 # CORS(
 #     app,
 #     supports_credentials=True,
@@ -24,11 +22,11 @@ else:
     print("Falha ao conectar ao banco de dados.")
 
 if __name__ == '__main__':
-    # Certificados SSL
-    cert_path = os.path.abspath('C:\\https\\cert.pem')
-    key_path = os.path.abspath('C:\\https\\key.pem')
+    # Caminho absoluto dos certificados SSL na pasta C:\httpspy
+    cert_path = os.path.abspath('C:\\httpspy\\cert.pem')
+    key_path = os.path.abspath('C:\\httpspy\\key.pem')
 
-    # Executando a aplicação com SSL
+    # Executando a aplicação com HTTPS
     app.run(
         debug=True,
         host='0.0.0.0',

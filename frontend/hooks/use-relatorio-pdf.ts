@@ -286,36 +286,36 @@ export function useRelatorioPDF() {
 
       // Totais
       if (data.totais) {
-        const { total_total_trabalhado, total_horas_extras, total_horas_desconto } = data.totais
+        const { total_total_trabalhado, total_horas_extras, total_horas_desconto } = data.totais;
 
-        doc.setFontSize(7)
-        doc.setTextColor(80, 80, 80)
+        doc.setFontSize(7);
+        doc.setTextColor(80, 80, 80);
 
         doc.text(
-          `Horas Normais Total: ${decimalToHHMMSS(total_total_trabalhado)}   Horas Extras Total: ${decimalToHHMMSS(total_horas_extras)}   Horas Desconto Total: ${decimalToHHMMSS(total_horas_desconto)}`,
+          `Horas Normais Total: ${total_total_trabalhado}   Horas Extras Total: ${total_horas_extras}   Horas Desconto Total: ${total_horas_desconto}`,
           margin,
           posY + 5,
-        )
+        );
 
         const summaryData = [
           [
             { content: "Horas Normais Total", styles: { fontStyle: "bold" as const } },
-            { content: decimalToHHMMSS(total_total_trabalhado), styles: { fontStyle: "bold" as const } },
+            { content: total_total_trabalhado, styles: { fontStyle: "bold" as const } },
             { content: "Horas Extras Total", styles: { fontStyle: "bold" as const } },
-            { content: decimalToHHMMSS(total_horas_extras), styles: { fontStyle: "bold" as const } },
+            { content: total_horas_extras, styles: { fontStyle: "bold" as const } },
             { content: "Horas Desconto Total", styles: { fontStyle: "bold" as const } },
-            { content: decimalToHHMMSS(total_horas_desconto), styles: { fontStyle: "bold" as const } },
+            { content: total_horas_desconto, styles: { fontStyle: "bold" as const } },
           ],
-        ]
+        ];
 
         autoTable(doc, {
-          startY: (doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable!.finalY + 2, // REDUCED SPACING
+          startY: (doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable!.finalY + 2,
           head: [],
           body: summaryData,
           theme: "grid",
           styles: {
-            fontSize: 8, // REDUCED
-            cellPadding: 1, // REDUCED
+            fontSize: 8,
+            cellPadding: 1,
             lineColor: primaryColor,
             lineWidth: 0.1,
           },
