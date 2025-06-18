@@ -117,7 +117,7 @@ module.exports = {
 
 
 
-    // ---> retorna os dados de faltas por unidade no mês atual
+    // ---> retorna os dados de faltas por unidade no mês atual (a partir do primeiro registro do mês)
     async listarFaltasPorUnidade(req, res) {
         try {
             const unidadeId = parseInt(req.params.unidadeId, 10);
@@ -127,7 +127,16 @@ module.exports = {
             }
 
             const query = `
-        WITH funcionarios_com_dias AS (
+        WITH primeiro_ponto_mes AS (
+          SELECT 
+            MIN(rp.data_hora::date) AS data_inicio
+          FROM registros_ponto rp
+          JOIN funcionarios f ON f.id = rp.funcionario_id
+          WHERE f.unidade_id = $1
+            AND rp.data_hora::date >= date_trunc('month', CURRENT_DATE)
+            AND rp.data_hora::date <= CURRENT_DATE
+        ),
+        funcionarios_com_dias AS (
           SELECT
             f.id AS funcionario_id,
             f.unidade_id,
@@ -139,7 +148,7 @@ module.exports = {
           JOIN unidades u ON u.id = f.unidade_id
           JOIN LATERAL gerar_dias_por_escala(
             date_trunc('month', CURRENT_DATE)::date,
-            (date_trunc('month', CURRENT_DATE) + interval '1 month - 1 day')::date,
+            CURRENT_DATE,  -- Limita até hoje!
             f.tipo_escala::text,
             f.data_admissao::date
           ) AS gd(dia) ON TRUE
