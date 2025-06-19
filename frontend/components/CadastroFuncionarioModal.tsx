@@ -28,6 +28,9 @@ import {
   Save,
 } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
+const API_LEITOR = process.env.NEXT_PUBLIC_LEITOR_URL 
+
+
 
 type Unidade = {
   id: string
@@ -208,7 +211,7 @@ export default function ModalCadastroFuncionarios({
       })
     }, 200)
 
-    const response = await fetch("https://leitor.itaguai.rj.gov.br:5000/register", {
+    const response = await fetch(`${API_LEITOR}/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

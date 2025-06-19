@@ -18,6 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { ModalBiometria } from "@/components/ModalBiometria"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
+const API_LEITOR = process.env.NEXT_PUBLIC_LEITOR_URL 
 
 type Registro = {
   id: number
@@ -146,7 +147,7 @@ const fetchRegistros = useCallback(async () => {
   }
 
   try {
-    const response = await fetch("https://leitor.itaguai.rj.gov.br:5000/register_ponto", {
+    const response = await fetch(`${API_LEITOR}/register_ponto`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

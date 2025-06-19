@@ -10,6 +10,7 @@ import { ModalBiometria } from "@/components/ModalBiometria";
 import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
 import { cn } from "@/lib/utils";
+const API_LEITOR = process.env.NEXT_PUBLIC_LEITOR_URL 
 
 function Relogio() {
 	const [hora, setHora] = useState(() =>
@@ -66,7 +67,7 @@ export default function KioskPage() {
 		};
 
 		try {
-			const response = await fetch("https://leitor.itaguai.rj.gov.br:5000/register_ponto", {
+			const response = await fetch(`${API_LEITOR}/register_ponto`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(payload),

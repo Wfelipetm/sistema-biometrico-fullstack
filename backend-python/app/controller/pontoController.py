@@ -75,12 +75,14 @@ def register_ponto():
         if ferias_data:
             return jsonify({"message": "Funcionario de férias, você não pode registrar o ponto!"}), 400
 
-        # Último ponto do dia
+        # Último ponto do dia ---------------------------------------------------------
         cursor.execute("""
-            SELECT id, hora_entrada, hora_saida FROM registros_ponto 
-            WHERE funcionario_id = %s AND DATE(data_hora) = %s 
+            SELECT id, hora_entrada, hora_saida, data_hora FROM registros_ponto 
+            WHERE funcionario_id = %s AND hora_saida IS NULL
             ORDER BY data_hora DESC LIMIT 1
-        """, (funcionario_id, data_atual))
+        """, (funcionario_id,))
+
+           # Último ponto do dia ---------------------------------------------------------
         ultimo_ponto = cursor.fetchone()
 
         data_hora = datetime.now()
