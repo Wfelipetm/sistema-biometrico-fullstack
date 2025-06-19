@@ -138,7 +138,8 @@ def register_ponto():
         elif ultimo_ponto[1] is not None and ultimo_ponto[2] is None:
             # Registro de saída
             hora_entrada_time = ultimo_ponto[1]
-            data_entrada = datetime.combine(data_atual, hora_entrada_time)
+            data_entrada = datetime.combine(ultimo_ponto[3].date(), hora_entrada_time)
+
             hora_saida = datetime.now().strftime("%H:%M:%S")
             payload = {
                 "funcionario_id": funcionario_id,
