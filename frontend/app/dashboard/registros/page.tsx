@@ -156,7 +156,7 @@ const fetchRegistros = useCallback(async () => {
 
     const contentType = response.headers.get("Content-Type")
 
-    let data: { message?: string } = {}
+    let data: { message?: string; error?: string } = {}
     if (contentType?.includes("application/json")) {
       data = await response.json()
     } else {
@@ -166,15 +166,11 @@ const fetchRegistros = useCallback(async () => {
 
     if (!response.ok) {
       setShowBiometriaModal(false)
-      const mensagemErro = data.message || "Erro de comunicação."
-      // Trate timeout/dedo não colocado
-      if (
-        mensagemErro.toLowerCase().includes("timeout") ||
-        mensagemErro.toLowerCase().includes("dedo")
-      ) {
+      const mensagemErro = data.message || data.error || "Erro de comunicação."
+      if (mensagemErro.includes("Registro de entrada não encontrado")) {
         toast.error(
-          "Tempo esgotado",
-          "O tempo para colocar o dedo no dispositivo acabou. Por favor, tente novamente e coloque o dedo no leitor."
+          "Entrada não encontrada",
+          "Você não possui entrada pendente. Procure o RH para regularizar seu ponto."
         )
       } else {
         toast.error("Falha no registro", mensagemErro)
@@ -188,17 +184,17 @@ const fetchRegistros = useCallback(async () => {
     router.refresh()
   } catch (error: any) {
     setShowBiometriaModal(false)
-    // Erro de conexão (internet ou USB)
+    // Erro de conexão (servidor fora do ar, rede, etc)
     if (error instanceof TypeError && error.message === "Failed to fetch") {
       toast.error(
-        "Falha de conexão",
-        "Não foi possível conectar ao dispositivo biométrico. Verifique se o equipamento está ligado e conectado à rede."
+        "Servidor indisponível",
+        "O sistema de ponto está temporariamente fora do ar. Por favor, tente novamente em alguns minutos ou procure o RH."
       )
     } else {
       console.error("Erro ao registrar ponto:", error instanceof Error ? error.message : error)
       toast.error(
-        "Erro no registro biométrico",
-        error instanceof Error ? error.message : "Erro inesperado ao registrar ponto."
+        "Erro inesperado",
+        "Não foi possível registrar seu ponto devido a uma falha no sistema. Tente novamente mais tarde ou procure o RH."
       )
     }
   } finally {

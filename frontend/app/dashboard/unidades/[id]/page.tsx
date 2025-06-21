@@ -131,10 +131,10 @@ export default function UnidadeDetalhesPage() {
           const presentes = Number.parseInt(item.total_registros, 10) || 0
 
           const ferias = feriasPorDiaMap.get(dia) ?? 0
-          let faltantes = total - presentes - ferias
-          if (faltantes < 0) faltantes = 0
+          // let faltantes = total - presentes - ferias
+          // if (faltantes < 0) faltantes = 0
 
-          return { dia, presentes, faltantes, ferias }
+          return { dia, presentes, ferias }
         },
       )
 
@@ -196,14 +196,14 @@ export default function UnidadeDetalhesPage() {
       const typedPayload = payload as unknown as CustomPayload[]
 
       const pres = typedPayload.find((p) => p.name === "presentes")?.value || 0
-      const falt = typedPayload.find((p) => p.name === "faltantes")?.value || 0
+      // const falt = typedPayload.find((p) => p.name === "faltantes")?.value || 0
       const feri = typedPayload.find((p) => p.name === "ferias")?.value || 0
 
       return (
         <div className="bg-white p-2 rounded shadow border text-sm">
           <p className="text-muted-foreground">Dia {label}</p>
           <p className="text-primary font-semibold">Presentes: {pres}</p>
-          <p className="text-red-500 font-semibold">Faltantes: {falt}</p>
+          {/* <p className="text-red-500 font-semibold">Faltantes: {falt}</p> */}
           <p className="text-green-500 font-semibold">Férias: {feri}</p>
         </div>
       )
@@ -341,7 +341,7 @@ export default function UnidadeDetalhesPage() {
                 <YAxis tick={{ fontSize: 12, fill: "#1e3a8a" }} />
                 <Tooltip content={<TooltipPersonalizado />} />
                 <Area type="monotone" dataKey="presentes" stroke="#0ea5e9" fill="#bae6fd" name="presentes" />
-                <Area type="monotone" dataKey="faltantes" stroke="#ef4444" fill="#fecaca" name="faltantes" />
+                {/* <Area type="monotone" dataKey="faltantes" stroke="#ef4444" fill="#fecaca" name="faltantes" /> */}
                 <Area type="monotone" dataKey="ferias" stroke="#22c55e" fill="#bbf7d0" name="ferias" />
               </AreaChart>
             </ResponsiveContainer>
