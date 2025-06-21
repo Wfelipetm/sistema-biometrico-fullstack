@@ -10,9 +10,10 @@ import { ModalBiometria } from "@/components/ModalBiometria";
 import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
 import { cn } from "@/lib/utils";
-import AlertaEntradaTurno from "../../../components/AlertaEntradaTurno";
 
-const API_LEITOR = process.env.NEXT_PUBLIC_LEITOR_URL;
+const API_LEITOR = process.env.NEXT_PUBLIC_LEITOR_URL 
+
+
 
 function Relogio() {
 	const [hora, setHora] = useState(() =>
@@ -88,8 +89,18 @@ export default function KioskPage() {
 
 			if (!response.ok) {
 				setShowBiometriaModal(false);
-				const mensagemErro = data.message || "Erro ao registrar ponto.";
-				toast.error(mensagemErro);
+				const mensagemErro = (data.message || "Não foi possível registrar o ponto. Por favor, tente novamente ou procure o RH.");
+				if (mensagemErro.toLowerCase().includes("registro de entrada não encontrado")) {
+					toast.error(
+						"Entrada não encontrada",
+						"Você não possui entrada pendente. Procure o RH para regularizar seu ponto."
+					);
+				} else {
+					toast.error(
+						"Falha no registro",
+						mensagemErro
+					);
+				}
 				return;
 			}
 
@@ -99,27 +110,16 @@ export default function KioskPage() {
 		} catch (error) {
 			setShowBiometriaModal(false);
 
-			// Só mostra no console se NÃO for "Failed to fetch"
-			if (!(error instanceof TypeError && error.message === "Failed to fetch")) {
-				console.error(
-					"Erro ao registrar ponto:",
-					error instanceof Error ? error.message : error,
-				);
-			}
-
-			// Tratamento específico para erro de conexão/dispositivo offline
-			if (
-				error instanceof TypeError &&
-				error.message === "Failed to fetch"
-			) {
+			if (error instanceof TypeError && error.message === "Failed to fetch") {
 				toast.error(
-					"Falha de conexão com o dispositivo biométrico. Verifique se o equipamento está ligado e conectado à rede."
+					"Servidor indisponível",
+					"O sistema de ponto está temporariamente fora do ar. Por favor, tente novamente em alguns minutos ou procure o RH."
 				);
 			} else {
+				console.error("Erro ao registrar ponto:", error instanceof Error ? error.message : error);
 				toast.error(
-					error instanceof Error
-						? error.message
-						: "Erro inesperado ao registrar ponto.",
+					"Erro inesperado",
+					"Não foi possível registrar seu ponto devido a uma falha no sistema. Tente novamente mais tarde ou procure o RH."
 				);
 			}
 		} finally {
@@ -129,7 +129,10 @@ export default function KioskPage() {
 
 	const handleExitKiosk = () => {
 		if (!user?.email) {
-			toast.error("Usuário não carregado! Faça login novamente.");
+			toast.error(
+				"Usuário não carregado",
+				"Não foi possível identificar o usuário. Faça login novamente para continuar."
+			);
 			return;
 		}
 		setModalOpen(true);
@@ -141,7 +144,7 @@ export default function KioskPage() {
 				logoMarginLeft="-10px"
 				className="absolute top-0 left-0 right-0 z-20"
 			/>
-			<AlertaEntradaTurno />
+			
 			<div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-8 bg-blue-100 shadow-2xl">
 				{/* Modal de senha de administrador */}
 				<ModalSenhaAdmin

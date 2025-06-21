@@ -245,14 +245,16 @@ export default function UnidadesPage() {
                                 <Edit className="h-4 w-4 text-blue-700" />
                                 <span className="sr-only">Editar</span>
                               </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleDelete(unidade.id, unidade.nome)}
-                              >
-                                <Trash2 className="h-4 w-4 text-blue-700" />
-                                <span className="sr-only">Excluir</span>
-                              </Button>
+                               {user?.papel === "master" && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleDelete(unidade.id, unidade.nome)}
+                                >
+                                  <Trash2 className="h-4 w-4 text-blue-700" />
+                                  <span className="sr-only">Excluir</span>
+                                </Button>
+                                )}
                             </div>
                           </TableCell>
                         )}

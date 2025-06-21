@@ -257,14 +257,16 @@ export default function FuncionariosPage() {
                                   <Edit className="h-4 w-4 text-blue-700" />
                                   <span className="sr-only">Editar</span>
                                 </Button>
-                                <Button
+                                 {user?.papel === "master" && (
+                                  <Button
                                   variant="ghost"
                                   size="icon"
                                   onClick={() => handleDelete(funcionario.id, funcionario.nome)}
-                                >
+                                  >
                                   <Trash2 className="h-4 w-4 text-blue-700" />
                                   <span className="sr-only">Excluir</span>
-                                </Button>
+                                  </Button>
+                                )}
                               </div>
                             </TableCell>
                           )}

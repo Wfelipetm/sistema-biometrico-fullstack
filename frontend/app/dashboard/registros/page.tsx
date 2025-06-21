@@ -436,14 +436,16 @@ const handleDelete = async (id: number, funcionarioNome: string) => {
                 <Edit className="h-4 w-4 text-blue-700" />
                 <span className="sr-only">Editar</span>
               </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleDelete(registro.id, registro.funcionario_nome)}
-              >
-                <Trash2 className="h-4 w-4 text-blue-700" />
-                <span className="sr-only">Excluir</span>
-              </Button>
+               {user?.papel === "master" && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleDelete(registro.id, registro.funcionario_nome)}
+                >
+                  <Trash2 className="h-4 w-4 text-blue-700" />
+                  <span className="sr-only">Excluir</span>
+                </Button>
+                )}
             </div>
           </TableCell>
         )}
