@@ -10,7 +10,9 @@ import { ModalBiometria } from "@/components/ModalBiometria";
 import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
 import { cn } from "@/lib/utils";
-const API_LEITOR = process.env.NEXT_PUBLIC_LEITOR_URL 
+import AlertaEntradaTurno from "../../../components/AlertaEntradaTurno";
+
+const API_LEITOR = process.env.NEXT_PUBLIC_LEITOR_URL;
 
 function Relogio() {
 	const [hora, setHora] = useState(() =>
@@ -139,6 +141,7 @@ export default function KioskPage() {
 				logoMarginLeft="-10px"
 				className="absolute top-0 left-0 right-0 z-20"
 			/>
+			<AlertaEntradaTurno />
 			<div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-8 bg-blue-100 shadow-2xl">
 				{/* Modal de senha de administrador */}
 				<ModalSenhaAdmin
