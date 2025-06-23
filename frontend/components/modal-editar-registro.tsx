@@ -148,8 +148,10 @@ export default function ModalEditarRegistroPonto({
     }
   }
 
-  // Formata a data para dd/MM/yyyy
-  const dataFormatada = registro?.data_hora ? format(new Date(registro.data_hora), "dd/MM/yyyy") : ""
+ // Formata a data para dd/MM/yyyy sem problemas de timezone
+  const dataFormatada = registro?.data_hora
+    ? registro.data_hora.slice(0, 10).split("-").reverse().join("/")
+    : ""
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

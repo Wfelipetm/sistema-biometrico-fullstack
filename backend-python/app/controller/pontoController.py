@@ -102,13 +102,26 @@ def register_ponto():
             # print("Payload enviado para Node.js:")
             # print(json.dumps(payload, indent=2))
             try:
-                response = requests.post("http://biometrico.itaguai.rj.gov.br:3001/reg/calcular-registro-ponto", json=payload, timeout=10)
+                response = requests.post(
+                    "http://biometrico.itaguai.rj.gov.br:3001/reg/calcular-registro-ponto",
+                    json=payload,
+                    timeout=10
+                )
                 print("Status code Node.js:", response.status_code)
                 print("Resposta Node.js:", response.text)
                 response.raise_for_status()
             except requests.RequestException as e:
                 print("Erro ao registrar ponto no backend Node.js:", str(e))
-                return jsonify({"error": f"Erro ao registrar ponto no backend Node.js: {str(e)}"}), 500
+                # Tenta extrair a mensagem do Node.js se houver resposta
+                try:
+                    error_message = response.json().get("error") if response is not None else None
+                except Exception:
+                    error_message = None
+                return jsonify({
+                    "message": error_message or
+                    "Não foi possível registrar seu ponto neste momento devido a uma instabilidade no sistema. "
+                    "Por favor, tente novamente em alguns minutos ou procure o RH para suporte."
+                }), 500
 
             mensagem = (
                 f"Registro de entrada realizado com sucesso para funcionario: {user_name}\n"
