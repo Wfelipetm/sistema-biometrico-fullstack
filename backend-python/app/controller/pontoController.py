@@ -101,7 +101,6 @@ def register_ponto():
             }
             # print("Payload enviado para Node.js:")
             # print(json.dumps(payload, indent=2))
-            # oi
             try:
                 response = requests.post(
                     "http://biometrico.itaguai.rj.gov.br:3001/reg/calcular-registro-ponto",
