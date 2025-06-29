@@ -1,0 +1,17 @@
+{
+  "name": "biometrico-quiosque",
+  "version": "1.0.0",
+  "description": "Tela de registro biométrico em modo quiosque",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --config electron-builder.yml --win --x64"
+  },
+  "author": "Aleijado",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "electron": "^37.1.0",
+    "electron-builder": "^24.6.0"
+  }
+}

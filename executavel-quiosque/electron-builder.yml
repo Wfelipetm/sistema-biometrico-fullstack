@@ -1,0 +1,12 @@
+appId: com.itaguai.biometrico.quiosque
+productName: RegistroBiometrico
+directories:
+  output: dist
+files:
+  - "**/*"
+win:
+  target:
+    - portable
+  icon: icon.ico
+compression: normal
+publish: null
