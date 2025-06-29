@@ -1,0 +1,68 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# Electron.js específico
+/dist/
+/build/
+/out/
+/release/
+/packages/
+*.dmg
+*.exe
+*.msi
+*.deb
+*.AppImage
+*.zip
+*.tar.gz
+
+# Electron cache e temporários
+/electron-cache/
+/electron-temp/
+/.electron-gyp/
+/.electron-prebuilt/
+
+# Platform específico
+*.app
+*.pkg
+*.snap
+
+# Logs do Electron
+*.log
+electron-debug.log
+
+# Certificados e chaves
+*.p12
+*.pfx
+*.key
+*.pem
+*.crt
+
+# Cache do sistema
+.DS_Store
+Thumbs.db
+Desktop.ini
