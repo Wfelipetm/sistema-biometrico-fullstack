@@ -8,7 +8,7 @@ import { Toaster } from "sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-	title: "Quiosque de Ponto Biométrico",
+	title: "Quiosque Ponto Biométrico",
 	description: "Sistema de registro de ponto biométrico - Quiosque",
 	generator: "codecity",
 	icons: {
