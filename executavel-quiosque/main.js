@@ -13,7 +13,7 @@ function createWindow() {
     });
 
     // ROTA DIRETA P/ TELA DE REGISTRO
-    win.loadURL('https://app.biometrico.itaguai.rj.gov.br/dashboard/quiosque');
+    win.loadURL('http://10.200.200.22:3000');
 }
 
 app.whenReady().then(createWindow);
