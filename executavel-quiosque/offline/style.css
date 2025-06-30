@@ -75,7 +75,16 @@
       display: block;
       margin: 0 auto;
       filter: drop-shadow(0 4px 16px rgba(30, 58, 138, 0.15));
-      animation: pulse 2s infinite;
+      animation: pulse  3s infinite;
+  }
+
+  @keyframes girar {
+      0% {
+          transform: rotate(0deg);
+      }
+      100% {
+          transform: rotate(360deg);
+      }
   }
 
   @keyframes pulse {
