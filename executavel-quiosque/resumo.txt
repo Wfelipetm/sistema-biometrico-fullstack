@@ -1,0 +1,34 @@
+1. Cria uma janela Electron em modo quiosque
+    - Fullscreen: Ocupa toda a tela.
+    - Kiosk: Usuário não consegue sair facilmente (bloqueia Alt+Tab, Alt+F4, etc).
+    - Sem barra de título (frame: false).
+    - Sem integração Node.js no frontend (mais seguro).
+
+2. Carrega a URL principal
+    - Abre o endereço http://10.200.200.22:3000 na janela.
+
+3. Proteções de segurança e navegação
+    - Desabilita o menu do botão direito do mouse (impede copiar/colar, inspecionar, etc).
+    - Bloqueia todos os eventos de teclado (nenhuma tecla funciona, nem física nem virtual).
+    - Bloqueia navegação fora da URL principal:
+        - Se tentar navegar para outro endereço, cancela e volta para a URL principal.
+    - Bloqueia abertura de novas janelas externas:
+        - Só permite abrir a URL principal, qualquer outra é negada.
+
+4. Modo offline e recuperação
+    - Se não conseguir carregar a URL (sem internet, servidor fora, etc):
+        - Mostra a tela offline/offline.html.
+        - Adiciona um listener: se a internet voltar (window.online), recarrega a URL principal automaticamente.
+    - Se o app travar ou o frontend crashar:
+        - Mostra a tela offline/offline.html.
+
+5. Monitoramento ativo da conexão
+    - A cada 10 segundos, faz um fetch (HEAD) na URL principal.
+    - Se falhar (ex: servidor caiu), redireciona para a tela offline.
+
+6. Inicialização
+    - Quando o Electron estiver pronto, executa tudo isso criando a janela.
+
+Resumo:
+    Seu app Electron abre em modo quiosque, só permite acesso à URL principal, bloqueia teclado, mouse, navegação e janelas externas, mostra uma tela offline se perder a conexão e tenta voltar automaticamente quando a internet retorna.
+    É um modo quiosque seguro e robusto para uso público!

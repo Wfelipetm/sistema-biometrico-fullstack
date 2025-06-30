@@ -1,0 +1,121 @@
+  html,
+  body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+  }
+
+  body {
+      min-height: 100vh;
+      background: #e0e7ff;
+      /* azul forte */
+      font-family: 'Inter', Arial, sans-serif;
+      margin: 0;
+  }
+
+  header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 110px;
+      background: #fff;
+      box-shadow: 0 2px 8px 0 rgba(30, 58, 138, 0.04);
+  }
+
+  header img {
+      width: 600px;
+      height: 200px;
+      object-fit: contain;
+      display: block;
+  }
+
+  .container {
+      position: absolute;
+      top: 110px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2.5rem;
+      min-height: calc(100vh - 110px);
+      background: #bfdbfe;
+      /* azul forte */
+  }
+
+  .clock {
+      color: #1e3a8a;
+      font-size: 5rem;
+      font-family: 'Roboto Mono', 'Consolas', monospace;
+      font-weight: bold;
+      letter-spacing: 0.15em;
+      user-select: none;
+      line-height: 1;
+  }
+
+  h1 {
+      font-size: 2rem;
+      font-weight: bold;
+      text-align: center;
+      margin: 0;
+      color: #1e293b;
+  }
+
+  .icone-biometria {
+      width: 12rem;
+      height: 12rem;
+      display: block;
+      margin: 0 auto;
+      filter: drop-shadow(0 4px 16px rgba(30, 58, 138, 0.15));
+      animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+
+      0%,
+      100% {
+          opacity: 1;
+          transform: scale(1);
+      }
+
+      50% {
+          opacity: 0.7;
+          transform: scale(1.05);
+      }
+  }
+
+  @media (max-width: 600px) {
+      header {
+          height: 70px;
+      }
+
+      header img {
+          width: 140px;
+      }
+
+      .container {
+          top: 70px;
+          min-height: calc(100vh - 70px);
+      }
+
+      .clock {
+          font-size: 2.5rem;
+      }
+
+      .icone-biometria {
+          width: 7rem;
+          height: 7rem;
+      }
+
+      h1 {
+          font-size: 1.2rem;
+      }
+  }
