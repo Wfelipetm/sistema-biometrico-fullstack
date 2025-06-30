@@ -13,7 +13,7 @@ function createWindow() {
         }
     });
 
-    const mainURL = 'http://10.200.200.22:3000';
+    const mainURL = 'https://quiosquebio.itaguai.rj.gov.br/';
     win.loadURL(mainURL);
 
     // Desabilita menu do mouse (botão direito)
