@@ -21,6 +21,7 @@ import {
   Loader2,
   Save,
   MailIcon,
+  Fingerprint,
 } from "lucide-react"
 import { api } from "@/lib/api"
 
@@ -70,8 +71,10 @@ export default function ModalEditarFuncionario({
   const [telefone, setTelefone] = useState("")
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
+  const [biometricLoading, setBiometricLoading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [success, setSuccess] = useState(false)
+  const [biometricSuccess, setBiometricSuccess] = useState(false)
   const [error, setError] = useState("")
   const [validationErrors, setValidationErrors] = useState<{
     nome?: string
@@ -122,6 +125,7 @@ export default function ModalEditarFuncionario({
           setEmail(data.email || "")
           setError("")
           setSuccess(false)
+          setBiometricSuccess(false)
           setUploadProgress(0)
           setValidationErrors({})
         } catch (error) {
@@ -224,6 +228,55 @@ export default function ModalEditarFuncionario({
       setError("Erro ao atualizar funcionário. Verifique os dados e tente novamente.")
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleUpdateBiometric = async () => {
+    setBiometricLoading(true)
+    setError("")
+    setBiometricSuccess(false)
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_LEITOR_URL}/update-biometric`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          funcionario_id: funcionario.id
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || "Erro ao atualizar biometria")
+      }
+
+      setBiometricSuccess(true)
+      setTimeout(() => {
+        setBiometricSuccess(false)
+      }, 3000)
+
+    } catch (error: any) {
+      console.error("Erro ao atualizar biometria:", error)
+      
+      // Tratamento específico para diferentes tipos de erro
+      if (error.message === "Failed to fetch") {
+        setError("Não foi possível conectar ao servidor biométrico. Verifique se o serviço Python está em execução.")
+      } else if (error.name === "TypeError") {
+        setError("Erro de rede. Verifique sua conexão e tente novamente.")
+      } else if (error.message.includes("viola a restrição de não-nulo") || error.message.includes("id_biometrico")) {
+        setError("Nenhuma digital foi recadastrada. Por favor, coloque o dedo corretamente no leitor biométrico e tente novamente.")
+      } else if (error.message.includes("Nenhuma impressão digital capturada")) {
+        setError("Nenhuma digital foi detectada pelo leitor. Certifique-se de posicionar o dedo corretamente e pressionar com firmeza.")
+      } else if (error.message.includes("Device not found") || error.message.includes("leitor")) {
+        setError("Leitor biométrico não encontrado. Verifique se o dispositivo está conectado e funcionando.")
+      } else {
+        setError(`Falha ao atualizar biometria: ${error.message.replace("Erro ao atualizar biometria: ", "")}`)
+      }
+    } finally {
+      setBiometricLoading(false)
     }
   }
 
@@ -473,6 +526,69 @@ export default function ModalEditarFuncionario({
               </div>
             </div>
 
+            {/* Seção de Biometria */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-blue-900 border-b border-blue-200 pb-2">
+                Biometria
+              </h3>
+
+              <div className="bg-blue-100 p-4 rounded-lg border border-blue-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-blue-200">
+                      <Fingerprint className="w-5 h-5 text-blue-700" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-blue-900">Atualizar Impressão Digital</p>
+                      <p className="text-sm text-blue-600">
+                        Coloque o dedo no leitor biométrico para recadastrar a digital
+                      </p>
+                      <p className="text-xs text-blue-500 mt-1">
+                        ⚠️ Pressione firmemente e aguarde a confirmação do leitor
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={handleUpdateBiometric}
+                    disabled={biometricLoading}
+                    className={`px-4 h-10 ${
+                      biometricLoading
+                        ? "bg-blue-400 cursor-not-allowed"
+                        : biometricSuccess
+                        ? "bg-green-600 hover:bg-green-700"
+                        : "bg-blue-600 hover:bg-blue-700"
+                    } text-white transition-all duration-300`}
+                  >
+                    {biometricLoading ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Aguardando...</span>
+                      </div>
+                    ) : biometricSuccess ? (
+                      <div className="flex items-center gap-2">
+                        <Check className="w-4 h-4" />
+                        <span>Atualizada!</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <Fingerprint className="w-4 h-4" />
+                        <span>Atualizar</span>
+                      </div>
+                    )}
+                  </Button>
+                </div>
+
+                {biometricSuccess && (
+                  <div className="mt-3 p-3 bg-green-100 border border-green-200 rounded-lg">
+                    <p className="text-sm text-green-800 flex items-center gap-2">
+                      <Check className="w-4 h-4" />
+                      Biometria atualizada com sucesso!
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* Progress Bar durante upload */}
             {loading && (
               <div className="space-y-2">
@@ -490,7 +606,7 @@ export default function ModalEditarFuncionario({
                 variant="outline"
                 type="button"
                 onClick={() => onOpenChange(false)}
-                disabled={loading}
+                disabled={loading || biometricLoading}
                 className="px-6 h-11 border-blue-300 text-blue-700 hover:bg-blue-100 transition-all duration-200"
               >
                 Cancelar
@@ -498,7 +614,7 @@ export default function ModalEditarFuncionario({
 
               <Button
                 onClick={handleSubmit}
-                disabled={loading || !isFormValid() || !hasChanges()}
+                disabled={loading || biometricLoading || !isFormValid() || !hasChanges()}
                 className={`px-8 h-11 font-medium transition-all duration-300 ${
                   loading
                     ? "bg-blue-400 cursor-not-allowed"

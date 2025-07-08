@@ -140,10 +140,26 @@ const fetchRegistros = useCallback(async () => {
   // Pequeno delay para o usuário ler a orientação biométrica
   await new Promise((resolve) => setTimeout(resolve, 1000))
 
+  // 🔐 VALIDAÇÃO DE UNIDADE: 
+  // No dashboard, a unidade SEMPRE vem do contexto do usuário logado
+  // Isso garante que apenas usuários com unidade vinculada podem registrar ponto
+  // e que a validação no backend seja efetiva (funcionário x unidade)
+  if (!user?.unidade_id) {
+    setShowBiometriaModal(false)
+    setLoading(false)
+    toast.error(
+      "Usuário sem unidade",
+      "Você não possui uma unidade vinculada. Procure o administrador para configurar sua unidade."
+    )
+    return
+  }
+
+  console.log(`🏥 Registro de ponto para unidade do usuário: ${user.secretaria_nome} (Unidade ID: ${user.unidade_id})`)
+
   const payload = {
-    funcionario_id: 1, // substitua conforme necessário
-    unidade_id: 1,
-    data_hora: new Date().toISOString(),
+    unidade_id: user.unidade_id, // ✅ Sempre do contexto do usuário logado
+    data: new Date().toISOString().split('T')[0], // YYYY-MM-DD
+    hora_entrada: new Date().toTimeString().split(' ')[0], // HH:MM:SS
   }
 
   try {
@@ -167,10 +183,27 @@ const fetchRegistros = useCallback(async () => {
     if (!response.ok) {
       setShowBiometriaModal(false)
       const mensagemErro = data.message || data.error || "Erro de comunicação."
-      if (mensagemErro.includes("Registro de entrada não encontrado")) {
+      
+      // Tratamento específico para erro 403 - Funcionário não pertence à unidade
+      if (response.status === 403) {
+        toast.error(
+          "Acesso negado",
+          `${mensagemErro} Você só pode registrar ponto na sua unidade de trabalho.`
+        )
+      } else if (response.status === 401) {
+        toast.error(
+          "Digital não identificada",
+          "Sua impressão digital não foi reconhecida. Tente novamente ou procure o RH para recadastrar sua biometria."
+        )
+      } else if (mensagemErro.includes("Registro de entrada não encontrado")) {
         toast.error(
           "Entrada não encontrada",
           "Você não possui entrada pendente. Procure o RH para regularizar seu ponto."
+        )
+      } else if (mensagemErro.includes("aguardar pelo menos 5 minutos")) {
+        toast.error(
+          "Aguarde um momento",
+          mensagemErro
         )
       } else {
         toast.error("Falha no registro", mensagemErro)
