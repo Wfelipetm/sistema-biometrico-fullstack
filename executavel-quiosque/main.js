@@ -20,9 +20,9 @@ function createWindow() {
     win.webContents.on('context-menu', (e) => e.preventDefault());
 
     // Bloqueia DevTools e atalhos perigosos
-    win.webContents.on('before-input-event', (event, input) => {
-        event.preventDefault(); // Bloqueia toda entrada de teclado
-    });
+    // win.webContents.on('before-input-event', (event, input) => {
+    //     event.preventDefault(); // Bloqueia toda entrada de teclado
+    // });
 
     // Bloqueia navegação fora da URL principal
     win.webContents.on('will-navigate', (event, url) => {
