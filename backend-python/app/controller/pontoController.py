@@ -5,6 +5,9 @@ from app.db.database import get_db_connection  # Função de conexão com o banc
 from app.services.biometric import IndexSearch, identify_user  # Lógica biométrica
 import requests  # Para fazer chamadas HTTP ao backend em Node.js
 
+
+# http://localhost:3001
+
 # ===========================
 # Função auxiliar para envio de e-mail
 # ===========================
@@ -132,7 +135,7 @@ def register_ponto():
         }
         try:
             response = requests.post(
-                "http://localhost:3001/reg/calcular-registro-ponto",
+                "http://biometrico.itaguai.rj.gov.br:3001/reg/calcular-registro-ponto",
                 json=payload,
                 timeout=10
             )
@@ -141,7 +144,31 @@ def register_ponto():
             print("Erro ao registrar ponto no backend Node.js:", str(e))
             return jsonify({"message": "Erro ao registrar ponto no sistema"}), 500
 
-        mensagem = f"Entrada registrada com sucesso para {user_name}"
+        # Envia e-mail de comprovante de entrada
+        data_hora = datetime.now()
+        mensagem = (
+            f"Registro de entrada realizado com sucesso para funcionario: {user_name}\n"
+            f"Comprovante enviado para o e-mail {email}"
+        )
+        send_email(
+            subject="Registro de Entrada - Ponto Registrado",
+            recipient=email,
+            body=f"""
+                Prezado(a) {user_name},
+
+                Este e-mail confirma o registro de seu ponto conforme as informações abaixo:
+
+                Entrada registrada com sucesso.
+
+                Profissional: {user_name}
+                Data/Hora: {data_hora.strftime('%d/%m/%Y %H:%M:%S')}
+
+                Se precisar de suporte ou tiver dúvidas, entre em contato com a Prefeitura de Itaguaí.
+
+                Atenciosamente,
+                Prefeitura de Itaguaí
+            """
+        )
         print(f"[ENTRADA REGISTRADA] Funcionário: {user_name} (ID: {funcionario_id}) | Unidade: {unidade_id_terminal} | Data/Hora: {data_registro} {hora_entrada}")
 
     # ===========================
@@ -172,7 +199,7 @@ def register_ponto():
         }
         try:
             response = requests.post(
-                "http://localhost:3001/reg/calcular-registro-ponto",
+                "http://biometrico.itaguai.rj.gov.br:3001/reg/calcular-registro-ponto",
                 json=payload,
                 timeout=10
             )
@@ -181,7 +208,30 @@ def register_ponto():
             print("Erro ao registrar ponto no backend Node.js:", str(e))
             return jsonify({"message": "Erro ao registrar ponto no sistema"}), 500
 
-        mensagem = f"Saída registrada com sucesso para {user_name}"
+        # Envia e-mail de comprovante de saída
+        mensagem = (
+            f"Registro de saida realizado com sucesso para funcionario: {user_name}\n"
+            f"Comprovante enviado para o e-mail {email}"
+        )
+        send_email(
+            subject="Registro de Saída - Ponto Registrado",
+            recipient=email,
+            body=f"""
+                Prezado(a) {user_name},
+
+                Este e-mail confirma o registro de sua saída conforme as informações abaixo:
+
+                Saída registrada com sucesso.
+
+                Profissional: {user_name}
+                Data/Hora: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}
+
+                Se precisar de suporte ou tiver dúvidas, entre em contato com a Prefeitura de Itaguaí.
+
+                Atenciosamente,
+                Prefeitura de Itaguaí
+            """
+        )
         print(f"[SAÍDA REGISTRADA] Funcionário: {user_name} (ID: {funcionario_id}) | Unidade: {unidade_id_terminal} | Tempo trabalhado: {tempo_decorrido_minutos:.2f} minutos")
 
     # ===========================
