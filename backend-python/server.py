@@ -3,6 +3,9 @@ from app.db.database import get_db_connection
 from app.services.mail import mail, init_mail
 from flask_cors import CORS
 import os
+import threading
+from app.controller.identifyController import identify_user_continuous  # Importe sua função contínua
+from app.services.biometric import identify_forever
 
 # Inicializa a aplicação e o serviço de e-mail
 app = create_app()
@@ -31,6 +34,11 @@ if __name__ == '__main__':
     # (Opcional) Verificação se os arquivos existem
     if not (os.path.exists(cert_path) and os.path.exists(key_path)):
         raise FileNotFoundError("Certificado ou chave SSL não encontrados.")
+
+    # Inicia a thread de identificação biométrica contínua
+    t = threading.Thread(target=identify_forever, daemon=True)
+    t.start()
+    print("[SERVER] Identificação biométrica contínua iniciada.")
 
     # Executando a aplicação com SSL
     app.run(
