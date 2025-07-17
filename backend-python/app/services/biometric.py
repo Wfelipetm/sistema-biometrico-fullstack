@@ -20,64 +20,6 @@ def identify_user():
     Device.Close(255)
     return Extraction.TextEncodeFIR
 
-def check_finger_status():
-    try:
-        Device.Open(255)
-        status = Device.CheckFinger
-        Device.Close(255)
-        return bool(status)
-    except Exception as e:
-        print(f"Erro ao verificar dedo: {e}")
-        return False
-
-def wait_for_finger(timeout=30):
-    print("Aguardando dedo no leitor...")
-    try:
-        Device.Open(255)
-        start_time = time.time()
-        while True:
-            if Device.CheckFinger:
-                print("Dedo detectado.")
-                Device.Close(255)
-                return True
-            if time.time() - start_time > timeout:
-                print(f"Timeout - nenhum dedo detectado em {timeout}s")
-                Device.Close(255)
-                return False
-            time.sleep(0.1)
-    except Exception as e:
-        print(f"Erro ao aguardar dedo: {e}")
-        try:
-            Device.Close(255)
-        except:
-            pass
-        return False
-
-def capture_with_checkfinger():
-    try:
-        Device.Open(255)
-        print("Leitor ativo - aguardando dedo...")
-        while not Device.CheckFinger:
-            time.sleep(0.1)
-        print("Dedo detectado. Capturando...")
-        Extraction.Capture(1)
-        fir_data = Extraction.TextEncodeFIR
-        Device.Close(255)
-        if fir_data:
-            print("Digital capturada com sucesso.")
-            return fir_data
-        else:
-            print("Falha na captura.")
-            return None
-    except Exception as e:
-        print(f"Erro na captura: {e}")
-        try:
-            Device.Close(255)
-        except:
-            pass
-        return None
-
-def identify_with_checkfinger():
     print("Iniciando identificação automática...")
     try:
         Extraction.WindowStyle = 1
@@ -178,7 +120,3 @@ def identify_forever():
             pass
         Device.Close(255)
 
-# Device.Open(255)
-# Extraction.WindowStyle = 1
-# print(Device.CheckFinger)  # Coloque o dedo e veja se muda para True
-# Device.Close(255)

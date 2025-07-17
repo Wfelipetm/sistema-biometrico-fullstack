@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import io from "socket.io-client";
 import { useRouter } from "next/navigation";
 import { Fingerprint, RefreshCcw, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,19 @@ import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
 import { cn } from "@/lib/utils";
 
+
 const API_LEITOR = process.env.NEXT_PUBLIC_LEITOR_URL 
+// Garante que SOCKET_URL seja sempre ws:// ou wss://
+let SOCKET_URL = process.env.NEXT_PUBLIC_LEITOR_WS_URL;
+if (!SOCKET_URL && API_LEITOR) {
+  if (API_LEITOR.startsWith('https://')) {
+	SOCKET_URL = API_LEITOR.replace('https://', 'wss://');
+  } else if (API_LEITOR.startsWith('http://')) {
+	SOCKET_URL = API_LEITOR.replace('http://', 'ws://');
+  } else {
+	SOCKET_URL = API_LEITOR;
+  }
+}
 
 
 
@@ -50,6 +63,7 @@ interface HeaderProps {
 	// ...
 }
 
+
 export default function KioskPage() {
 	const [loading, setLoading] = useState(false);
 	const [modalOpen, setModalOpen] = useState(false);
@@ -57,16 +71,28 @@ export default function KioskPage() {
 	const [showBiometriaModal, setShowBiometriaModal] = useState(false);
 	const { user } = useAuth();
 
+
+	// WebSocket: conecta e escuta evento biometria_detectada
+	useEffect(() => {
+		if (!SOCKET_URL) return;
+		const socket = io(SOCKET_URL, { transports: ["websocket"] });
+		socket.on("connect", () => {
+			//console.log("Conectado ao WebSocket biométrico");
+		});
+		socket.on("biometria_detectada", () => {
+			handleNovoRegistro();
+		});
+		return () => {
+			socket.disconnect();
+		};
+	}, []);
+
 	const handleNovoRegistro = async () => {
 		setShowBiometriaModal(true);
 		setLoading(true);
 
 		await new Promise((resolve) => setTimeout(resolve, 1000));
 
-		// VALIDAÇÃO DE UNIDADE: 
-		// No dashboard, a unidade SEMPRE vem do contexto do usuário logado
-		// Isso garante que apenas usuários com unidade vinculada podem registrar ponto
-		// e que a validação no backend seja efetiva (funcionário x unidade)
 		if (!user?.unidade_id) {
 			setShowBiometriaModal(false);
 			setLoading(false);
@@ -80,9 +106,9 @@ export default function KioskPage() {
 		console.log(`🏥 Registro de ponto para unidade do usuário: ${user.secretaria_nome} (Unidade ID: ${user.unidade_id})`);
 
 		const payload = {
-			unidade_id: user.unidade_id, // ✅ Sempre do contexto do usuário logado
-			data: new Date().toISOString().split('T')[0], // YYYY-MM-DD
-			hora_entrada: new Date().toTimeString().split(' ')[0], // HH:MM:SS
+			unidade_id: user.unidade_id,
+			data: new Date().toISOString().split('T')[0],
+			hora_entrada: new Date().toTimeString().split(' ')[0],
 		};
 
 		try {
@@ -106,8 +132,6 @@ export default function KioskPage() {
 			if (!response.ok) {
 				setShowBiometriaModal(false);
 				const mensagemErro = (data.message || "Não foi possível registrar o ponto. Por favor, tente novamente ou procure o RH.");
-				
-				// Tratamento específico para erro 403 - Funcionário não pertence à unidade
 				if (response.status === 403) {
 					toast.error(
 						"Acesso negado",
@@ -142,7 +166,6 @@ export default function KioskPage() {
 			router.refresh();
 		} catch (error) {
 			setShowBiometriaModal(false);
-
 			if (error instanceof TypeError && error.message === "Failed to fetch") {
 				toast.error(
 					"Servidor indisponível",
@@ -201,16 +224,7 @@ export default function KioskPage() {
 				<Relogio />
 				<h1 className="text-3xl font-bold text-center">Bata seu ponto</h1>
 				<Fingerprint className="w-48 h-48 text-primary animate-pulse" />
-				<Button
-					type="button"
-					size="lg"
-					className="text-lg flex items-center gap-4 px-8 py-6"
-					onClick={handleNovoRegistro}
-					disabled={loading}
-				>
-					<RefreshCcw className={`w-6 h-6 ${loading ? "animate-spin" : ""}`} />
-					{loading ? "Registrando..." : "Registrar Ponto"}
-				</Button>
+				{/* Botão removido: registro é feito automaticamente via WebSocket */}
 				<ModalBiometria open={showBiometriaModal} />
 			</div>
 		</>

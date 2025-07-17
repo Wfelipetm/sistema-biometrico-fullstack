@@ -1,15 +1,19 @@
+
 from app.routes import create_app
 from app.db.database import get_db_connection  
 from app.services.mail import mail, init_mail
 from flask_cors import CORS
 import os
 import threading
-from app.controller.identifyController import identify_user_continuous  # Importe sua função contínua
+# from app.controller.identifyController import identify_user_continuous  # Importe sua função contínua
 from app.services.biometric import identify_forever
+from flask_socketio import SocketIO
 
 # Inicializa a aplicação e o serviço de e-mail
+
 app = create_app()
 init_mail(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Ativando CORS somente para o domínio específico com suporte a cookies
 CORS(
@@ -26,24 +30,17 @@ if conn:
 else:
     print("Falha ao conectar ao banco de dados.")
 
-if __name__ == '__main__':
-    # Caminhos dos certificados SSL
-    cert_path = os.path.abspath(r'C:\https\cert1.pem')
-    key_path = os.path.abspath(r'C:\https\privkey1.pem')
 
-    # (Opcional) Verificação se os arquivos existem
-    if not (os.path.exists(cert_path) and os.path.exists(key_path)):
-        raise FileNotFoundError("Certificado ou chave SSL não encontrados.")
-
-    # Inicia a thread de identificação biométrica contínua
+def start_biometric_thread():
+    # Passa o socketio para o identify_forever
     t = threading.Thread(target=identify_forever, daemon=True)
     t.start()
     print("[SERVER] Identificação biométrica contínua iniciada.")
 
-    # Executando a aplicação com SSL
-    app.run(
-        debug=True,
-        host='0.0.0.0',
-        port=5000,
-        ssl_context=(cert_path, key_path)
-    )
+if __name__ == '__main__':
+    cert_path = os.path.abspath(r'C:\https\cert1.pem')
+    key_path = os.path.abspath(r'C:\https\privkey1.pem')
+    if not (os.path.exists(cert_path) and os.path.exists(key_path)):
+        raise FileNotFoundError("Certificado ou chave SSL não encontrados.")
+    start_biometric_thread()
+    socketio.run(app, debug=True, host='0.0.0.0', port=5000, ssl_context=(cert_path, key_path))
