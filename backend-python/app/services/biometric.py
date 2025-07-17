@@ -85,6 +85,12 @@ def identify_forever():
 
             IndexSearch.IdentifyUser(fir_data, 5)
             if IndexSearch.UserID != 0:
+                # Emitir evento websocket para o front-end
+                try:
+                    from app import socketio
+                    socketio.emit("biometria_detectada", broadcast=True, namespace="/")
+                except Exception as e:
+                    print(f"[SOCKETIO] Erro ao emitir evento biometria_detectada: {e}")
                 conn = get_db_connection()
                 cursor = conn.cursor()
                 cursor.execute(
