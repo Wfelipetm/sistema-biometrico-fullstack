@@ -1,5 +1,4 @@
-from flask import jsonify
-
+from flask import request, jsonify
 from app.db.database import get_db_connection
 from app.services.biometric import IndexSearch, identify_user
 import time
