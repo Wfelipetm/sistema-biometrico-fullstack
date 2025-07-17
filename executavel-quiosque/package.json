@@ -15,11 +15,14 @@
     "electron-builder": "^24.6.0"
   },
   "build": {
-  "appId": "com.exemplo.app",
-  "productName": "Quiosque Biometrico",
-  "icon": "icon/bio.ico",
-  "win": {
-    "target": "msi"
+    "appId": "com.exemplo.app",
+    "productName": "Quiosque Biometrico",
+    "icon": "icon/bio.ico",
+    "win": {
+      "target": "msi"
+    }
+  },
+  "dependencies": {
+    "biometrico-quiosque": "file:"
   }
-}
 }
