@@ -37,7 +37,7 @@ def identify_user():
         pause_event.clear()
 
 
-def identify_forever():
+def identify_forever(socketio):
     from app.db.database import get_db_connection
     print("[BIOMETRIC] Modo identificação contínua iniciado.")
     try:
@@ -85,22 +85,16 @@ def identify_forever():
 
             IndexSearch.IdentifyUser(fir_data, 5)
             if IndexSearch.UserID != 0:
-                # Emitir evento websocket para o front-end
-                try:
-                    from app import socketio
-                    socketio.emit("biometria_detectada", broadcast=True, namespace="/")
-                except Exception as e:
-                    print(f"[SOCKETIO] Erro ao emitir evento biometria_detectada: {e}")
                 conn = get_db_connection()
                 cursor = conn.cursor()
                 cursor.execute(
-                    "SELECT nome, id_biometrico, cpf, cargo, matricula, unidade_id, data_admissao FROM funcionarios WHERE id = %s",
+                    "SELECT id, nome, id_biometrico, cpf, cargo, matricula, unidade_id, data_admissao FROM funcionarios WHERE id = %s",
                     (IndexSearch.UserID,)
                 )
                 user = cursor.fetchone()
                 conn.close()
                 if user:
-                    user_name, id_biometrico, cpf, cargo, matricula, unidade_id, data_admissao = user
+                    funcionario_id, user_name, id_biometrico, cpf, cargo, matricula, unidade_id, data_admissao = user
                     data_admissao_formatada = data_admissao.strftime("%d/%m/%Y") if hasattr(data_admissao, 'strftime') else str(data_admissao)
                     print(
                         f"[IDENTIFY] Usuário identificado: {user_name} "
@@ -111,6 +105,20 @@ def identify_forever():
                         f"| Unidade: {unidade_id} "
                         f"| Admissão: {data_admissao_formatada}"
                     )
+                    # Emitir evento websocket para o front-end com os dados do usuário
+                    try:
+                        socketio.emit("biometria_detectada", {
+                            "funcionario_id": funcionario_id,
+                            "user_name": user_name,
+                            "id_biometrico": id_biometrico,
+                            "cpf": cpf,
+                            "cargo": cargo,
+                            "matricula": matricula,
+                            "unidade_id": unidade_id,
+                            "data_admissao": data_admissao_formatada
+                        }, namespace="/")
+                    except Exception as e:
+                        print(f"[SOCKETIO] Erro ao emitir evento biometria_detectada: {e}")
                 else:
                     print("[IDENTIFY] Usuário identificado, mas não encontrado no banco de dados.")
             else:

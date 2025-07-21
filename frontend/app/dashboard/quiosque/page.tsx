@@ -13,18 +13,8 @@ import Header from "@/components/Header";
 import { cn } from "@/lib/utils";
 
 
-const API_LEITOR = process.env.NEXT_PUBLIC_LEITOR_URL 
-// Garante que SOCKET_URL seja sempre ws:// ou wss://
-let SOCKET_URL = process.env.NEXT_PUBLIC_LEITOR_WS_URL;
-if (!SOCKET_URL && API_LEITOR) {
-  if (API_LEITOR.startsWith('https://')) {
-	SOCKET_URL = API_LEITOR.replace('https://', 'wss://');
-  } else if (API_LEITOR.startsWith('http://')) {
-	SOCKET_URL = API_LEITOR.replace('http://', 'ws://');
-  } else {
-	SOCKET_URL = API_LEITOR;
-  }
-}
+const API_LEITOR = process.env.NEXT_PUBLIC_LEITOR_URL;
+const SOCKET_URL = API_LEITOR; 
 
 
 
@@ -60,7 +50,7 @@ function Relogio() {
 interface HeaderProps {
 	logoMarginLeft?: string;
 	className?: string;
-	// ...
+
 }
 
 
@@ -77,19 +67,22 @@ export default function KioskPage() {
 		if (!SOCKET_URL) return;
 		const socket = io(SOCKET_URL, { transports: ["websocket"] });
 		socket.on("connect", () => {
-			//console.log("Conectado ao WebSocket biométrico");
+			console.log("Conectado ao WebSocket biométrico");
 		});
-		socket.on("biometria_detectada", () => {
-			handleNovoRegistro();
+		socket.on("biometria_detectada", (data) => {
+			handleNovoRegistro(data);
 		});
 		return () => {
 			socket.disconnect();
 		};
 	}, []);
 
-	const handleNovoRegistro = async () => {
+	const handleNovoRegistro = async (data?: any) => {
 		setShowBiometriaModal(true);
 		setLoading(true);
+
+		// Se quiser, pode usar os dados recebidos aqui
+		console.log("Dados recebidos do backend:", data);
 
 		await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -112,7 +105,7 @@ export default function KioskPage() {
 		};
 
 		try {
-			const response = await fetch(`${API_LEITOR}/register_ponto_biometric`, {
+			const response = await fetch(`${API_LEITOR}/register_ponto`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(payload),
