@@ -14,7 +14,7 @@ import requests  # Para fazer chamadas HTTP ao backend em Node.js
 def send_email(subject, recipient, body):
     try:
         # Envia um POST com os dados do e-mail para o backend Node.js
-        response = requests.post("http://biometrico.itaguai.rj.gov.br:3001/api/enviar-email", json={
+        response = requests.post("http://localhost:3001/api/enviar-email", json={
             "subject": subject,
             "recipient": recipient,
             "body": body
@@ -122,6 +122,44 @@ def register_ponto():
     mensagem = ""
 
     # ===========================
+    # BLOQUEIO DE ENTRADAS/SAÍDAS POR DIA CONFORME ESCALA
+    # ===========================
+    cursor.execute("SELECT tipo_escala FROM funcionarios WHERE id = %s", (funcionario_id,))
+    escala = cursor.fetchone()
+    tipo_escala = escala[0] if escala else "PADRAO"
+
+    # Conta quantas entradas e saídas já existem no dia
+    cursor.execute("""
+        SELECT COUNT(*) FILTER (WHERE hora_entrada IS NOT NULL AND hora_saida IS NULL) AS entradas_abertas,
+               COUNT(*) FILTER (WHERE hora_entrada IS NOT NULL AND hora_saida IS NOT NULL) AS saidas
+        FROM registros_ponto
+        WHERE funcionario_id = %s AND data_hora::date = %s
+    """, (funcionario_id, data_atual))
+    row = cursor.fetchone()
+    entradas_abertas = row[0] or 0
+    saidas = row[1] or 0
+
+    # Limites por escala
+    limite_entradas = 1
+    limite_saidas = 1
+    if tipo_escala == "DOIS_TURNOS":
+        limite_entradas = 2
+        limite_saidas = 2
+    # Adapte para outros tipos de escala se necessário
+
+    # Bloqueia múltiplas entradas
+    if not ultimo_ponto and entradas_abertas + saidas >= limite_entradas:
+        cursor.close()
+        conn.close()
+        return jsonify({"message": f"Limite de entradas atingido para sua escala hoje ({data_atual.strftime('%d/%m/%Y')})."}), 400
+
+    # Bloqueia múltiplas saídas
+    if ultimo_ponto and saidas >= limite_saidas:
+        cursor.close()
+        conn.close()
+        return jsonify({"message": f"Limite de saídas atingido para sua escala hoje ({data_atual.strftime('%d/%m/%Y')})."}), 400
+
+    # ===========================
     # 7. REGISTRO DE ENTRADA
     # ===========================
     if not ultimo_ponto:
@@ -135,7 +173,7 @@ def register_ponto():
         }
         try:
             response = requests.post(
-                "http://biometrico.itaguai.rj.gov.br:3001/reg/calcular-registro-ponto",
+                "http://localhost:3001/reg/calcular-registro-ponto",
                 json=payload,
                 timeout=10
             )
@@ -199,7 +237,7 @@ def register_ponto():
         }
         try:
             response = requests.post(
-                "http://biometrico.itaguai.rj.gov.br:3001/reg/calcular-registro-ponto",
+                "http://localhost:3001/reg/calcular-registro-ponto",
                 json=payload,
                 timeout=10
             )
