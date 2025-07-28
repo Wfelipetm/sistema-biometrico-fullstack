@@ -23,7 +23,6 @@ def enroll_user(id_biometrico):
     finally:
         pause_event.clear()
 
-
 def identify_user():
     pause_event.set()  # Pausa o loop
     try:
@@ -35,7 +34,6 @@ def identify_user():
         return fir_data
     finally:
         pause_event.clear()
-
 
 def identify_forever(socketio):
     from app.db.database import get_db_connection
