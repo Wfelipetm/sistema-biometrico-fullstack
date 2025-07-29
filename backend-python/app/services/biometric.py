@@ -1,186 +1,21 @@
 import comtypes.client
-import time
-import threading
 
 
 # Inicializando a biometria
 NBioBSP = comtypes.client.CreateObject("NBioBSPCOM.NBioBSP")
 Device = NBioBSP.Device
 Extraction = NBioBSP.Extraction
-IndexSearch = NBioBSP.IndexSearch
-
-# Controle de prioridade: loop só roda quando identify_user/enroll_user não estão ativos
-pause_event = threading.Event()
-
+IndexSearch = NBioBSP.IndexSearch 
 
 def enroll_user(id_biometrico):
-    pause_event.set()  # Pausa o loop
-    try:
-        Device.Open(255)
-        Extraction.Enroll(id_biometrico, 0)
-        Device.Close(255)
-        return Extraction.TextEncodeFIR
-    finally:
-        pause_event.clear()
+    Device.Open(255)
+    Extraction.Enroll(id_biometrico, 0)
+    Device.Close(255)
+    return Extraction.TextEncodeFIR
 
 def identify_user():
-    pause_event.set()  # Pausa o loop
-    try:
-        Extraction.WindowStyle = 1
-        Device.Open(255)
-        Extraction.Capture(1)
-        fir_data = Extraction.TextEncodeFIR
-        Device.Close(255)
-        return fir_data
-    finally:
-        pause_event.clear()
-
-def identify_forever(socketio):
-    from app.db.database import get_db_connection
-    print("[BIOMETRIC] Modo identificação contínua iniciado.")
-    ciclo = 0
-    try:
-        while True:
-            try:
-                Device.Open(255)
-                Extraction.WindowStyle = 1
-                led_supported = True
-                try:
-                    Device.SetLED(True)
-                    print("[BIOMETRIC] LED do leitor aceso (ativo).")
-                except Exception:
-                    print("[BIOMETRIC] LED não suportado ou erro ao acender.")
-                    led_supported = False
-
-                ciclo += 1
-                print(f"[BIOMETRIC] --- INÍCIO DO CICLO DE IDENTIFICAÇÃO {ciclo} ---")
-                # Pausa o loop se identify_user ou enroll_user estiverem ativos
-                while pause_event.is_set():
-                    time.sleep(0.1)
-
-                print("[BIOMETRIC] Aguardando dedo no leitor...")
-                # LED sempre aceso enquanto espera dedo
-                start_wait = time.time()
-                while not Device.CheckFinger and not pause_event.is_set():
-                    try:
-                        Device.SetLED(True)
-                    except Exception:
-                        pass
-                    time.sleep(0.1)
-                    if pause_event.is_set():
-                        break
-                    # Se esperar mais de 30 segundos, resetar Device
-                    if time.time() - start_wait > 30:
-                        print("[BIOMETRIC] Timeout esperando dedo. Reiniciando Device...")
-                        raise Exception("Timeout esperando dedo")
-
-                if pause_event.is_set():
-                    try:
-                        Device.SetLED(False)
-                    except Exception:
-                        pass
-                    Device.Close(255)
-                    continue
-
-                # Atualiza a base de digitais ANTES de capturar
-                IndexSearch.ClearDB()
-                conn = get_db_connection()
-                cursor = conn.cursor()
-                cursor.execute("SELECT id_biometrico, id FROM funcionarios")
-                for row in cursor.fetchall():
-                    IndexSearch.AddFIR(row[0], int(row[1]))
-                conn.close()
-
-                print("[BIOMETRIC] Dedo detectado. Capturando...")
-                try:
-                    Extraction.Capture(1)
-                    fir_data = Extraction.TextEncodeFIR
-                except Exception as e:
-                    print(f"[BIOMETRIC] Erro ao capturar digital: {e}")
-                    Device.Close(255)
-                    continue
-
-                try:
-                    IndexSearch.IdentifyUser(fir_data, 5)
-                    if IndexSearch.UserID != 0:
-                        conn = get_db_connection()
-                        cursor = conn.cursor()
-                        cursor.execute(
-                            "SELECT id, nome, id_biometrico, cpf, cargo, matricula, unidade_id, data_admissao FROM funcionarios WHERE id = %s",
-                            (IndexSearch.UserID,)
-                        )
-                        user = cursor.fetchone()
-                        conn.close()
-                        if user:
-                            funcionario_id, user_name, id_biometrico, cpf, cargo, matricula, unidade_id, data_admissao = user
-                            data_admissao_formatada = data_admissao.strftime("%d/%m/%Y") if hasattr(data_admissao, 'strftime') else str(data_admissao)
-                            print(
-                                f"[IDENTIFY] Usuário identificado: {user_name} "
-                                f"| ID biométrico: {id_biometrico} "
-                                f"| CPF: {cpf} "
-                                f"| Cargo: {cargo} "
-                                f"| Matrícula: {matricula} "
-                                f"| Unidade: {unidade_id} "
-                                f"| Admissão: {data_admissao_formatada}"
-                            )
-                            # Emitir evento websocket para o front-end com os dados do usuário
-                            try:
-                                socketio.emit("biometria_detectada", {
-                                    "funcionario_id": funcionario_id,
-                                    "user_name": user_name,
-                                    "id_biometrico": id_biometrico,
-                                    "cpf": cpf,
-                                    "cargo": cargo,
-                                    "matricula": matricula,
-                                    "unidade_id": unidade_id,
-                                    "data_admissao": data_admissao_formatada
-                                }, namespace="/")
-                            except Exception as e:
-                                print(f"[SOCKETIO] Erro ao emitir evento biometria_detectada: {e}")
-                        else:
-                            print("[IDENTIFY] Usuário identificado, mas não encontrado no banco de dados.")
-                    else:
-                        print("[BIOMETRIC] Usuário não identificado.")
-                except Exception as e:
-                    print(f"[BIOMETRIC] Erro na identificação: {e}")
-                    Device.Close(255)
-                    continue
-
-                print("[BIOMETRIC] Aguarde remover o dedo do leitor...")
-                check_count = 0
-                while Device.CheckFinger and not pause_event.is_set():
-                    if check_count % 10 == 0:
-                        print(f"[BIOMETRIC] Ainda detectando dedo no leitor... (loop {check_count})")
-                    time.sleep(0.1)
-                    check_count += 1
-                print("[BIOMETRIC] Dedo removido. Pronto para nova leitura.")
-                print(f"[BIOMETRIC] --- FIM DO CICLO DE IDENTIFICAÇÃO {ciclo} ---\n")
-
-                try:
-                    Device.SetLED(False)
-                except Exception:
-                    pass
-                Device.Close(255)
-
-            except Exception as e:
-                print(f"[BIOMETRIC] Reinicializando Device por erro ou timeout: {e}")
-                try:
-                    Device.SetLED(False)
-                except Exception:
-                    pass
-                try:
-                    Device.Close(255)
-                except Exception:
-                    pass
-                time.sleep(1)
-
-    finally:
-        try:
-            Device.SetLED(False)
-        except Exception:
-            pass
-        try:
-            Device.Close(255)
-        except Exception:
-            pass
-
+    Extraction.WindowStyle = 1
+    Device.Open(255)
+    Extraction.Capture(1)
+    Device.Close(255)
+    return Extraction.TextEncodeFIR
