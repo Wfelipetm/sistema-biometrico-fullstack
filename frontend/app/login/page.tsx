@@ -29,7 +29,7 @@ export default function LoginPage() {
   const router = useRouter()
   const pathname = usePathname()
   const emailRef = useRef<HTMLInputElement>(null)
-  const isEmailValid = email.includes("@itaguai.rj.gov.br") && email.includes(".")
+  const isEmailValid = email.trim().length > 0 && !email.includes("@")
   const isPasswordValid = password.length >= 6
   const isFormValid = isEmailValid && isPasswordValid
 
@@ -117,7 +117,7 @@ export default function LoginPage() {
         user_agent: navigator.userAgent,
       })
 
-      setError("Credenciais inválidas. Verifique seu email e senha.")
+      setError("Credenciais inválidas. Verifique seu usuário e senha.")
       console.error(error)
     } finally {
       setLoading(false)
@@ -179,10 +179,20 @@ export default function LoginPage() {
               </Alert>
             )}
 
+            {/* Aviso para formato de email */}
+            {email.includes("@") && (
+              <Alert variant="destructive" className="border-yellow-200 bg-yellow-50 animate-scale-in">
+                <AlertCircle className="h-4 w-4 text-yellow-600" />
+                <AlertDescription className="text-sm font-medium text-yellow-700">
+                  Por favor, use apenas seu nome de usuário. Não digite o email completo.
+                </AlertDescription>
+              </Alert>
+            )}
+
             {/* Email Field */}
             <div className="space-y-3">
               <Label htmlFor="email" className="text-sm font-semibold text-itaguai-900">
-                E-mail institucional
+                Usuário
               </Label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -191,8 +201,8 @@ export default function LoginPage() {
                 <Input
                   ref={emailRef}
                   id="email"
-                  type="email"
-                  placeholder="seu.nome@itaguai.rj.gov.br"
+                  type="text"
+                  placeholder="Digite apenas seu nome de usuário"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   onFocus={() => setEmailFocused(true)}
