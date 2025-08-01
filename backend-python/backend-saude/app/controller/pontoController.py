@@ -1,7 +1,6 @@
 # Importações de bibliotecas necessárias
 from datetime import datetime, timedelta  # Manipulação de datas e horários
 from flask import jsonify, request        # Utilidades Flask para requisição e resposta
-from app.middleware.auth import usuario_autenticado
 from app.db.database import get_db_connection  # Função de conexão com o banco de dados
 from app.services.biometric import IndexSearch, identify_user  # Lógica biométrica
 import requests  # Para fazer chamadas HTTP ao backend em Node.js
@@ -15,37 +14,6 @@ import requests  # Para fazer chamadas HTTP ao backend em Node.js
 # Função auxiliar para envio de e-mail
 # ===========================
 def send_email(subject, recipient, body):
-    # Verifica se o usuário que está fazendo a requisição é autenticado no banco
-    from app.db.database import get_db_connection
-    from flask import request
-    usuario_email = request.headers.get('Authorization')
-    if not usuario_email:
-        print("Usuário não autenticado: header Authorization ausente!")
-        return False
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT id FROM usuarios WHERE email = %s", (usuario_email,))
-    usuario = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    if not usuario:
-        print(f"Usuário não autenticado: {usuario_email} não encontrado no banco!")
-        return False
-    from app.db.database import get_db_connection
-    from flask import request
-    usuario_email = request.headers.get('Authorization')
-    if not usuario_email:
-        print("Usuário não autenticado: header Authorization ausente!")
-        return False
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT id FROM usuarios WHERE email = %s", (usuario_email,))
-    usuario = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    if not usuario:
-        print(f"Usuário não autenticado: {usuario_email} não encontrado no banco!")
-        return False
     try:
         # Envia um POST com os dados do e-mail para o backend Node.js
         response = requests.post("http://biometrico.itaguai.rj.gov.br:3001/api/enviar-email", json={
@@ -55,20 +23,14 @@ def send_email(subject, recipient, body):
         })
         response.raise_for_status()  # Lança exceção se o status não for 2xx
         print(f"E-mail enviado para {recipient}")
-        return True
     except requests.RequestException as e:
         print(f"Erro ao enviar e-mail: {e}")
-        return False
 
 # ===========================
 # Função principal: Registrar ponto via biometria
 # ===========================
-@usuario_autenticado
 def register_ponto():
-    print("[DEBUG] Headers recebidos:", dict(request.headers))
     data = request.json or {}  # Lê os dados enviados no corpo da requisição
-    # O usuário autenticado está disponível em request.usuario_id, request.usuario_nome, request.usuario_papel
-    # Se quiser, pode usar essas informações para logs ou lógica adicional
 
     # Captura os parâmetros principais enviados pelo terminal
     unidade_id_terminal = data.get('unidade_id')
@@ -204,20 +166,6 @@ def register_ponto():
             "hora_saida": None,
             "id_biometrico": id_biometrico
         }
-        # Verifica se o usuário que está fazendo a requisição é autenticado no banco
-        usuario_email = request.headers.get('Authorization')
-        if not usuario_email:
-            print("Usuário não autenticado: header Authorization ausente!")
-            return jsonify({"message": "Usuário não autenticado!"}), 401
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT id FROM usuarios WHERE email = %s", (usuario_email,))
-        usuario = cursor.fetchone()
-        cursor.close()
-        conn.close()
-        if not usuario:
-            print(f"Usuário não autenticado: {usuario_email} não encontrado no banco!")
-            return jsonify({"message": "Usuário não autenticado!"}), 401
         try:
             response = requests.post(
                 "http://biometrico.itaguai.rj.gov.br:3001/reg/calcular-registro-ponto",
@@ -283,20 +231,6 @@ def register_ponto():
             "hora_saida": hora_saida,
             "id_biometrico": id_biometrico
         }
-        # Verifica se o usuário que está fazendo a requisição é autenticado no banco
-        usuario_email = request.headers.get('Authorization')
-        if not usuario_email:
-            print("Usuário não autenticado: header Authorization ausente!")
-            return jsonify({"message": "Usuário não autenticado!"}), 401
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT id FROM usuarios WHERE email = %s", (usuario_email,))
-        usuario = cursor.fetchone()
-        cursor.close()
-        conn.close()
-        if not usuario:
-            print(f"Usuário não autenticado: {usuario_email} não encontrado no banco!")
-            return jsonify({"message": "Usuário não autenticado!"}), 401
         try:
             response = requests.post(
                 "http://biometrico.itaguai.rj.gov.br:3001/reg/calcular-registro-ponto",

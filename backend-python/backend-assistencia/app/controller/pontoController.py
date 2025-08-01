@@ -4,7 +4,6 @@ from flask import jsonify, request        # Utilidades Flask para requisição e
 from app.db.database import get_db_connection  # Função de conexão com o banco de dados
 from app.services.biometric import IndexSearch, identify_user  # Lógica biométrica
 import requests  # Para fazer chamadas HTTP ao backend em Node.js
-from app.middleware.auth import usuario_autenticado  # Middleware de autenticação de usuário
 
 
 # http://localhost:3001
@@ -13,21 +12,6 @@ from app.middleware.auth import usuario_autenticado  # Middleware de autenticaç
 # Função auxiliar para envio de e-mail
 # ===========================
 def send_email(subject, recipient, body):
-    from flask import request
-    from app.db.database import get_db_connection
-    usuario_email = request.headers.get('Authorization')
-    if not usuario_email:
-        print("Usuário não autenticado: header Authorization ausente!")
-        return False
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT id FROM usuarios WHERE email = %s", (usuario_email,))
-    usuario = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    if not usuario:
-        print(f"Usuário não autenticado: {usuario_email} não encontrado no banco!")
-        return False
     try:
         # Envia um POST com os dados do e-mail para o backend Node.js
         response = requests.post("http://biometrico.itaguai.rj.gov.br:3001/api/enviar-email", json={
@@ -37,15 +21,12 @@ def send_email(subject, recipient, body):
         })
         response.raise_for_status()  # Lança exceção se o status não for 2xx
         print(f"E-mail enviado para {recipient}")
-        return True
     except requests.RequestException as e:
         print(f"Erro ao enviar e-mail: {e}")
-        return False
 
 # ===========================
 # Função principal: Registrar ponto via biometria
 # ===========================
-@usuario_autenticado
 def register_ponto():
     data = request.json or {}  # Lê os dados enviados no corpo da requisição
 
@@ -152,20 +133,6 @@ def register_ponto():
             "hora_saida": None,
             "id_biometrico": id_biometrico
         }
-        # Verifica se o usuário que está fazendo a requisição é autenticado no banco
-        usuario_email = request.headers.get('Authorization')
-        if not usuario_email:
-            print("Usuário não autenticado: header Authorization ausente!")
-            return jsonify({"message": "Usuário não autenticado!"}), 401
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT id FROM usuarios WHERE email = %s", (usuario_email,))
-        usuario = cursor.fetchone()
-        cursor.close()
-        conn.close()
-        if not usuario:
-            print(f"Usuário não autenticado: {usuario_email} não encontrado no banco!")
-            return jsonify({"message": "Usuário não autenticado!"}), 401
         try:
             response = requests.post(
                 "http://biometrico.itaguai.rj.gov.br:3001/reg/calcular-registro-ponto",
@@ -230,20 +197,6 @@ def register_ponto():
             "hora_saida": hora_saida,
             "id_biometrico": id_biometrico
         }
-        # Verifica se o usuário que está fazendo a requisição é autenticado no banco
-        usuario_email = request.headers.get('Authorization')
-        if not usuario_email:
-            print("Usuário não autenticado: header Authorization ausente!")
-            return jsonify({"message": "Usuário não autenticado!"}), 401
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT id FROM usuarios WHERE email = %s", (usuario_email,))
-        usuario = cursor.fetchone()
-        cursor.close()
-        conn.close()
-        if not usuario:
-            print(f"Usuário não autenticado: {usuario_email} não encontrado no banco!")
-            return jsonify({"message": "Usuário não autenticado!"}), 401
         try:
             response = requests.post(
                 "http://biometrico.itaguai.rj.gov.br:3001/reg/calcular-registro-ponto",
