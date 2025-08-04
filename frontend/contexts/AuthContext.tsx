@@ -9,6 +9,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
+import { setCookie, destroyCookie, parseCookies } from "nookies";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 
@@ -44,8 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	const router = useRouter();
 
 	useEffect(() => {
-		const storedToken = localStorage.getItem("token");
-		const storedUser = localStorage.getItem("user");
+		const { token: storedToken, user: storedUser } = parseCookies();
 
 		if (storedToken && storedUser) {
 			const parsedUser = JSON.parse(storedUser);
@@ -87,8 +87,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 			setToken(token);
 			setUser(usuario);
-			localStorage.setItem("token", token);
-			localStorage.setItem("user", JSON.stringify(usuario));
+			setCookie(undefined, "token", token, {
+				maxAge: 60 * 60 * 24 * 30, // 30 days
+				path: "/",
+			});
+			setCookie(undefined, "user", JSON.stringify(usuario), {
+				maxAge: 60 * 60 * 24 * 30, // 30 days
+				path: "/",
+			});
 			api.defaults.headers.common.Authorization = `Bearer ${token}`;
 
 			// 👉 Redireciona para a home
@@ -102,12 +108,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	const logout = () => {
 		setToken(null);
 		setUser(null);
-		localStorage.removeItem("token");
-		localStorage.removeItem("user");
+		destroyCookie(undefined, "token");
+		destroyCookie(undefined, "user");
 		api.defaults.headers.common.Authorization = undefined;
-		// Remove cookies de autenticação
-		document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-		document.cookie = "user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 		window.location.href = "/login";
 	};
 

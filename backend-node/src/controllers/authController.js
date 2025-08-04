@@ -62,42 +62,174 @@ async function cadastrarUsuario(req, res) {
 }
 
 
-// Login de usuário
+// Login de usuário com suporte LDAP
 async function loginUsuario(req, res) {
-    const { email, senha } = req.body;
+    const { email, senha, data, password } = req.body;
+
+    // Se 'data' foi enviado, use-o ao invés de 'email'
+    const loginData = data || email;
+    const passwordField = senha || password;
+
+    console.log('Dados recebidos:', { email, data, senha, password, loginData, passwordField: passwordField ? '***' : null });
+
+    if (!loginData || !passwordField) {
+        return res.status(400).json({
+            error: 'Por favor, preencha todos os campos',
+            received: { loginData: !!loginData, password: !!passwordField }
+        });
+    }
 
     try {
-        const userQuery = "SELECT * FROM usuarios WHERE email = $1";
-        const userResult = await db.query(userQuery, [email]);
+        // Se contém '@', é login por email (local)
+        if (loginData.includes('@')) {
+            console.log('Login LOCAL detectado');
+            const userQuery = "SELECT * FROM usuarios WHERE email = $1";
+            const userResult = await db.query(userQuery, [loginData]);
 
-        if (userResult.rows.length === 0) {
-            return res.status(401).json({ error: "Credenciais inválidas" });
+            if (userResult.rows.length === 0) {
+                return res.status(401).json({ error: "Credenciais inválidas" });
+            }
+
+            const usuario = userResult.rows[0];
+            const senhaCorreta = await bcrypt.compare(passwordField, usuario.senha);
+
+            if (!senhaCorreta) {
+                return res.status(401).json({ error: "Credenciais inválidas" });
+            }
+
+            const token = jwt.sign(
+                { id: usuario.id, papel: usuario.papel },
+                process.env.SECRET_KEY,
+                { expiresIn: "24h" }
+            );
+
+            return res.status(200).json({
+                token,
+                usuario: {
+                    id: usuario.id,
+                    nome: usuario.nome,
+                    email: usuario.email,
+                    papel: usuario.papel,
+                    secretaria_id: usuario.secretaria_id || null,
+                    unidade_id: usuario.unidade_id || null,
+                    ldap_user: usuario.ldap_user || false
+                },
+            });
         }
+        // Se contém '.', é login LDAP (usuario.dominio)
+        else if (loginData.includes('.')) {
+            console.log('Login LDAP detectado');
+            const username = loginData;
+            req.body.username = username;
+            req.body.password = passwordField;
 
-        const usuario = userResult.rows[0];
+            console.log('Tentando autenticação LDAP para usuário:', username);
 
-        const senhaCorreta = await bcrypt.compare(senha, usuario.senha);
-        if (!senhaCorreta) {
-            return res.status(401).json({ error: "Credenciais inválidas" });
+            passport.authenticate("ldapauth", { session: false }, async (err, ldapUser, info) => {
+                console.log('Resultado da autenticação LDAP:');
+                console.log('Erro:', err);
+                console.log('Usuário LDAP:', ldapUser);
+
+                if (err) {
+                    console.error('Erro LDAP:', err);
+                    return res.status(500).json({
+                        error: "Erro interno no servidor",
+                        details: err.message
+                    });
+                }
+
+                if (!ldapUser) {
+                    console.log('Falha na autenticação LDAP');
+                    return res.status(401).json({ error: "Usuário ou senha inválidos" });
+                }
+
+                try {
+                    const username = ldapUser.sAMAccountName;
+                    const nome = ldapUser.cn;
+                    const email = ldapUser.mail;
+                    const dn = ldapUser.dn;
+                    const memberOf = ldapUser.memberOf;
+                    const description = ldapUser.description;
+                    const department = ldapUser.department;
+
+                    // Verifica se usuário já existe no banco
+                    let userQuery = "SELECT * FROM usuarios WHERE email = $1 OR nome = $2";
+                    let userResult = await db.query(userQuery, [email, username]);
+
+                    let usuario;
+
+                    if (userResult.rows.length === 0) {
+                        // Cria novo usuário LDAP no banco
+                        const insertQuery = `
+                            INSERT INTO usuarios (nome, email, senha, papel, secretaria_id, unidade_id, ldap_user)
+                            VALUES ($1, $2, $3, $4, $5, $6, $7)
+                            RETURNING id, nome, email, papel, secretaria_id, unidade_id
+                        `;
+
+                        // Senha temporária para usuários LDAP (não será usada)
+                        const senhaTemp = await bcrypt.hash('ldap_user_' + Date.now(), 10);
+
+                        const result = await db.query(insertQuery, [
+                            nome,
+                            email,
+                            senhaTemp,
+                            'quiosque', // papel padrão para usuários LDAP
+                            null, // secretaria_id - pode ser definido depois
+                            null, // unidade_id - pode ser definido depois
+                            true  // marca como usuário LDAP
+                        ]);
+
+                        usuario = result.rows[0];
+                    } else {
+                        // Atualiza dados do usuário existente
+                        usuario = userResult.rows[0];
+
+                        const updateQuery = `
+                            UPDATE usuarios SET nome = $1, email = $2, ldap_user = $3, updated_at = NOW()
+                            WHERE id = $4
+                            RETURNING id, nome, email, papel, secretaria_id, unidade_id
+                        `;
+
+                        const result = await db.query(updateQuery, [nome, email, true, usuario.id]);
+                        usuario = result.rows[0];
+                    }
+
+                    const token = jwt.sign(
+                        { id: usuario.id, papel: usuario.papel },
+                        process.env.SECRET_KEY,
+                        { expiresIn: "24h" }
+                    );
+
+                    return res.status(200).json({
+                        token,
+                        usuario: {
+                            id: usuario.id,
+                            nome: usuario.nome,
+                            email: usuario.email,
+                            papel: usuario.papel,
+                            secretaria_id: usuario.secretaria_id,
+                            unidade_id: usuario.unidade_id,
+                            ldap_user: true,
+                            matricula: description,
+                            departamento: department
+                        },
+                    });
+
+                } catch (error) {
+                    console.error('Erro ao processar usuário LDAP:', error);
+                    return res.status(500).json({
+                        error: "Erro ao salvar usuário LDAP",
+                        message: error.message
+                    });
+                }
+            })(req, res);
+        } else {
+            console.log('Formato de login inválido:', loginData);
+            return res.status(400).json({
+                error: 'Formato de login inválido',
+                info: 'Use email (com @) para login local ou usuario.dominio para LDAP'
+            });
         }
-
-        const token = jwt.sign(
-            { id: usuario.id, papel: usuario.papel },
-            process.env.SECRET_KEY,
-            { expiresIn: "1h" },
-        );
-
-        res.status(200).json({
-            token,
-            usuario: {
-                id: usuario.id,
-                nome: usuario.nome,
-                email: usuario.email,
-                papel: usuario.papel,
-                secretaria_id: usuario.secretaria_id || null,
-                unidade_id: usuario.unidade_id || null,
-            },
-        });
     } catch (error) {
         console.error("Erro ao realizar login:", error);
         res.status(500).json({ error: "Erro interno do servidor" });

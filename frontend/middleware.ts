@@ -3,9 +3,7 @@ import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
   // Busca o token no cookie ou no header Authorization
-  const token =
-    request.cookies.get("token")?.value ||
-    request.headers.get("authorization");
+  const token = request.cookies.get("token")?.value;
 
   const { pathname } = request.nextUrl;
 
