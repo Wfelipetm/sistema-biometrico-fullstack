@@ -78,4 +78,25 @@ O banco de dados inclui várias funções que automatizam cálculos e padroniza�
 - Constraints garantem a integridade dos dados
 - Relacionamentos são gerenciados por chaves estrangeiras com regras de cascata
 
+# Banco de Dados (PostgreSQL)
+
+Este módulo contém o schema e scripts para o banco de dados do sistema biométrico.
+
+## Como rodar
+
+1. Instale o PostgreSQL 12+
+2. Execute o script de criação:
+   ```bash
+   psql -U <usuario> -d <database> -f full-schema.sql
+   ```
+
+## Estrutura
+- `full-schema.sql`: Script de criação das tabelas e tipos
+
+## Requisitos
+- PostgreSQL 12+
+
+## Observação
+Consulte o README.md principal para detalhes de integração com os outros módulos.
+
 
