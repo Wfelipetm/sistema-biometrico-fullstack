@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const db = require('../config/db');
 const dotenv = require("dotenv");
+const passport = require('passport');
 
 dotenv.config();
 

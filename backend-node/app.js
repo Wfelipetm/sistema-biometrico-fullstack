@@ -69,13 +69,13 @@ app.use((req, res, next) => {
 app.use('/auth', authRoutes);
 app.use('/api', mailRoutes);
 app.use('/reg', registroPontoRoutes);
-app.use('/unid', jwt.validarToken, unidadeRoutes)
-app.use('/relat', jwt.validarToken, gerarRelatorioPontoRoutes);
-app.use('/relex', jwt.validarToken, feriasRoutes);
-app.use('/secre', jwt.validarToken, secretariasRoutes);
-app.use('/ferias', jwt.validarToken, feriasRoutes);
-app.use('/funci', jwt.validarToken, funcionarioRoutes);
-app.use('/log', jwt.validarToken, logsRouter);
+app.use('/unid', unidadeRoutes)
+app.use('/relat', gerarRelatorioPontoRoutes);
+app.use('/relex', feriasRoutes);
+app.use('/secre', secretariasRoutes);
+app.use('/ferias', feriasRoutes);
+app.use('/funci', funcionarioRoutes);
+app.use('/log', logsRouter);
 app.use('/uploads', express.static(path.join(__dirname, 'upload', 'upUnidade')));
 
 
