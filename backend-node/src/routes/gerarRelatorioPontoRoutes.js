@@ -7,6 +7,6 @@ router.get('/relatorio', gerarRelatorioPontoController.gerarRelatorioPonto);
 
 router.get('/relatoriosempdf', gerarRelatorioPontoController.gerarRelatorioPontosemPDF);
 
-
+router.get('/relatorio-unidade-sempdf', gerarRelatorioPontoController.gerarRelatorioPorunidadesemPDF);
 
 module.exports = router;

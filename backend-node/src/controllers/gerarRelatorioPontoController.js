@@ -114,9 +114,6 @@ module.exports = {
     },
 
 
-
-
-
     async gerarRelatorioPontosemPDF(req, res) {
         const { funcionario_id, mes, ano } = req.query;
         if (!funcionario_id || !mes || !ano) {
@@ -210,10 +207,154 @@ module.exports = {
             console.error('Erro ao gerar relatório:', error);
             return res.status(500).json({ error: 'Erro interno no servidor.' });
         }
+    },
+
+    // Novo endpoint para relatório por unidade sem PDF
+    async gerarRelatorioPorunidadesemPDF(req, res) {
+        const { unidade_id, mes, ano } = req.query;
+        if (!unidade_id || !mes || !ano) {
+            return res.status(400).json({ error: 'Parâmetros obrigatórios ausentes.' });
+        }
+
+        try {
+            const query = `
+                SELECT 
+                    rp.data_hora::DATE AS data, 
+                    rp.hora_entrada, 
+                    rp.hora_saida, 
+                    rp.horas_normais, 
+                    rp.hora_extra, 
+                    rp.hora_desconto,
+                    rp.total_trabalhado,
+                    f.nome AS funcionario_nome, 
+                    f.data_admissao, 
+                    f.cargo, 
+                    f.matricula, 
+                    f.tipo_escala,
+                    f.cpf,
+                    f.email,
+                    u.nome AS unidade_nome,
+                    f.id AS funcionario_id
+                FROM Registros_Ponto rp
+                INNER JOIN funcionarios f ON rp.funcionario_id = f.id
+                INNER JOIN unidades u ON rp.unidade_id = u.id
+                WHERE rp.unidade_id = $1
+                  AND EXTRACT(MONTH FROM rp.data_hora) = $2
+                  AND EXTRACT(YEAR FROM rp.data_hora) = $3
+                ORDER BY f.nome, rp.data_hora ASC
+            `;
+
+            const result = await db.query(query, [unidade_id, mes, ano]);
+
+            if (result.rows.length === 0) {
+                return res.status(404).json({ error: 'Nenhum registro encontrado para a unidade no período selecionado.' });
+            }
+
+            // Buscar nome da unidade
+            const unidadeNome = result.rows[0].unidade_nome;
+
+            // Agrupar registros por funcionário
+            const funcionariosMap = new Map();
+
+            result.rows.forEach(row => {
+                const funcionarioId = row.funcionario_id;
+
+                if (!funcionariosMap.has(funcionarioId)) {
+                    funcionariosMap.set(funcionarioId, {
+                        funcionario: {
+                            id: funcionarioId,
+                            nome: row.funcionario_nome,
+                            matricula: row.matricula,
+                            cargo: row.cargo,
+                            tipo_escala: row.tipo_escala,
+                            unidade_nome: row.unidade_nome,
+                            mes_ano: `${mes}/${ano}`
+                        },
+                        totais: {
+                            total_horas_normais: 0,
+                            total_horas_extras: 0,
+                            total_horas_desconto: 0
+                        },
+                        registros: []
+                    });
+                }
+
+                const funcionarioData = funcionariosMap.get(funcionarioId);
+
+                // Converter os intervalos em strings legíveis
+                const horas_normais = intervalToString(row.horas_normais);
+                const horas_extras = intervalToString(row.hora_extra);
+                const horas_desconto = intervalToString(row.hora_desconto);
+
+                // Acumular totais para este funcionário
+                if (horas_normais !== '--') {
+                    funcionarioData.totais.total_horas_normais += timeToSeconds(horas_normais);
+                }
+                if (horas_extras !== '--') {
+                    funcionarioData.totais.total_horas_extras += timeToSeconds(horas_extras);
+                }
+                if (horas_desconto !== '--') {
+                    funcionarioData.totais.total_horas_desconto += timeToSeconds(horas_desconto);
+                }
+
+                // Adicionar registro ao funcionário
+                funcionarioData.registros.push({
+                    data: format(new Date(row.data), 'dd/MM/yyyy'),
+                    hora_entrada: row.hora_entrada || '--',
+                    hora_saida: row.hora_saida || '--',
+                    horas_normais,
+                    horas_extras,
+                    horas_desconto,
+                    justificativa: ' '
+                });
+            });
+
+            // Converter os totais de segundos para formato de hora
+            for (const funcionarioData of funcionariosMap.values()) {
+                funcionarioData.totais.total_horas_normais = funcionarioData.totais.total_horas_normais > 0
+                    ? secondsToHora(funcionarioData.totais.total_horas_normais)
+                    : '--';
+
+                funcionarioData.totais.total_horas_extras = funcionarioData.totais.total_horas_extras > 0
+                    ? secondsToHora(funcionarioData.totais.total_horas_extras)
+                    : '--';
+
+                funcionarioData.totais.total_horas_desconto = funcionarioData.totais.total_horas_desconto > 0
+                    ? secondsToHora(funcionarioData.totais.total_horas_desconto)
+                    : '--';
+            }
+
+            // Preparar a resposta com todos os funcionários
+            const response = {
+                unidade: {
+                    id: unidade_id,
+                    nome: unidadeNome
+                },
+                periodo: {
+                    mes,
+                    ano
+                },
+                funcionarios: Array.from(funcionariosMap.values())
+            };
+
+            return res.status(200).json(response);
+
+        } catch (error) {
+            console.error('Erro ao gerar relatório por unidade:', error);
+            return res.status(500).json({ error: 'Erro interno no servidor.' });
+        }
     }
 }
 
-// Funções utilitárias corretas:
+// Função auxiliar para converter interval para string
+function intervalToString(interval) {
+    if (!interval) return '--';
+    if (typeof interval === 'string') return interval;
+    const h = String(interval.hours || 0).padStart(2, '0');
+    const m = String(interval.minutes || 0).padStart(2, '0');
+    const s = String(interval.seconds || 0).padStart(2, '0');
+    return `${h}:${m}:${s}`;
+}
 function timeToSeconds(timeStr) {
     if (!timeStr || timeStr === '--' || timeStr === '00:00:00') return 0;
     const [h, m, s] = timeStr.split(':').map(Number);
