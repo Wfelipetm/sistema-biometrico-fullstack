@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { toast } from "sonner"
 
-export function useRelatorioPDFtodos() {
+export function useRelatorioPDFtodo() {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 

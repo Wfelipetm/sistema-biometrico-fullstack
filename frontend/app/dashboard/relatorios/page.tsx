@@ -19,7 +19,7 @@ import {
 
 type Funcionario = FuncionarioBase & { unidade_id?: number };
 import { useRelatorioPDF } from "@/hooks/use-relatorio-pdf";
-import { useRelatorioPDFtodos } from "@/hooks/use-relatorio-pdf-todos-new.";
+import { useRelatorioPDFtodos } from "@/hooks/use-relatorio-pdf-todos-new";
 import { FuncionarioSearch } from "@/components/funcionario-search";
 import { PeriodoSelector } from "@/components/periodo-selector";
 import { useAuth } from "@/contexts/AuthContext"; // IMPORTANTE
@@ -148,66 +148,74 @@ export default function RelatoriosPage() {
 	};
 
 	const handleGerarRelatorioTodos = async () => {
-		const unidadeId = selectedUnidadeId || user?.unidade_id;
-		
-		if (!unidadeId) {
-			toast.error("Selecione uma unidade para gerar os relatórios individuais");
-			return;
-		}
-		
-		try {
-			setLoadingTodosPDF(true);
-			toast.info("Iniciando geração de relatórios individuais para todos os funcionários da unidade");
-			
-			// Primeiro precisamos buscar todos os funcionários da unidade
-			const response = await api.get(`/unid/${unidadeId}/funcionarios`);
-			
-			if (!response.data || !Array.isArray(response.data) || response.data.length === 0) {
-				toast.warning("Nenhum funcionário encontrado na unidade selecionada");
-				return;
-			}
-			
-			const funcionarios = response.data;
-			
-			// Informa quantos relatórios serão gerados
-			toast.info(`Gerando ${funcionarios.length} relatórios individuais. Isso pode levar algum tempo...`);
-			
-			// Gera o relatório para cada funcionário
-			for (const funcionario of funcionarios) {
-				try {
-					await gerarRelatorioPDFtodos(funcionario.id, mes, ano);
-				} catch (error) {
-					console.error(`Erro ao gerar relatório para ${funcionario.nome}:`, error);
-					// Continua para o próximo funcionário mesmo se houver erro
-				}
-			}
-			
-			toast.success(`Relatórios individuais gerados com sucesso!`);
-		} catch (error) {
-			console.error("Erro ao buscar funcionários da unidade:", error);
-			toast.error("Erro ao gerar relatórios individuais");
-		} finally {
-			setLoadingTodosPDF(false);
-		}
+  const unidadeId = selectedUnidadeId || user?.unidade_id;
+  console.log('[COMPONENTE] Iniciando handleGerarRelatorioTodos', { unidadeId, mes, ano });
+  if (!unidadeId) {
+	toast.error("Selecione uma unidade para gerar os relatórios individuais");
+	console.warn('[COMPONENTE] Unidade não selecionada');
+	return;
+  }
+  try {
+	setLoadingTodosPDF(true);
+	toast.info("Iniciando geração de relatórios individuais para todos os funcionários da unidade");
+	// Primeiro precisamos buscar todos os funcionários da unidade
+	const response = await api.get(`/unid/${unidadeId}/funcionarios`);
+	console.log('[COMPONENTE] Funcionários retornados:', response.data);
+	if (!response.data || !Array.isArray(response.data) || response.data.length === 0) {
+	  toast.warning("Nenhum funcionário encontrado na unidade selecionada");
+	  console.warn('[COMPONENTE] Nenhum funcionário encontrado na unidade', unidadeId);
+	  return;
+	}
+	const funcionarios = response.data;
+	toast.info(`Gerando ${funcionarios.length} relatórios individuais. Isso pode levar algum tempo...`);
+	for (const funcionario of funcionarios) {
+	  try {
+		console.log('[COMPONENTE] Gerando PDF para funcionário', funcionario.id, funcionario.nome);
+		await gerarRelatorioPDFtodos(funcionario.id, mes, ano);
+		console.log('[COMPONENTE] PDF gerado para funcionário', funcionario.id);
+	  } catch (error) {
+		console.error(`[COMPONENTE] Erro ao gerar relatório para ${funcionario.nome}:`, error);
+	  }
+	}
+	toast.success(`Relatórios individuais gerados com sucesso!`);
+  } catch (error) {
+	console.error("Erro ao buscar funcionários da unidade:", error);
+	toast.error("Erro ao gerar relatórios individuais");
+  } finally {
+	setLoadingTodosPDF(false);
+	console.log('[COMPONENTE] Finalizou handleGerarRelatorioTodos', { unidadeId, mes, ano });
+  }
 	};
 
-	const { gerarRelatorioUnidadePDF } = useRelatorioPDFtodos();
-	const handleGerarRelatorioPorUnidade = async () => {
-		const unidadeId = selectedUnidadeId || user?.unidade_id;
-		if (!unidadeId) {
-			toast.error("Selecione uma unidade para gerar o relatório");
+
+const handleGerarRelatorioPorUnidade = async () => {
+	const unidadeId = String(selectedUnidadeId || user?.unidade_id);
+	console.log('[COMPONENTE] Iniciando handleGerarRelatorioPorUnidade', { unidadeId, mes, ano });
+	if (!unidadeId) {
+		toast.error("Selecione uma unidade para gerar o relatório");
+		console.warn('[COMPONENTE] Unidade não selecionada');
+		return;
+	}
+	setLoadingUnidadePDF(true);
+	try {
+		// Antes de gerar o PDF, buscar os dados da unidade para debug
+		const response = await api.get(`/unid/${unidadeId}/funcionarios`);
+		console.log('[COMPONENTE] Funcionários da unidade para PDF:', response.data);
+		if (!response.data || !Array.isArray(response.data) || response.data.length === 0) {
+			toast.warning("Nenhum funcionário encontrado na unidade selecionada");
+			console.warn('[COMPONENTE] Nenhum funcionário encontrado na unidade', unidadeId);
 			return;
 		}
-		setLoadingUnidadePDF(true);
-		try {
-		await gerarRelatorioUnidadePDF(unidadeId, mes, ano);
-		} catch (error) {
-			console.error("Erro ao gerar relatório da unidade:", error);
-			toast.error("Erro ao gerar relatório da unidade");
-		} finally {
-			setLoadingUnidadePDF(false);
-		}
-	};
+		await gerarRelatorioPDFtodos(unidadeId, mes, ano);
+		console.log('[COMPONENTE] PDF da unidade gerado com sucesso', unidadeId);
+	} catch (error) {
+		console.error("Erro ao gerar relatório da unidade:", error);
+		toast.error("Erro ao gerar relatório da unidade");
+	} finally {
+		setLoadingUnidadePDF(false);
+		console.log('[COMPONENTE] Finalizou handleGerarRelatorioPorUnidade', { unidadeId, mes, ano });
+	}
+};
 
 	const isFormValid = selectedFuncionario && mes && ano;
 	const hasError = errorFuncionarios || errorPDF;
