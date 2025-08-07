@@ -255,11 +255,17 @@ const handleGerarRelatorioPorUnidade = async () => {
 
 			<Tabs defaultValue="funcionario">
 				<TabsList className="grid w-full grid-cols-2">
-					<TabsTrigger value="funcionario">Relatório por Funcionário</TabsTrigger>
-					<TabsTrigger 
-						value="unidade" 
+					<TabsTrigger
+						value="funcionario"
+						className="text-blue-900 data-[state=active]:bg-blue-400 data-[state=active]:text-white"
+					>
+						Relatório por Funcionário
+					</TabsTrigger>
+					<TabsTrigger
+						value="unidade"
 						disabled={!user?.secretaria_id && !user?.unidade_id}
 						title={!user?.secretaria_id && !user?.unidade_id ? "Disponível apenas para usuários com secretaria ou unidade" : ""}
+						className="text-blue-900 data-[state=active]:bg-blue-400 data-[state=active]:text-white"
 					>
 						Relatório da Unidade
 					</TabsTrigger>
