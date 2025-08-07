@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FileDown, Download } from "lucide-react";
+import { FileDown, Download, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -11,6 +11,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
 	useFuncionarios,
 	type Funcionario as FuncionarioBase,
@@ -18,9 +19,12 @@ import {
 
 type Funcionario = FuncionarioBase & { unidade_id?: number };
 import { useRelatorioPDF } from "@/hooks/use-relatorio-pdf";
+import { useRelatorioPDFtodos } from "@/hooks/use-relatorio-pdf-todos-new.";
 import { FuncionarioSearch } from "@/components/funcionario-search";
 import { PeriodoSelector } from "@/components/periodo-selector";
 import { useAuth } from "@/contexts/AuthContext"; // IMPORTANTE
+import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 const STORAGE_KEY = "recentFuncionarios";
 
@@ -35,6 +39,12 @@ export default function RelatoriosPage() {
 	>([]);
 	const [mes, setMes] = useState((new Date().getMonth() + 1).toString());
 	const [ano, setAno] = useState(new Date().getFullYear().toString());
+	const [loadingUnidadePDF, setLoadingUnidadePDF] = useState(false);
+	const [loadingTodosPDF, setLoadingTodosPDF] = useState(false);
+	const [unidadeNome, setUnidadeNome] = useState<string>("");
+	const [unidades, setUnidades] = useState<Array<{id: number, nome: string}>>([]);
+	const [selectedUnidadeId, setSelectedUnidadeId] = useState<number | null>(null);
+	const [loadingUnidades, setLoadingUnidades] = useState(false);
 
 	const {
 		funcionarios,
@@ -46,6 +56,12 @@ export default function RelatoriosPage() {
 		loading: loadingPDF,
 		error: errorPDF,
 	} = useRelatorioPDF();
+	
+	const {
+		gerarRelatorioPDF: gerarRelatorioPDFtodos,
+		loading: loadingPDFtodos,
+		error: errorPDFtodos,
+	} = useRelatorioPDFtodos();
 
 	const { user } = useAuth(); // PEGANDO USUÁRIO LOGADO
 
@@ -54,6 +70,48 @@ export default function RelatoriosPage() {
 		const stored = localStorage.getItem(STORAGE_KEY);
 		if (stored) setRecentFuncionarios(JSON.parse(stored));
 	}, []);
+
+	// Carrega o nome da unidade se o usuário for gestor
+	useEffect(() => {
+		if (user?.unidade_id) {
+			const fetchUnidadeNome = async () => {
+				try {
+					const response = await api.get(`unid/unidades`);
+					if (response.data && response.data.nome) {
+						setUnidadeNome(response.data.nome);
+						// Define a unidade do usuário como selecionada por padrão
+						setSelectedUnidadeId(user.unidade_id);
+					}
+				} catch (error) {
+					console.error("Erro ao buscar nome da unidade:", error);
+				}
+			};
+			
+			fetchUnidadeNome();
+		}
+	}, [user]);
+
+	// Carrega todas as unidades da secretaria do usuário
+	useEffect(() => {
+		if (user?.secretaria_id) {
+			const fetchUnidades = async () => {
+				try {
+					setLoadingUnidades(true);
+					const response = await api.get(`/secre/${user.secretaria_id}/unidades`);
+					if (response.data && Array.isArray(response.data)) {
+						setUnidades(response.data);
+					}
+				} catch (error) {
+					console.error("Erro ao buscar unidades da secretaria:", error);
+					toast.error("Erro ao carregar unidades da secretaria");
+				} finally {
+					setLoadingUnidades(false);
+				}
+			};
+			
+			fetchUnidades();
+		}
+	}, [user]);
 
 	// Atualiza o histórico ao selecionar
 	const handleSelectFuncionario = (funcionario: Funcionario | null) => {
@@ -87,6 +145,68 @@ export default function RelatoriosPage() {
 	const handleGerarRelatorio = async () => {
 		if (!selectedFuncionario) return;
 		await gerarRelatorioPDF(selectedFuncionario.id, mes, ano);
+	};
+
+	const handleGerarRelatorioTodos = async () => {
+		const unidadeId = selectedUnidadeId || user?.unidade_id;
+		
+		if (!unidadeId) {
+			toast.error("Selecione uma unidade para gerar os relatórios individuais");
+			return;
+		}
+		
+		try {
+			setLoadingTodosPDF(true);
+			toast.info("Iniciando geração de relatórios individuais para todos os funcionários da unidade");
+			
+			// Primeiro precisamos buscar todos os funcionários da unidade
+			const response = await api.get(`/unid/${unidadeId}/funcionarios`);
+			
+			if (!response.data || !Array.isArray(response.data) || response.data.length === 0) {
+				toast.warning("Nenhum funcionário encontrado na unidade selecionada");
+				return;
+			}
+			
+			const funcionarios = response.data;
+			
+			// Informa quantos relatórios serão gerados
+			toast.info(`Gerando ${funcionarios.length} relatórios individuais. Isso pode levar algum tempo...`);
+			
+			// Gera o relatório para cada funcionário
+			for (const funcionario of funcionarios) {
+				try {
+					await gerarRelatorioPDFtodos(funcionario.id, mes, ano);
+				} catch (error) {
+					console.error(`Erro ao gerar relatório para ${funcionario.nome}:`, error);
+					// Continua para o próximo funcionário mesmo se houver erro
+				}
+			}
+			
+			toast.success(`Relatórios individuais gerados com sucesso!`);
+		} catch (error) {
+			console.error("Erro ao buscar funcionários da unidade:", error);
+			toast.error("Erro ao gerar relatórios individuais");
+		} finally {
+			setLoadingTodosPDF(false);
+		}
+	};
+
+	const { gerarRelatorioUnidadePDF } = useRelatorioPDFtodos();
+	const handleGerarRelatorioPorUnidade = async () => {
+		const unidadeId = selectedUnidadeId || user?.unidade_id;
+		if (!unidadeId) {
+			toast.error("Selecione uma unidade para gerar o relatório");
+			return;
+		}
+		setLoadingUnidadePDF(true);
+		try {
+		await gerarRelatorioUnidadePDF(unidadeId, mes, ano);
+		} catch (error) {
+			console.error("Erro ao gerar relatório da unidade:", error);
+			toast.error("Erro ao gerar relatório da unidade");
+		} finally {
+			setLoadingUnidadePDF(false);
+		}
 	};
 
 	const isFormValid = selectedFuncionario && mes && ano;
@@ -125,101 +245,202 @@ export default function RelatoriosPage() {
 				</p>
 			</div>
 
-			{/* Main Card */}
-			<Card className="shadow-xl rounded-xl bg-white/80 backdrop-blur-md">
-				<CardHeader>
-					<CardTitle className="flex items-center gap-2 text-blue-900">
-						<FileDown className="h-5 w-5 text-blue-700" />
-						Relatório de Ponto
-					</CardTitle>
-					<CardDescription className="text-blue-700">
-						Selecione um funcionário e o período para gerar o relatório em PDF
-					</CardDescription>
-				</CardHeader>
+			<Tabs defaultValue="funcionario">
+				<TabsList className="grid w-full grid-cols-2">
+					<TabsTrigger value="funcionario">Relatório por Funcionário</TabsTrigger>
+					<TabsTrigger 
+						value="unidade" 
+						disabled={!user?.secretaria_id && !user?.unidade_id}
+						title={!user?.secretaria_id && !user?.unidade_id ? "Disponível apenas para usuários com secretaria ou unidade" : ""}
+					>
+						Relatório da Unidade
+					</TabsTrigger>
+				</TabsList>
 
-				<CardContent className="space-y-6">
-					{/* Form */}
-					<div className="grid gap-5 items-center md:grid-cols-4">
-						<FuncionarioSearch
-							selectedFuncionario={selectedFuncionario}
-							onSelect={handleSelectFuncionario}
-							recentFuncionarios={recentFuncionarios}
-							loading={loadingFuncionarios}
-							error={errorFuncionarios}
-						/>
+				<TabsContent value="funcionario">
+					{/* Main Card - Funcionário */}
+					<Card className="shadow-xl rounded-xl bg-white/80 backdrop-blur-md">
+						<CardHeader>
+							<CardTitle className="flex items-center gap-2 text-blue-900">
+								<FileDown className="h-5 w-5 text-blue-700" />
+								Relatório de Ponto
+							</CardTitle>
+							<CardDescription className="text-blue-700">
+								Selecione um funcionário e o período para gerar o relatório em PDF
+							</CardDescription>
+						</CardHeader>
 
-						<PeriodoSelector
-							mes={mes}
-							ano={ano}
-							onMesChange={setMes}
-							onAnoChange={setAno}
-						/>
+						<CardContent className="space-y-6">
+							{/* Form */}
+							<div className="grid gap-5 items-center md:grid-cols-4">
+								<FuncionarioSearch
+									selectedFuncionario={selectedFuncionario}
+									onSelect={handleSelectFuncionario}
+									recentFuncionarios={recentFuncionarios}
+									loading={loadingFuncionarios}
+									error={errorFuncionarios}
+								/>
 
-						<div className="flex justify-center md:justify-end mt-5 ">
-							<Button
-								onClick={handleGerarRelatorio}
-								disabled={!isFormValid || loadingPDF}
-								className="w-80 text-white bg-blue-500 hover:bg-blue-700 dark:bg-white dark:text-blue-900 dark:hover:bg-gray-200"
-								size="default"
-							>
-								{loadingPDF ? (
-									<>
-										<div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-										Gerando...
-									</>
-								) : (
-									<>
-										<Download className="mr-2 h-4 w-4" />
-										Gerar PDF
-									</>
-								)}
-							</Button>
-						</div>
-					</div>
+								<PeriodoSelector
+									mes={mes}
+									ano={ano}
+									onMesChange={setMes}
+									onAnoChange={setAno}
+								/>
 
-					{/* Error Display */}
-					{hasError && (
-						<Alert variant="destructive" className="shadow-lg rounded-xl bg-white/80 backdrop-blur-md">
-							<AlertDescription className="text-blue-700">
-								{errorFuncionarios || errorPDF}
-							</AlertDescription>
-						</Alert>
-					)}
+								<div className="flex justify-center md:justify-end mt-5 ">
+									<Button
+										onClick={handleGerarRelatorio}
+										disabled={!isFormValid || loadingPDF}
+										className="w-80 text-white bg-blue-500 hover:bg-blue-700 dark:bg-white dark:text-blue-900 dark:hover:bg-gray-200"
+										size="default"
+									>
+										{loadingPDF ? (
+											<>
+												<div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+												Gerando...
+											</>
+										) : (
+											<>
+												<Download className="mr-2 h-4 w-4" />
+												Gerar PDF
+											</>
+										)}
+									</Button>
+								</div>
+							</div>
 
-					{/* Recentes Cards - vertical */}
-					{recentFuncionarios.length > 0 && (
-						<div className="flex flex-col gap-2">
-							{recentFuncionarios.map((func) => (
-								<Card key={func.id} className="bg-muted/50 shadow-lg rounded-xl bg-white/80 backdrop-blur-md">
-									<CardContent className="pt-6">
-										<div className="flex items-center justify-between">
-											<div>
-												<p className="font-medium text-blue-900">{func.nome}</p>
-												<p className="text-xs text-blue-700">
-													Consultado em: {formatarData(func.dataConsulta)}
-												</p>
-												<p className="text-sm text-blue-700">
-													{selectedFuncionario?.id === func.id
-														? `Período: ${mes.padStart(2, "0")}/${ano}`
-														: "Funcionário recente"}
-												</p>
-											</div>
-											<Button
-												variant="outline"
-												size="sm"
-												onClick={() => handleLimparFuncionario(func.id)}
-												className="bg-blue-600 border-blue-200 text-white dark:text-blue-900 dark:bg-white dark:border-white hover:bg-blue-100 dark:hover:bg-gray-200"
-											>
-												Limpar
-											</Button>
+							{/* Error Display */}
+							{hasError && (
+								<Alert variant="destructive" className="shadow-lg rounded-xl bg-white/80 backdrop-blur-md">
+									<AlertDescription className="text-blue-700">
+										{errorFuncionarios || errorPDF}
+									</AlertDescription>
+								</Alert>
+							)}
+
+							{/* Recentes Cards - vertical */}
+							{recentFuncionarios.length > 0 && (
+								<div className="flex flex-col gap-2">
+									{recentFuncionarios.map((func) => (
+										<Card key={func.id} className="shadow-lg rounded-xl bg-white/80 backdrop-blur-md">
+											<CardContent className="pt-6">
+												<div className="flex items-center justify-between">
+													<div>
+														<p className="font-medium text-blue-900">{func.nome}</p>
+														<p className="text-xs text-blue-700">
+															Consultado em: {formatarData(func.dataConsulta)}
+														</p>
+														<p className="text-sm text-blue-700">
+															{selectedFuncionario?.id === func.id
+																? `Período: ${mes.padStart(2, "0")}/${ano}`
+																: "Funcionário recente"}
+														</p>
+													</div>
+													<Button
+														variant="outline"
+														size="sm"
+														onClick={() => handleLimparFuncionario(func.id)}
+														className="bg-blue-600 border-blue-200 text-white dark:text-blue-900 dark:bg-white dark:border-white hover:bg-blue-100 dark:hover:bg-gray-200"
+													>
+														Limpar
+													</Button>
+												</div>
+											</CardContent>
+										</Card>
+									))}
+								</div>
+							)}
+						</CardContent>
+					</Card>
+				</TabsContent>
+
+				<TabsContent value="unidade">
+					{/* Main Card - Unidade */}
+					<Card className="shadow-xl rounded-xl bg-white/80 backdrop-blur-md">
+						<CardHeader>
+							<CardTitle className="flex items-center gap-2 text-blue-900">
+								<Building2 className="h-5 w-5 text-blue-700" />
+								Relatório da Unidade
+							</CardTitle>
+							<CardDescription className="text-blue-700">
+								Gere um relatório consolidado de todos os funcionários da sua unidade
+							</CardDescription>
+						</CardHeader>
+
+						<CardContent className="space-y-6">
+							{/* Form */}
+							<div className="grid gap-5 items-center md:grid-cols-3">
+								<div className="flex flex-col gap-2">
+									<label className="text-sm font-medium text-blue-900">
+										Unidade
+									</label>
+									{loadingUnidades ? (
+										<div className="flex h-10 items-center rounded-md border border-blue-200 bg-white px-3 py-2 text-sm">
+											<div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-blue-700 border-t-transparent"></div>
+											Carregando unidades...
 										</div>
-									</CardContent>
-								</Card>
-							))}
-						</div>
-					)}
-				</CardContent>
-			</Card>
+									) : unidades.length > 0 ? (
+										<select
+											className="flex h-10 w-full rounded-md border border-blue-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+											value={selectedUnidadeId || ""}
+											onChange={(e) => setSelectedUnidadeId(Number(e.target.value) || null)}
+										>
+											<option value="">Selecione uma unidade</option>
+											{unidades.map((unidade) => (
+												<option key={unidade.id} value={unidade.id}>
+													{unidade.nome}
+												</option>
+											))}
+										</select>
+									) : user?.unidade_id ? (
+										<div className="flex h-10 items-center rounded-md border border-blue-200 bg-white px-3 py-2 text-sm">
+											<span>{unidadeNome || "Sua Unidade"}</span>
+										</div>
+									) : (
+										<div className="flex h-10 items-center rounded-md border border-blue-200 bg-white px-3 py-2 text-sm text-gray-400">
+											Nenhuma unidade encontrada
+										</div>
+									)}
+									{!user?.secretaria_id && (
+										<p className="text-xs text-amber-600 mt-1">
+											Você não está vinculado a nenhuma secretaria. Contate o administrador.
+										</p>
+									)}
+								</div>
+
+								<PeriodoSelector
+									mes={mes}
+									ano={ano}
+									onMesChange={setMes}
+									onAnoChange={setAno}
+								/>
+
+								<div className="flex justify-center md:justify-end mt-5">
+									<Button
+										onClick={handleGerarRelatorioPorUnidade}
+										disabled={(!selectedUnidadeId && !user?.unidade_id) || loadingUnidadePDF}
+										className="w-full md:w-80 text-white bg-blue-500 hover:bg-blue-700 dark:bg-white dark:text-blue-900 dark:hover:bg-gray-200"
+										size="default"
+									>
+										{loadingUnidadePDF ? (
+											<>
+												<div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+												Gerando...
+											</>
+										) : (
+											<>
+												<Download className="mr-2 h-4 w-4" />
+												Gerar PDF da Unidade
+											</>
+										)}
+									</Button>
+								</div>
+							</div>
+						</CardContent>
+					</Card>
+				</TabsContent>
+			</Tabs>
 		</div>
 	);
 }
