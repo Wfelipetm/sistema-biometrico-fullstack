@@ -376,76 +376,77 @@ const handleGerarRelatorioPorUnidade = async () => {
 							</CardDescription>
 						</CardHeader>
 
-						<CardContent className="space-y-6">
-							{/* Form */}
-							<div className="grid gap-5 items-center md:grid-cols-3">
-								<div className="flex flex-col gap-2">
-									<label className="text-sm font-medium text-blue-900">
-										Unidade
-									</label>
-									{loadingUnidades ? (
-										<div className="flex h-10 items-center rounded-md border border-blue-200 bg-white px-3 py-2 text-sm">
-											<div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-blue-700 border-t-transparent"></div>
-											Carregando unidades...
-										</div>
-									) : unidades.length > 0 ? (
-										<select
-											className="flex h-10 w-full rounded-md border border-blue-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-											value={selectedUnidadeId || ""}
-											onChange={(e) => setSelectedUnidadeId(Number(e.target.value) || null)}
-										>
-											<option value="">Selecione uma unidade</option>
-											{unidades.map((unidade) => (
-												<option key={unidade.id} value={unidade.id}>
-													{unidade.nome}
-												</option>
-											))}
-										</select>
-									) : user?.unidade_id ? (
-										<div className="flex h-10 items-center rounded-md border border-blue-200 bg-white px-3 py-2 text-sm">
-											<span>{unidadeNome || "Sua Unidade"}</span>
-										</div>
-									) : (
-										<div className="flex h-10 items-center rounded-md border border-blue-200 bg-white px-3 py-2 text-sm text-gray-400">
-											Nenhuma unidade encontrada
-										</div>
-									)}
-									{!user?.secretaria_id && (
-										<p className="text-xs text-amber-600 mt-1">
-											Você não está vinculado a nenhuma secretaria. Contate o administrador.
-										</p>
-									)}
-								</div>
-
-								<PeriodoSelector
-									mes={mes}
-									ano={ano}
-									onMesChange={setMes}
-									onAnoChange={setAno}
-								/>
-
-								<div className="flex justify-center md:justify-end mt-5">
-									<Button
-										onClick={handleGerarRelatorioPorUnidade}
-										disabled={(!selectedUnidadeId && !user?.unidade_id) || loadingUnidadePDF}
-										className="w-full md:w-80 text-white bg-blue-500 hover:bg-blue-700 dark:bg-white dark:text-blue-900 dark:hover:bg-gray-200"
-										size="default"
-									>
-										{loadingUnidadePDF ? (
-											<>
-												<div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-												Gerando...
-											</>
-										) : (
-											<>
-												<Download className="mr-2 h-4 w-4" />
-												Gerar PDF da Unidade
-											</>
-										)}
-									</Button>
-								</div>
-							</div>
-						</CardContent>
+<CardContent className="space-y-6">
+	{/* Form - lado a lado */}
+	<div className="grid gap-5 items-center grid-cols-1 md:grid-cols-3">
+		{/* Unidade */}
+		<div className="flex flex-col gap-2">
+			<label className="text-sm font-medium text-blue-900">Unidade</label>
+			{loadingUnidades ? (
+				<div className="flex h-10 items-center rounded-md border border-blue-200 bg-white px-3 py-2 text-sm">
+					<div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-blue-700 border-t-transparent"></div>
+					Carregando unidades...
+				</div>
+			) : unidades.length > 0 ? (
+				<select
+					className="flex h-10 w-full rounded-md border border-blue-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+					value={selectedUnidadeId || ""}
+					onChange={(e) => setSelectedUnidadeId(Number(e.target.value) || null)}
+				>
+					<option value="">Selecione uma unidade</option>
+					{unidades.map((unidade) => (
+						<option key={unidade.id} value={unidade.id}>
+							{unidade.nome}
+						</option>
+					))}
+				</select>
+			) : user?.unidade_id ? (
+				<div className="flex h-10 items-center rounded-md border border-blue-200 bg-white px-3 py-2 text-sm">
+					<span>{unidadeNome || "Sua Unidade"}</span>
+				</div>
+			) : (
+				<div className="flex h-10 items-center rounded-md border border-blue-200 bg-white px-3 py-2 text-sm text-gray-400">
+					Nenhuma unidade encontrada
+				</div>
+			)}
+			{!user?.secretaria_id && (
+				<p className="text-xs text-amber-600 mt-1">
+					Você não está vinculado a nenhuma secretaria. Contate o administrador.
+				</p>
+			)}
+		</div>
+		{/* Mês e Ano juntos */}
+		<div className="flex gap-2 items-end">
+			<PeriodoSelector
+				mes={mes}
+				ano={ano}
+				onMesChange={setMes}
+				onAnoChange={setAno}
+			/>
+		</div>
+		{/* Botão */}
+		<div className="flex justify-center md:justify-end items-end">
+			<Button
+				onClick={handleGerarRelatorioPorUnidade}
+				disabled={(!selectedUnidadeId && !user?.unidade_id) || loadingUnidadePDF}
+				className="w-full md:w-80 text-white bg-blue-500 hover:bg-blue-700 dark:bg-white dark:text-blue-900 dark:hover:bg-gray-200"
+				size="default"
+			>
+				{loadingUnidadePDF ? (
+					<>
+						<div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+						Gerando...
+					</>
+				) : (
+					<>
+						<Download className="mr-2 h-4 w-4" />
+						Gerar PDF da Unidade
+					</>
+				)}
+			</Button>
+		</div>
+	</div>
+</CardContent>
 					</Card>
 				</TabsContent>
 			</Tabs>
