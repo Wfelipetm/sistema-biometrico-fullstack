@@ -147,45 +147,7 @@ export default function RelatoriosPage() {
 		await gerarRelatorioPDF(selectedFuncionario.id, mes, ano);
 	};
 
-	const handleGerarRelatorioTodos = async () => {
-  const unidadeId = selectedUnidadeId || user?.unidade_id;
-  console.log('[COMPONENTE] Iniciando handleGerarRelatorioTodos', { unidadeId, mes, ano });
-  if (!unidadeId) {
-	toast.error("Selecione uma unidade para gerar os relatórios individuais");
-	console.warn('[COMPONENTE] Unidade não selecionada');
-	return;
-  }
-  try {
-	setLoadingTodosPDF(true);
-	toast.info("Iniciando geração de relatórios individuais para todos os funcionários da unidade");
-	// Primeiro precisamos buscar todos os funcionários da unidade
-	const response = await api.get(`/unid/${unidadeId}/funcionarios`);
-	console.log('[COMPONENTE] Funcionários retornados:', response.data);
-	if (!response.data || !Array.isArray(response.data) || response.data.length === 0) {
-	  toast.warning("Nenhum funcionário encontrado na unidade selecionada");
-	  console.warn('[COMPONENTE] Nenhum funcionário encontrado na unidade', unidadeId);
-	  return;
-	}
-	const funcionarios = response.data;
-	toast.info(`Gerando ${funcionarios.length} relatórios individuais. Isso pode levar algum tempo...`);
-	for (const funcionario of funcionarios) {
-	  try {
-		console.log('[COMPONENTE] Gerando PDF para funcionário', funcionario.id, funcionario.nome);
-		await gerarRelatorioPDFtodos(funcionario.id, mes, ano);
-		console.log('[COMPONENTE] PDF gerado para funcionário', funcionario.id);
-	  } catch (error) {
-		console.error(`[COMPONENTE] Erro ao gerar relatório para ${funcionario.nome}:`, error);
-	  }
-	}
-	toast.success(`Relatórios individuais gerados com sucesso!`);
-  } catch (error) {
-	console.error("Erro ao buscar funcionários da unidade:", error);
-	toast.error("Erro ao gerar relatórios individuais");
-  } finally {
-	setLoadingTodosPDF(false);
-	console.log('[COMPONENTE] Finalizou handleGerarRelatorioTodos', { unidadeId, mes, ano });
-  }
-	};
+
 
 
 const handleGerarRelatorioPorUnidade = async () => {
@@ -285,43 +247,42 @@ const handleGerarRelatorioPorUnidade = async () => {
 						</CardHeader>
 
 						<CardContent className="space-y-6">
-							{/* Form */}
-							<div className="grid gap-5 items-center md:grid-cols-4">
-								<FuncionarioSearch
-									selectedFuncionario={selectedFuncionario}
-									onSelect={handleSelectFuncionario}
-									recentFuncionarios={recentFuncionarios}
-									loading={loadingFuncionarios}
-									error={errorFuncionarios}
-								/>
-
+							{/* Form Funcionário - layout igual ao de unidade */}
+							<div className="flex flex-col md:flex-row gap-2 items-end w-full">
+								<div className="w-full md:w-auto">
+									<FuncionarioSearch
+										selectedFuncionario={selectedFuncionario}
+										onSelect={handleSelectFuncionario}
+										recentFuncionarios={recentFuncionarios}
+										loading={loadingFuncionarios}
+										error={errorFuncionarios}
+									/>
+								</div>
 								<PeriodoSelector
 									mes={mes}
 									ano={ano}
 									onMesChange={setMes}
 									onAnoChange={setAno}
+									inputWidthClass="w-full md:w-56 lg:w-72"
 								/>
-
-								<div className="flex justify-center md:justify-end mt-5 ">
-									<Button
-										onClick={handleGerarRelatorio}
-										disabled={!isFormValid || loadingPDF}
-										className="w-80 text-white bg-blue-500 hover:bg-blue-700 dark:bg-white dark:text-blue-900 dark:hover:bg-gray-200"
-										size="default"
-									>
-										{loadingPDF ? (
-											<>
-												<div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-												Gerando...
-											</>
-										) : (
-											<>
-												<Download className="mr-2 h-4 w-4" />
-												Gerar PDF
-											</>
-										)}
-									</Button>
-								</div>
+								<Button
+									onClick={handleGerarRelatorio}
+									disabled={!isFormValid || loadingPDF}
+									className="w-full md:w-80 text-white bg-blue-500 hover:bg-blue-700 dark:bg-white dark:text-blue-900 dark:hover:bg-gray-200"
+									size="default"
+								>
+									{loadingPDF ? (
+										<>
+											<div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+											Gerando...
+										</>
+									) : (
+										<>
+											<Download className="mr-2 h-4 w-4" />
+											Gerar PDF
+										</>
+									)}
+								</Button>
 							</div>
 
 							{/* Error Display */}
@@ -421,17 +382,15 @@ const handleGerarRelatorioPorUnidade = async () => {
 				</p>
 			)}
 		</div>
-		{/* Mês e Ano juntos */}
-		<div className="flex gap-2 items-end">
+		{/* Mês, Ano e Botão juntos */}
+		<div className="flex gap-2 items-end w-full md:w-auto">
 			<PeriodoSelector
 				mes={mes}
 				ano={ano}
 				onMesChange={setMes}
 				onAnoChange={setAno}
+				inputWidthClass="w-full md:w-56 lg:w-72"
 			/>
-		</div>
-		{/* Botão */}
-		<div className="flex justify-center md:justify-end items-end">
 			<Button
 				onClick={handleGerarRelatorioPorUnidade}
 				disabled={(!selectedUnidadeId && !user?.unidade_id) || loadingUnidadePDF}

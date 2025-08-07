@@ -41,58 +41,59 @@ export function PeriodoSelector({
 	ano,
 	onMesChange,
 	onAnoChange,
-}: PeriodoSelectorProps) {
+	inputWidthClass = "w-32 md:w-60", // valor padrão
+}: PeriodoSelectorProps & { inputWidthClass?: string }) {
 	return (
 		<>
-	<div className="grid gap-2">
-		<Label htmlFor="mes" className="text-blue-900">
-			Mês
-		</Label>
-		<Select value={mes} onValueChange={onMesChange}>
-			<SelectTrigger className="border-blue-300 text-blue-900 placeholder:text-blue-700 w-32 md:w-60">
-				<SelectValue
-					placeholder="Selecione o mês"
-					className="text-blue-900 placeholder:text-blue-700"
-				/>
-			</SelectTrigger>
-			<SelectContent>
-				{MESES.map((mesItem) => (
-					<SelectItem
-						key={mesItem.value}
-						value={mesItem.value}
-						className="text-blue-900 data-[state=checked]:bg-blue-100"
-					>
-						{mesItem.label}
-					</SelectItem>
-				))}
-			</SelectContent>
-		</Select>
-	</div>
+			<div className="grid gap-2">
+				<Label htmlFor="mes" className="text-blue-900">
+					Mês
+				</Label>
+				<Select value={mes} onValueChange={onMesChange}>
+					<SelectTrigger className={`border-blue-300 text-blue-900 placeholder:text-blue-700 ${inputWidthClass}`}>
+						<SelectValue
+							placeholder="Selecione o mês"
+							className="text-blue-900 placeholder:text-blue-700"
+						/>
+					</SelectTrigger>
+					<SelectContent>
+						{MESES.map((mesItem) => (
+							<SelectItem
+								key={mesItem.value}
+								value={mesItem.value}
+								className="text-blue-900 data-[state=checked]:bg-blue-100"
+							>
+								{mesItem.label}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+			</div>
 
-	<div className="grid gap-2">
-		<Label htmlFor="ano" className="text-blue-900">
-			Ano
-		</Label>
-		<Select value={ano} onValueChange={onAnoChange}>
-			<SelectTrigger className="border-blue-300 text-blue-900 placeholder:text-blue-700 w-32 md:w-60">
-				<SelectValue
-					placeholder="Selecione o ano"
-					className="text-blue-900 placeholder:text-blue-700"
-				/>
-			</SelectTrigger>
-			<SelectContent>
-				{ANOS.map((anoItem) => (
-					<SelectItem
-						key={anoItem.value}
-						value={anoItem.value}
-						className="text-blue-900 data-[state=checked]:bg-blue-100"
-					>
-						{anoItem.label}
-					</SelectItem>
-				))}
-			</SelectContent>
-		</Select>
-	</div>
+			<div className="grid gap-2">
+				<Label htmlFor="ano" className="text-blue-900">
+					Ano
+				</Label>
+				<Select value={ano} onValueChange={onAnoChange}>
+					<SelectTrigger className={`border-blue-300 text-blue-900 placeholder:text-blue-700 ${inputWidthClass}`}>
+						<SelectValue
+							placeholder="Selecione o ano"
+							className="text-blue-900 placeholder:text-blue-700"
+						/>
+					</SelectTrigger>
+					<SelectContent>
+						{ANOS.map((anoItem) => (
+							<SelectItem
+								key={anoItem.value}
+								value={anoItem.value}
+								className="text-blue-900 data-[state=checked]:bg-blue-100"
+							>
+								{anoItem.label}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+			</div>
 		</>
 	);
 }
