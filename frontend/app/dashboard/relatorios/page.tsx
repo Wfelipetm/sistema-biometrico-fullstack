@@ -21,6 +21,7 @@ type Funcionario = FuncionarioBase & { unidade_id?: number };
 import { useRelatorioPDF } from "@/hooks/use-relatorio-pdf";
 import { useRelatorioPDFtodos } from "@/hooks/use-relatorio-pdf-todos-new";
 import { FuncionarioSearch } from "@/components/funcionario-search";
+import { UnidadeSearch } from "@/components/unidade-search";
 import { PeriodoSelector } from "@/components/periodo-selector";
 import { useAuth } from "@/contexts/AuthContext"; // IMPORTANTE
 import { api } from "@/lib/api";
@@ -349,33 +350,17 @@ const handleGerarRelatorioPorUnidade = async () => {
 		{/* Unidade */}
 		<div className="flex flex-col gap-2">
 			<label className="text-sm font-medium text-blue-900">Unidade</label>
-			{loadingUnidades ? (
-				<div className="flex h-10 items-center rounded-md border border-blue-200 bg-white px-3 py-2 text-sm">
-					<div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-blue-700 border-t-transparent"></div>
-					Carregando unidades...
-				</div>
-			) : unidades.length > 0 ? (
-				<select
-					className="flex h-10 w-full rounded-md border border-blue-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-					value={selectedUnidadeId || ""}
-					onChange={(e) => setSelectedUnidadeId(Number(e.target.value) || null)}
-				>
-					<option value="">Selecione uma unidade</option>
-					{unidades.map((unidade) => (
-						<option key={unidade.id} value={unidade.id}>
-							{unidade.nome}
-						</option>
-					))}
-				</select>
-			) : user?.unidade_id ? (
-				<div className="flex h-10 items-center rounded-md border border-blue-200 bg-white px-3 py-2 text-sm">
-					<span>{unidadeNome || "Sua Unidade"}</span>
-				</div>
-			) : (
-				<div className="flex h-10 items-center rounded-md border border-blue-200 bg-white px-3 py-2 text-sm text-gray-400">
-					Nenhuma unidade encontrada
-				</div>
-			)}
+			<UnidadeSearch
+				unidades={unidades}
+				selectedUnidade={selectedUnidadeId ? unidades.find(u => u.id === selectedUnidadeId) || null : null}
+				onSelect={unidade => {
+					setSelectedUnidadeId(unidade ? unidade.id : null);
+					setUnidadeNome(unidade ? unidade.nome : "");
+				}}
+				loading={loadingUnidades}
+				error={null}
+				placeholder="Selecione uma unidade"
+			/>
 			{!user?.secretaria_id && (
 				<p className="text-xs text-amber-600 mt-1">
 					Você não está vinculado a nenhuma secretaria. Contate o administrador.
