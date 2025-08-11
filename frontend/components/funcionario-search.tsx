@@ -68,66 +68,70 @@ export function FuncionarioSearch({
     }, [user?.secretaria_id, user?.unidade_id, user?.papel]);
 
     return (
-        <div className="grid gap-2">
-            <Label htmlFor="funcionario" className="text-blue-900">Funcionário</Label>
-            <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild>
-                    <button
-                        type="button"
-                        className="w-full border border-blue-300 rounded px-3 py-2 text-left text-blue-900 placeholder:text-blue-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-                        disabled={loading || loadingProp}
-                    >
-                        {selectedFuncionario?.nome || "Selecione um funcionário..."}
-                    </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[447px] p-0">
-                    <Command>
-                        <CommandInput
-                            placeholder="Buscar funcionário..."
-                            className="border-blue-300 focus:border-blue-500 focus:ring-blue-500 text-blue-900 placeholder:text-blue-700"
-                            onValueChange={(value) => {
-                                // Filtra apenas funcionários da unidade do gestor logado
-                                if (user?.papel === "gestor" && user.unidade_id) {
-                                    setFuncionarios((prev) =>
-                                        prev.filter(
-                                            (func) =>
-                                                func.unidade_id === user.unidade_id &&
+        <>
+            <div className="grid gap-2">
+                <Label htmlFor="funcionario" className="text-blue-900">Funcionário</Label>
+                <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                        <button
+                            type="button"
+                            className="w-full border border-blue-300 rounded px-3 py-2 text-left text-blue-900 placeholder:text-blue-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                            disabled={loading || loadingProp}
+                        >
+                            {selectedFuncionario?.nome || "Selecione um funcionário..."}
+                        </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[447px] p-0">
+                        <Command>
+                            <CommandInput
+                                placeholder="Buscar funcionário..."
+                                className="border-blue-300 focus:border-blue-500 focus:ring-blue-500 text-blue-900 placeholder:text-blue-700"
+                                onValueChange={(value) => {
+                                    // Filtra apenas funcionários da unidade do gestor logado
+                                    if (user?.papel === "gestor" && user.unidade_id) {
+                                        setFuncionarios((prev) =>
+                                            prev.filter(
+                                                (func) =>
+                                                    func.unidade_id === user.unidade_id &&
+                                                    func.nome.toLowerCase().includes(value.toLowerCase())
+                                            )
+                                        );
+                                    } else {
+                                        setFuncionarios((prev) =>
+                                            prev.filter((func) =>
                                                 func.nome.toLowerCase().includes(value.toLowerCase())
-                                        )
-                                    );
-                                } else {
-                                    setFuncionarios((prev) =>
-                                        prev.filter((func) =>
-                                            func.nome.toLowerCase().includes(value.toLowerCase())
-                                        )
-                                    );
-                                }
-                            }}
-                        />
-                        <CommandList>
-                            <CommandGroup heading="Todos">
-                                {funcionarios.map((funcionario) => (
-                                    <CommandItem
-                                        key={funcionario.id}
-                                        value={funcionario.nome}
-                                        onSelect={() => {
-                                            onSelect(funcionario);
-                                            setOpen(false);
-                                        }}
-                                        className="text-blue-900 data-[selected=true]:bg-blue-100"
-                                    >
-                                        {funcionario.nome}
-                                    </CommandItem>
-                                ))}
-                            </CommandGroup>
-                            <CommandEmpty className="text-blue-700">Nenhum funcionário encontrado.</CommandEmpty>
-                        </CommandList>
-                    </Command>
-                </PopoverContent>
-            </Popover>
+                                            )
+                                        );
+                                    }
+                                }}
+                            />
+                            <CommandList>
+                                <CommandGroup heading="Todos">
+                                    {funcionarios.map((funcionario) => (
+                                        <CommandItem
+                                            key={funcionario.id}
+                                            value={funcionario.nome}
+                                            onSelect={() => {
+                                                onSelect(funcionario);
+                                                setOpen(false);
+                                            }}
+                                            className="text-blue-900 data-[selected=true]:bg-blue-100"
+                                        >
+                                            {funcionario.nome}
+                                        </CommandItem>
+                                    ))}
+                                </CommandGroup>
+                                <CommandEmpty className="text-blue-700">Nenhum funcionário encontrado.</CommandEmpty>
+                            </CommandList>
+                        </Command>
+                    </PopoverContent>
+                </Popover>
+            </div>
             {(error || errorProp) && (
-                <p className="text-sm text-destructive">{error || errorProp}</p>
+                <div className="mt-1">
+                    <p className="text-sm text-destructive">{error || errorProp}</p>
+                </div>
             )}
-        </div>
+        </>
     );
 }

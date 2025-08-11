@@ -12,6 +12,14 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Label } from "@/components/ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import {
 	useFuncionarios,
 	type Funcionario as FuncionarioBase,
@@ -43,7 +51,7 @@ export default function RelatoriosPage() {
 	const [loadingUnidadePDF, setLoadingUnidadePDF] = useState(false);
 	const [loadingTodosPDF, setLoadingTodosPDF] = useState(false);
 	const [unidadeNome, setUnidadeNome] = useState<string>("");
-	const [unidades, setUnidades] = useState<Array<{id: number, nome: string}>>([]);
+	const [unidades, setUnidades] = useState<Array<{ id: number, nome: string }>>([]);
 	const [selectedUnidadeId, setSelectedUnidadeId] = useState<number | null>(null);
 	const [loadingUnidades, setLoadingUnidades] = useState(false);
 
@@ -57,7 +65,7 @@ export default function RelatoriosPage() {
 		loading: loadingPDF,
 		error: errorPDF,
 	} = useRelatorioPDF();
-	
+
 	const {
 		gerarRelatorioPDF: gerarRelatorioPDFtodos,
 		loading: loadingPDFtodos,
@@ -87,7 +95,7 @@ export default function RelatoriosPage() {
 					console.error("Erro ao buscar nome da unidade:", error);
 				}
 			};
-			
+
 			fetchUnidadeNome();
 		}
 	}, [user]);
@@ -109,7 +117,7 @@ export default function RelatoriosPage() {
 					setLoadingUnidades(false);
 				}
 			};
-			
+
 			fetchUnidades();
 		}
 	}, [user]);
@@ -151,34 +159,34 @@ export default function RelatoriosPage() {
 
 
 
-const handleGerarRelatorioPorUnidade = async () => {
-	const unidadeId = String(selectedUnidadeId || user?.unidade_id);
-	console.log('[COMPONENTE] Iniciando handleGerarRelatorioPorUnidade', { unidadeId, mes, ano });
-	if (!unidadeId) {
-		toast.error("Selecione uma unidade para gerar o relatório");
-		console.warn('[COMPONENTE] Unidade não selecionada');
-		return;
-	}
-	setLoadingUnidadePDF(true);
-	try {
-		// Antes de gerar o PDF, buscar os dados da unidade para debug
-		const response = await api.get(`/unid/${unidadeId}/funcionarios`);
-		console.log('[COMPONENTE] Funcionários da unidade para PDF:', response.data);
-		if (!response.data || !Array.isArray(response.data) || response.data.length === 0) {
-			toast.warning("Nenhum funcionário encontrado na unidade selecionada");
-			console.warn('[COMPONENTE] Nenhum funcionário encontrado na unidade', unidadeId);
+	const handleGerarRelatorioPorUnidade = async () => {
+		const unidadeId = String(selectedUnidadeId || user?.unidade_id);
+		console.log('[COMPONENTE] Iniciando handleGerarRelatorioPorUnidade', { unidadeId, mes, ano });
+		if (!unidadeId) {
+			toast.error("Selecione uma unidade para gerar o relatório");
+			console.warn('[COMPONENTE] Unidade não selecionada');
 			return;
 		}
-		await gerarRelatorioPDFtodos(unidadeId, mes, ano);
-		console.log('[COMPONENTE] PDF da unidade gerado com sucesso', unidadeId);
-	} catch (error) {
-		console.error("Erro ao gerar relatório da unidade:", error);
-		toast.error("Erro ao gerar relatório da unidade");
-	} finally {
-		setLoadingUnidadePDF(false);
-		console.log('[COMPONENTE] Finalizou handleGerarRelatorioPorUnidade', { unidadeId, mes, ano });
-	}
-};
+		setLoadingUnidadePDF(true);
+		try {
+			// Antes de gerar o PDF, buscar os dados da unidade para debug
+			const response = await api.get(`/unid/${unidadeId}/funcionarios`);
+			console.log('[COMPONENTE] Funcionários da unidade para PDF:', response.data);
+			if (!response.data || !Array.isArray(response.data) || response.data.length === 0) {
+				toast.warning("Nenhum funcionário encontrado na unidade selecionada");
+				console.warn('[COMPONENTE] Nenhum funcionário encontrado na unidade', unidadeId);
+				return;
+			}
+			await gerarRelatorioPDFtodos(unidadeId, mes, ano);
+			console.log('[COMPONENTE] PDF da unidade gerado com sucesso', unidadeId);
+		} catch (error) {
+			console.error("Erro ao gerar relatório da unidade:", error);
+			toast.error("Erro ao gerar relatório da unidade");
+		} finally {
+			setLoadingUnidadePDF(false);
+			console.log('[COMPONENTE] Finalizou handleGerarRelatorioPorUnidade', { unidadeId, mes, ano });
+		}
+	};
 
 	const isFormValid = selectedFuncionario && mes && ano;
 	const hasError = errorFuncionarios || errorPDF;
@@ -205,7 +213,7 @@ const handleGerarRelatorioPorUnidade = async () => {
 	}
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-3">
 			{/* Header */}
 			<div className="shadow-lg rounded-xl bg-white/80 backdrop-blur-md p-6">
 				<h1 className="text-3xl font-bold tracking-tight text-blue-900">
@@ -217,10 +225,10 @@ const handleGerarRelatorioPorUnidade = async () => {
 			</div>
 
 			<Tabs defaultValue="funcionario">
-				<TabsList className="grid w-full grid-cols-2">
+				<TabsList className="grid w-full bg-white/0 gap-20 px-10 grid-cols-2">
 					<TabsTrigger
 						value="funcionario"
-						className="text-blue-900 data-[state=active]:bg-blue-400 data-[state=active]:text-white"
+						className="text-blue-900 bg-white shadow-lg backdrop-blur-md data-[state=active]:bg-blue-600 data-[state=active]:text-white"
 					>
 						Relatório por Funcionário
 					</TabsTrigger>
@@ -228,7 +236,7 @@ const handleGerarRelatorioPorUnidade = async () => {
 						value="unidade"
 						disabled={!user?.secretaria_id && !user?.unidade_id}
 						title={!user?.secretaria_id && !user?.unidade_id ? "Disponível apenas para usuários com secretaria ou unidade" : ""}
-						className="text-blue-900 data-[state=active]:bg-blue-400 data-[state=active]:text-white"
+						className="text-blue-900 bg-white shadow-lg backdrop-blur-md data-[state=active]:bg-blue-600 data-[state=active]:text-white"
 					>
 						Relatório da Unidade
 					</TabsTrigger>
@@ -250,7 +258,7 @@ const handleGerarRelatorioPorUnidade = async () => {
 						<CardContent className="space-y-6">
 							{/* Form Funcionário - layout igual ao de unidade */}
 							<div className="flex flex-col md:flex-row gap-2 items-end w-full">
-								<div className="w-full md:w-auto">
+								<div className="w-full md:w-96">
 									<FuncionarioSearch
 										selectedFuncionario={selectedFuncionario}
 										onSelect={handleSelectFuncionario}
@@ -264,12 +272,12 @@ const handleGerarRelatorioPorUnidade = async () => {
 									ano={ano}
 									onMesChange={setMes}
 									onAnoChange={setAno}
-									inputWidthClass="w-full md:w-56 lg:w-72"
+									inputWidthClass="w-full md:w-56 lg:w-96"
 								/>
 								<Button
 									onClick={handleGerarRelatorio}
 									disabled={!isFormValid || loadingPDF}
-									className="w-full md:w-80 text-white bg-blue-500 hover:bg-blue-700 dark:bg-white dark:text-blue-900 dark:hover:bg-gray-200"
+									className="w-full md:w-96 text-white bg-blue-500 hover:bg-blue-700 dark:bg-white dark:text-blue-900 dark:hover:bg-gray-200"
 									size="default"
 								>
 									{loadingPDF ? (
@@ -344,59 +352,85 @@ const handleGerarRelatorioPorUnidade = async () => {
 							</CardDescription>
 						</CardHeader>
 
-<CardContent className="space-y-6">
-	{/* Form - lado a lado */}
-	<div className="grid gap-5 items-center grid-cols-1 md:grid-cols-3">
-		{/* Unidade */}
-		<div className="flex flex-col gap-2">
-			<label className="text-sm font-medium text-blue-900">Unidade</label>
-			<UnidadeSearch
-				unidades={unidades}
-				selectedUnidade={selectedUnidadeId ? unidades.find(u => u.id === selectedUnidadeId) || null : null}
-				onSelect={unidade => {
-					setSelectedUnidadeId(unidade ? unidade.id : null);
-					setUnidadeNome(unidade ? unidade.nome : "");
-				}}
-				loading={loadingUnidades}
-				error={null}
-				placeholder="Selecione uma unidade"
-			/>
-			{!user?.secretaria_id && (
-				<p className="text-xs text-amber-600 mt-1">
-					Você não está vinculado a nenhuma secretaria. Contate o administrador.
-				</p>
-			)}
-		</div>
-		{/* Mês, Ano e Botão juntos */}
-		<div className="flex gap-2 items-end w-full md:w-auto">
-			<PeriodoSelector
-				mes={mes}
-				ano={ano}
-				onMesChange={setMes}
-				onAnoChange={setAno}
-				inputWidthClass="w-full md:w-56 lg:w-72"
-			/>
-			<Button
-				onClick={handleGerarRelatorioPorUnidade}
-				disabled={(!selectedUnidadeId && !user?.unidade_id) || loadingUnidadePDF}
-				className="w-full md:w-80 text-white bg-blue-500 hover:bg-blue-700 dark:bg-white dark:text-blue-900 dark:hover:bg-gray-200"
-				size="default"
-			>
-				{loadingUnidadePDF ? (
-					<>
-						<div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-						Gerando...
-					</>
-				) : (
-					<>
-						<Download className="mr-2 h-4 w-4" />
-						Gerar PDF da Unidade
-					</>
-				)}
-			</Button>
-		</div>
-	</div>
-</CardContent>
+						<CardContent className="space-y-6">
+							{/* Form - todos alinhados */}
+							<div className="flex flex-col md:flex-row gap-2 items-end w-full">
+								{/* Unidade */}
+								<div className="flex flex-col gap-2 w-full md:w-auto">
+									<Label className="text-sm font-medium text-blue-900">Unidade</Label>
+									{loadingUnidades ? (
+										<div className="flex h-10 w-full md:w-96 items-center rounded-md border border-blue-200 bg-white px-3 py-2 text-sm">
+											<div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
+											Carregando unidades...
+										</div>
+									) : unidades.length > 0 ? (
+										<Select 
+											value={selectedUnidadeId?.toString() || ""} 
+											onValueChange={(value) => setSelectedUnidadeId(Number(value) || null)}
+										>
+											<SelectTrigger className="w-full md:w-96 border-blue-300 text-blue-900 placeholder:text-blue-700">
+												<SelectValue 
+													placeholder="Selecione uma unidade"
+													className="text-blue-900 placeholder:text-blue-700"
+												/>
+											</SelectTrigger>
+											<SelectContent>
+												{unidades.map((unidade) => (
+													<SelectItem
+														key={unidade.id}
+														value={unidade.id.toString()}
+														className="text-blue-900 data-[state=checked]:bg-blue-100"
+													>
+														{unidade.nome}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+									) : user?.unidade_id ? (
+										<div className="flex h-10 w-full md:w-96 items-center rounded-md border border-blue-200 bg-white px-3 py-2 text-sm">
+											<span>{unidadeNome || "Sua Unidade"}</span>
+										</div>
+									) : (
+										<div className="flex h-10 w-full md:w-96 items-center rounded-md border border-blue-200 bg-white px-3 py-2 text-sm text-gray-400">
+											Nenhuma unidade encontrada
+										</div>
+									)}
+								</div>
+								{/* Período (Mês e Ano) */}
+								<PeriodoSelector
+									mes={mes}
+									ano={ano}
+									onMesChange={setMes}
+									onAnoChange={setAno}
+									inputWidthClass="w-full h-10 md:w-56 lg:w-72"
+								/>
+								{/* Botão */}
+								<Button
+									onClick={handleGerarRelatorioPorUnidade}
+									disabled={(!selectedUnidadeId && !user?.unidade_id) || loadingUnidadePDF}
+									className="w-full md:w-80 text-white bg-blue-500 hover:bg-blue-700 dark:bg-white dark:text-blue-900 dark:hover:bg-gray-200"
+									size="default"
+								>
+									{loadingUnidadePDF ? (
+										<>
+											<div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+											Gerando...
+										</>
+									) : (
+										<>
+											<Download className="mr-2 h-4 w-4" />
+											Gerar PDF da Unidade
+										</>
+									)}
+								</Button>
+							</div>
+							{/* Aviso sobre secretaria */}
+							{!user?.secretaria_id && (
+								<p className="text-xs text-amber-600">
+									Você não está vinculado a nenhuma secretaria. Contate o administrador.
+								</p>
+							)}
+						</CardContent>
 					</Card>
 				</TabsContent>
 			</Tabs>
