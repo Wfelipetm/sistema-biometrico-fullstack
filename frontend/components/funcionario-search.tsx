@@ -75,7 +75,7 @@ export function FuncionarioSearch({
                     <PopoverTrigger asChild>
                         <button
                             type="button"
-                            className="w-full border border-blue-300 rounded px-3 py-1 text-left text-blue-900 placeholder:text-blue-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                            className="w-full border border-blue-300 rounded px-3 h-10 text-left text-blue-900 placeholder:text-blue-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                             disabled={loading || loadingProp}
                         >
                             {selectedFuncionario?.nome || "Selecione um funcionário..."}

@@ -225,7 +225,7 @@ export default function RelatoriosPage() {
 			</div>
 
 			<Tabs defaultValue="funcionario">
-				<TabsList className="grid w-full bg-white/0 gap-20 px-10 grid-cols-2">
+				<TabsList className="grid w-full bg-white/0 gap-10 grid-cols-2">
 					<TabsTrigger
 						value="funcionario"
 						className="text-blue-900 bg-white shadow-lg backdrop-blur-md data-[state=active]:bg-blue-600 data-[state=active]:text-white"
@@ -402,13 +402,13 @@ export default function RelatoriosPage() {
 									ano={ano}
 									onMesChange={setMes}
 									onAnoChange={setAno}
-									inputWidthClass="w-full h-10 md:w-56 lg:w-72"
+									inputWidthClass="w-full h-10 md:w-56 lg:w-96"
 								/>
 								{/* Botão */}
 								<Button
 									onClick={handleGerarRelatorioPorUnidade}
 									disabled={(!selectedUnidadeId && !user?.unidade_id) || loadingUnidadePDF}
-									className="w-full md:w-80 text-white bg-blue-500 hover:bg-blue-700 dark:bg-white dark:text-blue-900 dark:hover:bg-gray-200"
+									className="w-full md:w-96 text-white bg-blue-500 hover:bg-blue-700 dark:bg-white dark:text-blue-900 dark:hover:bg-gray-200"
 									size="default"
 								>
 									{loadingUnidadePDF ? (
