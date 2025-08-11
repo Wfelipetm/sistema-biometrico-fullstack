@@ -249,7 +249,7 @@ export default function RelatoriosPage() {
 								<FileDown className="h-5 w-5 text-blue-700" />
 								Relatório de Ponto
 							</CardTitle>
-							<CardDescription className="text-blue-700">
+							<CardDescription className="text-blue-700 ">
 								Selecione um funcionário e o período para gerar o relatório em PDF
 							</CardDescription>
 						</CardHeader>
