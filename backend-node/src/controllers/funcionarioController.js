@@ -65,7 +65,8 @@ module.exports = {
       const { nome, cargo, unidade_id } = req.query;
       let query = `
         SELECT id, nome, cpf, cargo, unidade_id, data_admissao, id_biometrico, matricula, created_at
-        FROM funcionarios`;
+        FROM funcionarios
+        WHERE status = 1`;
 
       const conditions = [];
       const values = [];
@@ -82,7 +83,7 @@ module.exports = {
         values.push(unidade_id);
       }
       if (conditions.length > 0) {
-        query += ` WHERE ${conditions.join(' AND ')}`;
+        query += ` AND ${conditions.join(' AND ')}`;
       }
 
       const result = await db.query(query, values);
@@ -177,9 +178,9 @@ module.exports = {
       const funcionariosResult = await db.query(
         `SELECT id, nome, cpf, cargo, data_admissao, id_biometrico, matricula, tipo_escala, telefone, email 
          FROM funcionarios 
-         WHERE unidade_id = $1
+         WHERE unidade_id = $1 AND status = 1
          LIMIT $2 OFFSET $3`,
-        [unidadeId, limit, offset] // Passando os parâmetros de limite e offset para a query
+        [unidadeId, limit, offset]
       );
 
       if (funcionariosResult.rowCount === 0) {
@@ -198,12 +199,12 @@ module.exports = {
     const { id } = req.params;
     try {
       const result = await db.query(
-        `SELECT * FROM funcionarios WHERE id = $1`,
+        `SELECT * FROM funcionarios WHERE id = $1 AND status = 1`,
         [id]
       );
 
       if (result.rowCount === 0) {
-        return res.status(404).json({ error: "Funcionário não encontrado." });
+        return res.status(404).json({ error: "Funcionário não encontrado ou inativo." });
       }
 
       res.status(200).json(result.rows[0]);
@@ -218,14 +219,17 @@ module.exports = {
 
 
 
-  async excluirFuncionario(req, res) {
+  async inativarFuncionario(req, res) {
     const { id } = req.params;
     try {
-      const result = await db.query('DELETE FROM funcionarios WHERE id = $1 RETURNING *', [id]);
+      const result = await db.query(
+        'UPDATE funcionarios SET status = 0, updated_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *',
+        [id]
+      );
       if (result.rowCount === 0) {
         return res.status(404).json({ error: 'Funcionário não encontrado' });
       }
-      res.status(200).json({ message: 'Funcionário excluído com sucesso' });
+      res.status(200).json({ message: 'Funcionário inativado com sucesso' });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

@@ -63,6 +63,9 @@ export default function FuncionariosPage() {
 
       let data: Funcionario[] = await response.json()
 
+      // Filtra apenas funcionários ativos (status=1)
+      data = data.filter((func: any) => func.status === 1 || func.status === undefined)
+
       if (user.papel === "gestor" && user.unidade_id) {
         const unidadeResp = await api.get(`/unid/unidade/${user.unidade_id}`)
         const unidadeNome = unidadeResp.data?.nome || ""
@@ -88,20 +91,20 @@ export default function FuncionariosPage() {
 
   const handleDelete = async (id: string, nome: string) => {
     toast.confirm(
-      "Excluir Funcionário",
-      `Tem certeza que deseja excluir o funcionário "${nome}"? Esta ação não pode ser desfeita.`,
+      "Inativar Funcionário",
+      `Tem certeza que deseja inativar o funcionário "${nome}"? Ele não aparecerá mais nas listagens, mas poderá ser reativado futuramente.`,
       async () => {
         try {
-          await api.delete(`/funci/funcionario/${id}`)
+          await api.put(`/funci/funcionario/${id}`)
           setFuncionarios((prev) => prev.filter((func) => func.id !== id))
-          toast.success("Funcionário excluído!", "O funcionário foi removido com sucesso.")
+          toast.success("Funcionário inativado!", "O funcionário foi marcado como inativo.")
         } catch (error) {
-          console.error("Erro ao excluir funcionário:", error)
-          toast.error("Erro ao excluir", "Não foi possível excluir o funcionário. Tente novamente.")
+          console.error("Erro ao inativar funcionário:", error)
+          toast.error("Erro ao inativar", "Não foi possível inativar o funcionário. Tente novamente.")
         }
       },
       {
-        confirmText: "Excluir",
+        confirmText: "Inativar",
         cancelText: "Cancelar",
         variant: "danger",
       },
@@ -257,7 +260,7 @@ export default function FuncionariosPage() {
                                   <Edit className="h-4 w-4 text-blue-700" />
                                   <span className="sr-only">Editar</span>
                                 </Button>
-                                 {user?.papel === "master" && (
+                                 {user?.papel === "admin" && (
                                   <Button
                                   variant="ghost"
                                   size="icon"

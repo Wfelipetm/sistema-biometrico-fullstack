@@ -25,7 +25,7 @@ router.get('/funcionario/:id', funcionarioController.obterFuncionarioPorId);
 router.put('/funcionario/:id', funcionarioController.atualizarFuncionario);
 
 //Rota para deletar funcionario 
-router.delete('/funcionario/:id', funcionarioController.excluirFuncionario);
+router.put('/funcionario-inativo/:id', funcionarioController.inativarFuncionario);
 
 
 module.exports = router;
