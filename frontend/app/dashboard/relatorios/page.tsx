@@ -29,6 +29,7 @@ type Funcionario = FuncionarioBase & { unidade_id?: number };
 import { useRelatorioPDF } from "@/hooks/use-relatorio-pdf";
 import { useRelatorioPDFtodos } from "@/hooks/use-relatorio-pdf-todos-new";
 import { FuncionarioSearch } from "@/components/funcionario-search";
+import { UnidadeSearch } from "@/components/unidade-search";
 import { PeriodoSelector } from "@/components/periodo-selector";
 import { useAuth } from "@/contexts/AuthContext"; // IMPORTANTE
 import { api } from "@/lib/api";
