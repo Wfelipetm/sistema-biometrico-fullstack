@@ -255,16 +255,17 @@ export default function RelatoriosPage() {
 							</CardDescription>
 						</CardHeader>
 
-						<CardContent className="space-y-6">
+						<CardContent className="space-y-2 min-h-[100px]">
 							{/* Form Funcionário - layout igual ao de unidade */}
 							<div className="flex flex-col md:flex-row gap-2 items-end w-full">
-								<div className="w-full md:w-96">
+								<div className="flex flex-col w-full md:w-auto">
 									<FuncionarioSearch
 										selectedFuncionario={selectedFuncionario}
 										onSelect={handleSelectFuncionario}
 										recentFuncionarios={recentFuncionarios}
 										loading={loadingFuncionarios}
 										error={errorFuncionarios}
+										inputWidthClass="w-full md:w-96"
 									/>
 								</div>
 								<PeriodoSelector
@@ -288,7 +289,7 @@ export default function RelatoriosPage() {
 									) : (
 										<>
 											<Download className="mr-2 h-4 w-4" />
-											Gerar PDF
+											Gerar PDF do Funcionário
 										</>
 									)}
 								</Button>
@@ -352,11 +353,11 @@ export default function RelatoriosPage() {
 							</CardDescription>
 						</CardHeader>
 
-						<CardContent className="space-y-6">
+						<CardContent className="space-y-6 min-h-[100px]">
 							{/* Form - todos alinhados */}
 							<div className="flex flex-col md:flex-row gap-2 items-end w-full">
 								{/* Unidade */}
-								<div className="flex flex-col gap-2 w-full md:w-auto">
+								<div className="flex flex-col w-full md:w-auto">
 									<Label className="text-sm font-medium text-blue-900">Unidade</Label>
 									{loadingUnidades ? (
 										<div className="flex h-10 w-full md:w-96 items-center rounded-md border border-blue-200 bg-white px-3 py-2 text-sm">
@@ -402,7 +403,7 @@ export default function RelatoriosPage() {
 									ano={ano}
 									onMesChange={setMes}
 									onAnoChange={setAno}
-									inputWidthClass="w-full h-10 md:w-56 lg:w-96"
+									inputWidthClass="w-full md:w-56 lg:w-96"
 								/>
 								{/* Botão */}
 								<Button
@@ -424,12 +425,16 @@ export default function RelatoriosPage() {
 									)}
 								</Button>
 							</div>
+							
 							{/* Aviso sobre secretaria */}
 							{!user?.secretaria_id && (
 								<p className="text-xs text-amber-600">
 									Você não está vinculado a nenhuma secretaria. Contate o administrador.
 								</p>
 							)}
+							
+							{/* Espaço reservado para manter altura consistente */}
+							
 						</CardContent>
 					</Card>
 				</TabsContent>
