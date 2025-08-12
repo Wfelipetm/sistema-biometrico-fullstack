@@ -16,7 +16,7 @@ import requests  # Para fazer chamadas HTTP ao backend em Node.js
 def send_email(subject, recipient, body):
     try:
         # Envia um POST com os dados do e-mail para o backend Node.js
-        response = requests.post("http://localhost:3001/api/enviar-email", json={
+        response = requests.post("http://biometrico.itaguai.rj.gov.br:3001/api/enviar-email", json={
             "subject": subject,
             "recipient": recipient,
             "body": body
@@ -168,13 +168,21 @@ def register_ponto():
         }
         try:
             response = requests.post(
-                "http://localhost:3001/reg/calcular-registro-ponto",
+                "http://biometrico.itaguai.rj.gov.br:3001/reg/calcular-registro-ponto",
                 json=payload,
                 timeout=10
             )
             response.raise_for_status()
         except requests.RequestException as e:
-            print("Erro ao registrar ponto no backend Node.js:", str(e))
+            # Se o Node.js retornou erro, tente pegar a mensagem do corpo da resposta
+            if e.response is not None and e.response.content:
+                try:
+                    error_json = e.response.json()
+                    return jsonify(error_json), e.response.status_code
+                except Exception:
+                    # Se não for JSON, retorna texto puro
+                    return jsonify({"message": e.response.text}), e.response.status_code
+            # Se não tem resposta do Node, retorna erro genérico
             return jsonify({"message": "Erro ao registrar ponto no sistema"}), 500
 
         # Envia e-mail de comprovante de entrada
@@ -233,13 +241,21 @@ def register_ponto():
         }
         try:
             response = requests.post(
-                "http://localhost:3001/reg/calcular-registro-ponto",
+                "http://biometrico.itaguai.rj.gov.br:3001/reg/calcular-registro-ponto",
                 json=payload,
                 timeout=10
             )
             response.raise_for_status()
         except requests.RequestException as e:
-            print("Erro ao registrar ponto no backend Node.js:", str(e))
+            # Se o Node.js retornou erro, tente pegar a mensagem do corpo da resposta
+            if e.response is not None and e.response.content:
+                try:
+                    error_json = e.response.json()
+                    return jsonify(error_json), e.response.status_code
+                except Exception:
+                    # Se não for JSON, retorna texto puro
+                    return jsonify({"message": e.response.text}), e.response.status_code
+            # Se não tem resposta do Node, retorna erro genérico
             return jsonify({"message": "Erro ao registrar ponto no sistema"}), 500
 
         # Envia e-mail de comprovante de saída
