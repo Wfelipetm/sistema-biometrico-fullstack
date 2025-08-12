@@ -95,7 +95,7 @@ export default function FuncionariosPage() {
       `Tem certeza que deseja inativar o funcionário "${nome}"? Ele não aparecerá mais nas listagens, mas poderá ser reativado futuramente.`,
       async () => {
         try {
-          await api.put(`/funci/funcionario/${id}`)
+          await api.put(`/funci/funcionario-inativo/${id}`)
           setFuncionarios((prev) => prev.filter((func) => func.id !== id))
           toast.success("Funcionário inativado!", "O funcionário foi marcado como inativo.")
         } catch (error) {

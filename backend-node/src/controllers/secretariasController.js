@@ -76,7 +76,7 @@ module.exports = {
                 COUNT(rp.id) AS total_registros_hoje
             FROM secretarias s
             LEFT JOIN unidades u ON u.secretaria_id = s.id
-            LEFT JOIN funcionarios f ON f.unidade_id = u.id
+            LEFT JOIN funcionarios f ON f.unidade_id = u.id AND f.status = 1
             LEFT JOIN registros_ponto rp ON rp.funcionario_id = f.id 
                 AND TO_CHAR(rp.data_hora, 'YYYY-MM-DD') = TO_CHAR(NOW() AT TIME ZONE 'America/Sao_Paulo', 'YYYY-MM-DD')
             WHERE s.id = $1
@@ -128,7 +128,7 @@ module.exports = {
                 s.nome AS secretaria_nome,
                 COUNT(rp.id) AS total_registros
             FROM registros_ponto rp
-            JOIN funcionarios f ON rp.funcionario_id = f.id
+            JOIN funcionarios f ON rp.funcionario_id = f.id AND f.status = 1
             JOIN unidades u ON f.unidade_id = u.id
             JOIN secretarias s ON u.secretaria_id = s.id
             WHERE s.id = $1
@@ -164,7 +164,7 @@ module.exports = {
                 f.tipo_escala AS tipo_escala,
                 u.nome AS unidade_nome
             FROM registros_ponto r
-            INNER JOIN funcionarios f ON r.funcionario_id = f.id
+            INNER JOIN funcionarios f ON r.funcionario_id = f.id AND f.status = 1
             INNER JOIN unidades u ON f.unidade_id = u.id
             WHERE u.secretaria_id = $1
         `;
@@ -204,7 +204,7 @@ module.exports = {
                 TO_CHAR(rp.data_hora, 'DD/MM/YYYY') AS data,
                 COUNT(rp.id) AS registroTotal
             FROM registros_ponto rp
-            JOIN funcionarios f ON rp.funcionario_id = f.id
+            JOIN funcionarios f ON rp.funcionario_id = f.id AND f.status = 1
             JOIN unidades u ON f.unidade_id = u.id
             JOIN secretarias s ON u.secretaria_id = s.id
             WHERE s.id = $1
@@ -245,7 +245,7 @@ module.exports = {
             JOIN
                 unidades u ON f.unidade_id = u.id
             WHERE
-                u.secretaria_id = $1
+                u.secretaria_id = $1 AND f.status = 1
             GROUP BY
                 u.secretaria_id;
         `;
@@ -285,7 +285,7 @@ module.exports = {
         JOIN
             secretarias s ON u.secretaria_id = s.id
         WHERE
-            s.id = $1
+            s.id = $1 AND f.status = 1
         ORDER BY
             f.created_at DESC
         LIMIT $2
@@ -320,7 +320,7 @@ module.exports = {
                 `SELECT f.*, u.nome AS unidade_nome
              FROM funcionarios f
              JOIN unidades u ON f.unidade_id = u.id
-             WHERE u.secretaria_id = $1
+             WHERE u.secretaria_id = $1 AND f.status = 1
              ORDER BY f.nome`,
                 [id]
             );

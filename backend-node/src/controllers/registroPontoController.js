@@ -16,12 +16,15 @@ module.exports = {
         }
 
         try {
-            // Buscar escala do funcionário
-            const escalaResult = await db.query(
-                `SELECT tipo_escala FROM funcionarios WHERE id = $1`,
+            // Verifica se o funcionário está ativo
+            const statusResult = await db.query(
+                `SELECT status, tipo_escala FROM funcionarios WHERE id = $1`,
                 [funcionario_id]
             );
-            const escala = escalaResult.rows[0]?.tipo_escala || '8h';
+            if (!statusResult.rows.length || statusResult.rows[0].status !== 1) {
+                return res.status(403).json({ error: 'Funcionário inativo não pode bater ponto.' });
+            }
+            const escala = statusResult.rows[0]?.tipo_escala || '8h';
 
             // Jornada esperada por escala
             const jornadas = {
@@ -125,12 +128,15 @@ module.exports = {
         }
 
         try {
-            // Buscar escala do funcionário
-            const escalaResult = await db.query(
-                `SELECT tipo_escala FROM funcionarios WHERE id = $1`,
+            // Verifica se o funcionário está ativo
+            const statusResult = await db.query(
+                `SELECT status, tipo_escala FROM funcionarios WHERE id = $1`,
                 [funcionario_id]
             );
-            const escala = escalaResult.rows[0]?.tipo_escala || '8h';
+            if (!statusResult.rows.length || statusResult.rows[0].status !== 1) {
+                return res.status(403).json({ error: 'Funcionário inativo não pode bater ponto.' });
+            }
+            const escala = statusResult.rows[0]?.tipo_escala || '8h';
 
             const jornadas = {
                 '24h': 22, '24x72': 22, '8h': 8, '12h': 12, '16h': 16,
@@ -280,6 +286,7 @@ module.exports = {
             FROM public.registros_ponto rp
             INNER JOIN public.funcionarios f ON rp.funcionario_id = f.id
             INNER JOIN public.unidades u ON rp.unidade_id = u.id
+            WHERE f.status = 1
             `
             );
 
@@ -330,6 +337,7 @@ module.exports = {
                     unidades u ON rp.unidade_id = u.id
                 WHERE 
                     f.id = $1
+                    AND f.status = 1
                     AND EXTRACT(MONTH FROM rp.data_hora) = $2
                     AND EXTRACT(YEAR FROM rp.data_hora) = $3
                 ORDER BY 
@@ -392,6 +400,7 @@ module.exports = {
         WHERE 
             EXTRACT(MONTH FROM rp.data_hora) = $1
             AND EXTRACT(YEAR FROM rp.data_hora) = $2
+            AND f.status = 1
         ORDER BY 
             rp.data_hora ASC, f.nome ASC
     `;
@@ -447,6 +456,7 @@ module.exports = {
             AND EXTRACT(YEAR FROM rp.data_hora) = $2
         WHERE 
             f.unidade_id = $3
+            AND f.status = 1
         ORDER BY 
             f.nome ASC, rp.data_hora ASC
         LIMIT $4 OFFSET $5
@@ -510,6 +520,7 @@ module.exports = {
             WHERE rp.funcionario_id = $1
               AND EXTRACT(YEAR FROM rp.data_hora) = $2
               AND TO_CHAR(rp.data_hora, 'MM') = $3 
+              AND f.status = 1
             ORDER BY rp.data_hora;`,
                 [funcionario_id, ano, mes]
             );
@@ -538,13 +549,15 @@ module.exports = {
 
         try {
             const query = `
-          SELECT unidade_id, data_hora
-          FROM registros_ponto
-          WHERE unidade_id = $1
-            AND data_hora >= date_trunc('day', now() AT TIME ZONE 'America/Sao_Paulo')
-            AND data_hora < date_trunc('day', now() AT TIME ZONE 'America/Sao_Paulo') + INTERVAL '1 day'
-          ORDER BY data_hora DESC;
-        `;
+                SELECT rp.unidade_id, rp.data_hora, f.id AS funcionario_id, f.nome AS funcionario_nome
+                FROM registros_ponto rp
+                INNER JOIN funcionarios f ON rp.funcionario_id = f.id
+                WHERE rp.unidade_id = $1
+                  AND f.status = 1
+                  AND rp.data_hora >= date_trunc('day', now() AT TIME ZONE 'America/Sao_Paulo')
+                  AND rp.data_hora < date_trunc('day', now() AT TIME ZONE 'America/Sao_Paulo') + INTERVAL '1 day'
+                ORDER BY rp.data_hora DESC;
+            `;
 
             const { rows } = await db.query(query, [unidade_id]);
 

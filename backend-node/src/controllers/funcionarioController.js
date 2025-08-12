@@ -112,8 +112,8 @@ module.exports = {
     } = req.body;
 
     try {
-      // Busca os dados atuais do funcionário
-      const { rows } = await db.query("SELECT * FROM funcionarios WHERE id = $1", [id]);
+      // Busca os dados atuais do funcionário (apenas ativos)
+      const { rows } = await db.query("SELECT * FROM funcionarios WHERE id = $1 AND status = 1", [id]);
       if (rows.length === 0) {
         return res.status(404).json({ error: "Funcionário não encontrado" });
       }

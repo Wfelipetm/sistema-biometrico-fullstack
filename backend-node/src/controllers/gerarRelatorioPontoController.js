@@ -22,7 +22,7 @@ module.exports = {
                 FROM Registros_Ponto rp
                 INNER JOIN funcionarios f ON rp.funcionario_id = f.id
                 INNER JOIN unidades u ON rp.unidade_id = u.id
-                WHERE f.id = $1 AND EXTRACT(MONTH FROM rp.data_hora) = $2 AND EXTRACT(YEAR FROM rp.data_hora) = $3
+                WHERE f.id = $1 AND f.status = 1 AND EXTRACT(MONTH FROM rp.data_hora) = $2 AND EXTRACT(YEAR FROM rp.data_hora) = $3
                 ORDER BY rp.data_hora ASC
             `;
 
@@ -141,7 +141,7 @@ module.exports = {
         FROM Registros_Ponto rp
         INNER JOIN funcionarios f ON rp.funcionario_id = f.id
         INNER JOIN unidades u ON rp.unidade_id = u.id
-        WHERE f.id = $1 AND EXTRACT(MONTH FROM rp.data_hora) = $2 AND EXTRACT(YEAR FROM rp.data_hora) = $3
+        WHERE f.id = $1 AND f.status = 1 AND EXTRACT(MONTH FROM rp.data_hora) = $2 AND EXTRACT(YEAR FROM rp.data_hora) = $3
         ORDER BY rp.data_hora ASC
     `;
 
@@ -239,6 +239,7 @@ module.exports = {
                 INNER JOIN funcionarios f ON rp.funcionario_id = f.id
                 INNER JOIN unidades u ON rp.unidade_id = u.id
                 WHERE rp.unidade_id = $1
+                  AND f.status = 1
                   AND EXTRACT(MONTH FROM rp.data_hora) = $2
                   AND EXTRACT(YEAR FROM rp.data_hora) = $3
                 ORDER BY f.nome, rp.data_hora ASC
