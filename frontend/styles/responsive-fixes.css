@@ -1,0 +1,130 @@
+/* Fixes específicos para responsividade em dispositivos sm/md */
+
+/* Breakpoints customizados para telas menores */
+@media (max-width: 640px) {
+  /* Dispositivos muito pequenos */
+  .responsive-container {
+    padding: 0.5rem !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+  
+  .responsive-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+  
+  .responsive-text {
+    font-size: 0.875rem !important;
+    line-height: 1.25rem !important;
+  }
+  
+  .responsive-button {
+    min-height: 2.5rem !important;
+    padding: 0.5rem 1rem !important;
+    font-size: 0.875rem !important;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  /* Tablets pequenos e dispositivos sm */
+  .responsive-container {
+    padding: 1rem !important;
+    max-width: 100% !important;
+  }
+  
+  .responsive-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 1rem !important;
+  }
+  
+  .responsive-text {
+    font-size: 1rem !important;
+    line-height: 1.5rem !important;
+  }
+  
+  .responsive-button {
+    min-height: 3rem !important;
+    padding: 0.75rem 1.5rem !important;
+    font-size: 1rem !important;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* Tablets grandes e dispositivos md */
+  .responsive-container {
+    padding: 1.5rem !important;
+    max-width: calc(100% - 2rem) !important;
+  }
+  
+  .responsive-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+    gap: 1.5rem !important;
+  }
+  
+  .responsive-text {
+    font-size: 1rem !important;
+    line-height: 1.5rem !important;
+  }
+  
+  .responsive-button {
+    min-height: 2.5rem !important;
+    padding: 0.625rem 1.25rem !important;
+    font-size: 1rem !important;
+  }
+}
+
+/* Fix específico para monitores AOC 24P1U (1920x1080) em modo landscape */
+@media (min-width: 1920px) and (max-width: 1920px) and (min-height: 1080px) and (max-height: 1080px) {
+  .aoc-24p1u-fix {
+    max-width: 95vw !important;
+    margin: 0 auto !important;
+  }
+}
+
+/* Orientações específicas */
+@media (orientation: portrait) {
+  .portrait-stack {
+    flex-direction: column !important;
+  }
+  
+  .portrait-full-width {
+    width: 100% !important;
+  }
+}
+
+@media (orientation: landscape) {
+  .landscape-row {
+    flex-direction: row !important;
+  }
+  
+  .landscape-flex {
+    display: flex !important;
+    flex-wrap: wrap !important;
+  }
+}
+
+/* Utility classes para componentes específicos */
+.overflow-fix {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  max-width: 100% !important;
+}
+
+.text-overflow-fix {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.flex-responsive {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 1rem !important;
+}
+
+.grid-responsive {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+  gap: 1rem !important;
+}

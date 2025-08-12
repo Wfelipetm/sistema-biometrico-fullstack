@@ -14,6 +14,9 @@ interface PeriodoSelectorProps {
 	ano: string;
 	onMesChange: (mes: string) => void;
 	onAnoChange: (ano: string) => void;
+	inputWidthClass?: string;
+	containerClass?: string;
+	responsive?: boolean;
 }
 
 const MESES = [
@@ -41,27 +44,38 @@ export function PeriodoSelector({
 	ano,
 	onMesChange,
 	onAnoChange,
-	inputWidthClass = "w-32 md:w-60", // valor padrão
-}: PeriodoSelectorProps & { inputWidthClass?: string }) {
+	inputWidthClass = "w-full sm:w-32 md:w-40 lg:w-48",
+	containerClass = "",
+	responsive = true,
+}: PeriodoSelectorProps) {
 	return (
-		<>
-			<div className="grid gap-2">
-				<Label htmlFor="mes" className="text-blue-900">
+		<div className={`flex flex-col sm:flex-row gap-2 ${containerClass}`}>
+			<div className="grid gap-2 flex-1 min-w-0">
+				<Label 
+					htmlFor="mes" 
+					className={`text-blue-900 font-medium ${responsive ? 'text-sm sm:text-base' : 'text-base'}`}
+				>
 					Mês
 				</Label>
 				<Select value={mes} onValueChange={onMesChange}>
-					<SelectTrigger className={`border-blue-300 text-blue-900 placeholder:text-blue-700 ${inputWidthClass}`}>
+					<SelectTrigger className={`border-blue-300 text-blue-900 placeholder:text-blue-700 transition-all duration-200 hover:border-blue-400 ${
+						responsive 
+							? 'h-10 sm:h-12 md:h-10 text-sm sm:text-base' 
+							: 'h-10 text-base'
+					} ${inputWidthClass}`}>
 						<SelectValue
 							placeholder="Selecione o mês"
 							className="text-blue-900 placeholder:text-blue-700"
 						/>
 					</SelectTrigger>
-					<SelectContent>
+					<SelectContent className="max-h-[200px] overflow-y-auto">
 						{MESES.map((mesItem) => (
 							<SelectItem
 								key={mesItem.value}
 								value={mesItem.value}
-								className="text-blue-900 data-[state=checked]:bg-blue-100"
+								className={`text-blue-900 data-[state=checked]:bg-blue-100 hover:bg-blue-50 cursor-pointer transition-colors duration-150 ${
+									responsive ? 'py-2 sm:py-3 md:py-2 text-sm sm:text-base' : 'py-2 text-base'
+								}`}
 							>
 								{mesItem.label}
 							</SelectItem>
@@ -70,23 +84,32 @@ export function PeriodoSelector({
 				</Select>
 			</div>
 
-			<div className="grid gap-2">
-				<Label htmlFor="ano" className="text-blue-900">
+			<div className="grid gap-2 flex-1 min-w-0">
+				<Label 
+					htmlFor="ano" 
+					className={`text-blue-900 font-medium ${responsive ? 'text-sm sm:text-base' : 'text-base'}`}
+				>
 					Ano
 				</Label>
 				<Select value={ano} onValueChange={onAnoChange}>
-					<SelectTrigger className={`border-blue-300 text-blue-900 placeholder:text-blue-700 ${inputWidthClass}`}>
+					<SelectTrigger className={`border-blue-300 text-blue-900 placeholder:text-blue-700 transition-all duration-200 hover:border-blue-400 ${
+						responsive 
+							? 'h-10 sm:h-12 md:h-10 text-sm sm:text-base' 
+							: 'h-10 text-base'
+					} ${inputWidthClass}`}>
 						<SelectValue
 							placeholder="Selecione o ano"
 							className="text-blue-900 placeholder:text-blue-700"
 						/>
 					</SelectTrigger>
-					<SelectContent>
+					<SelectContent className="max-h-[200px] overflow-y-auto">
 						{ANOS.map((anoItem) => (
 							<SelectItem
 								key={anoItem.value}
 								value={anoItem.value}
-								className="text-blue-900 data-[state=checked]:bg-blue-100"
+								className={`text-blue-900 data-[state=checked]:bg-blue-100 hover:bg-blue-50 cursor-pointer transition-colors duration-150 ${
+									responsive ? 'py-2 sm:py-3 md:py-2 text-sm sm:text-base' : 'py-2 text-base'
+								}`}
 							>
 								{anoItem.label}
 							</SelectItem>
@@ -94,6 +117,6 @@ export function PeriodoSelector({
 					</SelectContent>
 				</Select>
 			</div>
-		</>
+		</div>
 	);
 }

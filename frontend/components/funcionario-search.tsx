@@ -24,6 +24,8 @@ interface FuncionarioSearchProps {
     loading?: boolean;
     error?: string | null;
     inputWidthClass?: string;
+    containerClass?: string;
+    responsive?: boolean;
 }
 
 export function FuncionarioSearch({
@@ -33,6 +35,8 @@ export function FuncionarioSearch({
     loading: loadingProp,
     error: errorProp,
     inputWidthClass = "w-full",
+    containerClass = "",
+    responsive = true,
 }: FuncionarioSearchProps) {
     const [open, setOpen] = useState(false);
     const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
@@ -71,23 +75,47 @@ export function FuncionarioSearch({
 
     return (
         <>
-            <div className="grid gap-2">
-                <Label htmlFor="funcionario" className="text-blue-900">Funcionário</Label>
+            <div className={`grid gap-2 w-full ${containerClass} ${responsive ? 'sm:gap-3 md:gap-2' : ''}`}>
+                <Label 
+                    htmlFor="funcionario" 
+                    className={`text-blue-900 font-medium ${responsive ? 'text-sm sm:text-base md:text-lg' : 'text-base'}`}
+                >
+                    Funcionário
+                </Label>
                 <Popover open={open} onOpenChange={setOpen}>
                     <PopoverTrigger asChild>
                         <button
                             type="button"
-                            className={`${inputWidthClass} border border-blue-300 rounded px-3 h-10 text-left text-blue-900 placeholder:text-blue-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500`}
+                            className={`${inputWidthClass} border border-blue-300 rounded px-3 py-2 text-left text-blue-900 placeholder:text-blue-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200 hover:border-blue-400 ${
+                                responsive 
+                                    ? 'h-10 sm:h-12 md:h-10 text-sm sm:text-base md:text-lg sm:py-3 md:py-2' 
+                                    : 'h-10 text-base'
+                            }`}
                             disabled={loading || loadingProp}
                         >
-                            {selectedFuncionario?.nome || "Selecione um funcionário..."}
+                            <span className="truncate block">
+                                {selectedFuncionario?.nome || "Selecione um funcionário..."}
+                            </span>
                         </button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[447px] p-0">
-                        <Command>
+                    <PopoverContent 
+                        className={`p-0 shadow-lg border-blue-200 ${
+                            responsive 
+                                ? 'w-full min-w-[280px] sm:w-[380px] md:w-[447px] max-w-[95vw]' 
+                                : 'w-[447px]'
+                        }`}
+                        side="bottom"
+                        align="start"
+                        sideOffset={4}
+                    >
+                        <Command className="w-full">
                             <CommandInput
                                 placeholder="Buscar funcionário..."
-                                className="border-blue-300 focus:border-blue-500 focus:ring-blue-500 text-blue-900 placeholder:text-blue-700"
+                                className={`border-blue-300 focus:border-blue-500 focus:ring-blue-500 text-blue-900 placeholder:text-blue-700 px-3 ${
+                                    responsive 
+                                        ? 'text-sm sm:text-base h-10 sm:h-12 md:h-10' 
+                                        : 'text-base h-10'
+                                }`}
                                 onValueChange={(value) => {
                                     // Filtra apenas funcionários da unidade do gestor logado
                                     if (user?.papel === "gestor" && user.unidade_id) {
@@ -107,8 +135,12 @@ export function FuncionarioSearch({
                                     }
                                 }}
                             />
-                            <CommandList>
-                                <CommandGroup heading="Todos">
+                            <CommandList className={`overflow-y-auto ${
+                                responsive 
+                                    ? 'max-h-[200px] sm:max-h-[250px] md:max-h-[300px]' 
+                                    : 'max-h-[300px]'
+                            }`}>
+                                <CommandGroup heading="Todos" className="text-blue-800 font-medium">
                                     {funcionarios.map((funcionario) => (
                                         <CommandItem
                                             key={funcionario.id}
@@ -117,21 +149,37 @@ export function FuncionarioSearch({
                                                 onSelect(funcionario);
                                                 setOpen(false);
                                             }}
-                                            className="text-blue-900 data-[selected=true]:bg-blue-100"
+                                            className={`text-blue-900 data-[selected=true]:bg-blue-100 hover:bg-blue-50 cursor-pointer px-3 transition-colors duration-150 ${
+                                                responsive 
+                                                    ? 'py-2 sm:py-3 md:py-2 text-sm sm:text-base md:text-lg' 
+                                                    : 'py-2 text-base'
+                                            }`}
                                         >
-                                            {funcionario.nome}
+                                            <span className="truncate">
+                                                {funcionario.nome}
+                                            </span>
                                         </CommandItem>
                                     ))}
                                 </CommandGroup>
-                                <CommandEmpty className="text-blue-700">Nenhum funcionário encontrado.</CommandEmpty>
+                                <CommandEmpty className={`text-blue-700 text-center ${
+                                    responsive 
+                                        ? 'py-4 sm:py-6 md:py-4 text-sm sm:text-base' 
+                                        : 'py-4 text-base'
+                                }`}>
+                                    Nenhum funcionário encontrado.
+                                </CommandEmpty>
                             </CommandList>
                         </Command>
                     </PopoverContent>
                 </Popover>
             </div>
             {(error || errorProp) && (
-                <div className="mt-1">
-                    <p className="text-sm text-destructive">{error || errorProp}</p>
+                <div className={`${responsive ? 'mt-1 sm:mt-2' : 'mt-1'}`}>
+                    <p className={`text-destructive break-words ${
+                        responsive ? 'text-sm sm:text-base' : 'text-sm'
+                    }`}>
+                        {error || errorProp}
+                    </p>
                 </div>
             )}
         </>
