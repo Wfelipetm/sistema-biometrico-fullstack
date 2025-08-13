@@ -30,7 +30,7 @@ type RelatorioData = {
   }
   registros: RegistroRelatorio[]
   totais?: {
-    total_total_trabalhado: string
+    total_horas_normais: string
     total_horas_extras: string
     total_horas_desconto: string
   }
@@ -286,13 +286,13 @@ export function useRelatorioPDF() {
 
       // Totais
       if (data.totais) {
-        const { total_total_trabalhado, total_horas_extras, total_horas_desconto } = data.totais;
+        const { total_horas_normais, total_horas_extras, total_horas_desconto } = data.totais;
 
         doc.setFontSize(7);
         doc.setTextColor(80, 80, 80);
 
         doc.text(
-          `Horas Normais Total: ${total_total_trabalhado}   Horas Extras Total: ${total_horas_extras}   Horas Desconto Total: ${total_horas_desconto}`,
+          `Horas Normais Total: ${total_horas_normais}   Horas Extras Total: ${total_horas_extras}   Horas Desconto Total: ${total_horas_desconto}`,
           margin,
           posY + 5,
         );
@@ -300,7 +300,7 @@ export function useRelatorioPDF() {
         const summaryData = [
           [
             { content: "Horas Normais Total", styles: { fontStyle: "bold" as const } },
-            { content: total_total_trabalhado, styles: { fontStyle: "bold" as const } },
+            { content: total_horas_normais, styles: { fontStyle: "bold" as const } },
             { content: "Horas Extras Total", styles: { fontStyle: "bold" as const } },
             { content: total_horas_extras, styles: { fontStyle: "bold" as const } },
             { content: "Horas Desconto Total", styles: { fontStyle: "bold" as const } },
