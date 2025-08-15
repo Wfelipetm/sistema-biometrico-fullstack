@@ -576,53 +576,56 @@ module.exports = {
         const { id } = req.params;
         const { hora_entrada, hora_saida } = req.body;
 
-        if (!id || !hora_entrada || !hora_saida) {
-            return res.status(400).json({ error: 'Campos obrigatórios: id, hora_entrada, hora_saida' });
+        if (!id || (!hora_entrada && !hora_saida)) {
+            return res.status(400).json({ error: 'Informe pelo menos hora_entrada ou hora_saida.' });
         }
 
         // Validação simples para formato HH:mm
         const horaRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
-        if (!horaRegex.test(hora_entrada) || !horaRegex.test(hora_saida)) {
-            return res.status(400).json({ error: 'Formato de hora inválido. Use HH:mm (ex: 09:00)' });
+        if (hora_entrada && !horaRegex.test(hora_entrada)) {
+            return res.status(400).json({ error: 'Formato de hora_entrada inválido. Use HH:mm (ex: 09:00)' });
+        }
+        if (hora_saida && !horaRegex.test(hora_saida)) {
+            return res.status(400).json({ error: 'Formato de hora_saida inválido. Use HH:mm (ex: 18:00)' });
         }
 
         try {
             // Busca o registro para pegar funcionario_id, unidade_id, data_hora, id_biometrico
             const registroResult = await db.query(
-                `SELECT funcionario_id, unidade_id, data_hora, id_biometrico FROM registros_ponto WHERE id = $1`,
+                `SELECT funcionario_id, unidade_id, data_hora, id_biometrico, hora_entrada, hora_saida FROM registros_ponto WHERE id = $1`,
                 [id]
             );
             if (registroResult.rowCount === 0) {
                 return res.status(404).json({ error: 'Registro não encontrado' });
             }
-            const { funcionario_id, unidade_id, data_hora, id_biometrico } = registroResult.rows[0];
+            const registro = registroResult.rows[0];
 
-            // Busca a escala do funcionário
-            const escalaResult = await db.query(
-                `SELECT tipo_escala FROM funcionarios WHERE id = $1`,
-                [funcionario_id]
-            );
-            const escala = escalaResult.rows[0]?.tipo_escala || '8h';
+            // Use os valores antigos se não forem enviados novos
+            const novaHoraEntrada = hora_entrada || registro.hora_entrada;
+            const novaHoraSaida = hora_saida || registro.hora_saida;
 
-            // Jornada esperada por escala
-            const jornadas = {
-                '24h': 22, '24x72': 22, '8h': 8, '12h': 12, '16h': 16,
-                '12x36': 12, '32h': 32, '20h': 20, 'default': 8
-            };
-            const jornadaEsperada = jornadas[escala] || jornadas['default'];
-
-            // Pausa de almoço por escala
-            let pausaAlmoco = 0;
-            if (['24h', '24x72', '16h'].includes(escala)) {
-                pausaAlmoco = 2;
-            } else if (['8h', '12h'].includes(escala)) {
-                pausaAlmoco = 1;
+            // Se ainda não tem ambos, apenas atualize o campo informado
+            if (!novaHoraEntrada || !novaHoraSaida) {
+                // Atualiza só o campo informado
+                const result = await db.query(
+                    `
+                UPDATE registros_ponto
+                SET
+                    hora_entrada = COALESCE($1, hora_entrada),
+                    hora_saida = COALESCE($2, hora_saida),
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = $3
+                RETURNING *
+                `,
+                    [hora_entrada, hora_saida, id]
+                );
+                return res.status(200).json(result.rows[0]);
             }
 
             // Monta datas de entrada e saída
-            const data = format(new Date(data_hora), 'yyyy-MM-dd');
-            const dataEntrada = new Date(`${data}T${hora_entrada}`);
-            let dataSaida = new Date(`${data}T${hora_saida}`);
+            const data = format(new Date(registro.data_hora), 'yyyy-MM-dd');
+            const dataEntrada = new Date(`${data}T${novaHoraEntrada}`);
+            let dataSaida = new Date(`${data}T${novaHoraSaida}`);
             if (['24h', '24x72'].includes(escala)) {
                 dataSaida.setDate(dataSaida.getDate() + 1);
             } else if (dataSaida < dataEntrada) {
