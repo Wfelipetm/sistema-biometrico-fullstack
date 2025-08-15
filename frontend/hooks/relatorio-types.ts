@@ -20,7 +20,7 @@ export type RelatorioData = {
     };
     registros: RegistroRelatorio[];
     totais?: {
-        total_total_trabalhado: string;
+        total_horas_normais: string;
         total_horas_extras: string;
         total_horas_desconto: string;
     };

@@ -78,7 +78,7 @@ export function FuncionarioSearch({
             <div className={`grid gap-2 w-full ${containerClass} ${responsive ? 'sm:gap-3 md:gap-2' : ''}`}>
                 <Label 
                     htmlFor="funcionario" 
-                    className={`text-blue-900 font-medium ${responsive ? 'text-sm sm:text-base md:text-lg' : 'text-base'}`}
+                    className={`text-blue-900 font-medium ${responsive ? 'text-sm sm:text-base md:text-base' : 'text-base'}`}
                 >
                     Funcionário
                 </Label>
@@ -88,13 +88,13 @@ export function FuncionarioSearch({
                             type="button"
                             className={`${inputWidthClass} border border-blue-300 rounded px-3 py-2 text-left text-blue-900 placeholder:text-blue-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200 hover:border-blue-400 ${
                                 responsive 
-                                    ? 'h-10 sm:h-12 md:h-10 text-sm sm:text-base md:text-lg sm:py-3 md:py-2' 
+                                    ? 'h-10 sm:h-12 md:h-10 text-sm sm:text-sm md:text-base sm:py-3 md:py-2' 
                                     : 'h-10 text-base'
                             }`}
                             disabled={loading || loadingProp}
                         >
                             <span className="truncate block">
-                                {selectedFuncionario?.nome || "Selecione um funcionário..."}
+                                {selectedFuncionario?.nome || "Selecione um funcionário"}
                             </span>
                         </button>
                     </PopoverTrigger>

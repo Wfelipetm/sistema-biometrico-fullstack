@@ -16,7 +16,7 @@ export function ModalBiometria({ open }: ModalBiometriaProps) {
             }
             `}</style>
             <DialogContent
-                className="flex flex-col items-center gap-6 max-w-2xl max-w-3xl h-96 bg-blue-50"
+                className="flex flex-col items-center gap-6 max-w-2xl  h-96 bg-blue-50"
                 style={{ minHeight: "24rem" }}
                 onInteractOutside={e => e.preventDefault()}
                 onEscapeKeyDown={e => e.preventDefault()}
