@@ -215,9 +215,9 @@ export default function RelatoriosPage() {
 	}
 
 	return (
-		<div className="space-y-3 p-2 sm:p-4 md:p-6 max-w-full overflow-hidden responsive-container aoc-24p1u-fix">
+		<div className="space-y-3 sm:p-4 max-w-full overflow-hidden responsive-container aoc-24p1u-fix">
 			{/* Header */}
-			<div className="shadow-lg rounded-xl bg-white/80 backdrop-blur-md p-4 sm:p-6 overflow-fix">
+			<div className="shadow-lg rounded-xl bg-white/80 backdrop-blur-md sm:p-6 overflow-fix">
 				<h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-blue-900 responsive-text">
 					Relatórios
 				</h1>
