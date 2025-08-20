@@ -6,7 +6,7 @@ from app.services.biometric import IndexSearch, identify_user  # Lógica biomét
 import requests  # Para fazer chamadas HTTP ao backend em Node.js
 
 
-# http://localhost:3001
+# http://biometrico.itaguai.rj.gov.br:3001
 
 # ===========================
 # Função auxiliar para envio de e-mail
@@ -135,13 +135,19 @@ def register_ponto():
         }
         try:
             response = requests.post(
-                "http://biometrico.itaguai.rj.gov.br:3001/reg/calcular-registro-ponto",
+                "http://biometrico.itaguai.rj.gov.br:3001/reg/calcular-registro-ponto-assistencia",
                 json=payload,
                 timeout=10
             )
             response.raise_for_status()
         except requests.RequestException as e:
-            print("Erro ao registrar ponto no backend Node.js:", str(e))
+            # Repasse a mensagem do Node.js se houver
+            if e.response is not None and e.response.content:
+                try:
+                    error_json = e.response.json()
+                    return jsonify(error_json), e.response.status_code
+                except Exception:
+                    return jsonify({"message": e.response.text}), e.response.status_code
             return jsonify({"message": "Erro ao registrar ponto no sistema"}), 500
 
         # Envia e-mail de comprovante de entrada
@@ -180,8 +186,8 @@ def register_ponto():
         tempo_decorrido = datetime.now() - data_entrada
         tempo_decorrido_minutos = tempo_decorrido.total_seconds() / 60
 
-        if tempo_decorrido_minutos < 5:
-            tempo_restante = int(5 - tempo_decorrido_minutos) + 1
+        if tempo_decorrido_minutos < 1:
+            tempo_restante = int(1 - tempo_decorrido_minutos) + 1
             print(f"[TENTATIVA BLOQUEADA] Funcionário: {user_name} (ID: {funcionario_id}) | Tempo decorrido: {tempo_decorrido_minutos:.2f} minutos | Tempo restante: {tempo_restante} minuto(s)")
             return jsonify({
                 "message": f"Você deve aguardar pelo menos 5 minutos após a entrada para registrar a saída. Tempo restante: {tempo_restante} minuto(s)."
@@ -199,13 +205,19 @@ def register_ponto():
         }
         try:
             response = requests.post(
-                "http://biometrico.itaguai.rj.gov.br:3001/reg/calcular-registro-ponto",
+                "http://biometrico.itaguai.rj.gov.br:3001/reg/calcular-registro-ponto-assistencia",
                 json=payload,
                 timeout=10
             )
             response.raise_for_status()
         except requests.RequestException as e:
-            print("Erro ao registrar ponto no backend Node.js:", str(e))
+            # Repasse a mensagem do Node.js se houver
+            if e.response is not None and e.response.content:
+                try:
+                    error_json = e.response.json()
+                    return jsonify(error_json), e.response.status_code
+                except Exception:
+                    return jsonify({"message": e.response.text}), e.response.status_code
             return jsonify({"message": "Erro ao registrar ponto no sistema"}), 500
 
         # Envia e-mail de comprovante de saída
