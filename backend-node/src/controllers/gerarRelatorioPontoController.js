@@ -469,7 +469,7 @@ module.exports = {
                     horas_normais,
                     horas_extras,
                     horas_desconto,
-                    justificativa: ' '
+                    justificativa: '--' // Mudando de ' ' para '--'
                 });
             });
 
@@ -479,7 +479,9 @@ module.exports = {
 
                 todasAsDatas.forEach(data => {
                     const dataFormatada = format(data, 'dd/MM/yyyy');
-                    if (!registrosMap.has(dataFormatada)) {
+                    const registroExistente = registrosMap.get(dataFormatada);
+
+                    if (!registroExistente) {
                         const motivoAfastamento = getMotivoAfastamento(funcionarioId, data);
                         let justificativa = '--';
 
@@ -498,11 +500,27 @@ module.exports = {
                             horas_desconto: '--',
                             justificativa,
                         });
+                    } else {
+                        // Verificar se precisa atualizar justificativa de registro existente
+                        if (registroExistente.justificativa === '--' || registroExistente.justificativa === ' ') {
+                            const motivoAfastamento = getMotivoAfastamento(funcionarioId, data);
+
+                            if (motivoAfastamento) {
+                                registroExistente.justificativa = motivoAfastamento;
+                            } else if (isFerias(funcionarioId, data)) {
+                                registroExistente.justificativa = 'Férias';
+                            }
+                        }
                     }
                 });
 
                 // Ordenar registros por data
-                funcionarioData.registros.sort((a, b) => new Date(a.data) - new Date(b.data));
+                funcionarioData.registros.sort((a, b) => {
+                    // Converter data DD/MM/YYYY para Date object corretamente
+                    const dateA = new Date(a.data.split('/').reverse().join('-'));
+                    const dateB = new Date(b.data.split('/').reverse().join('-'));
+                    return dateA - dateB;
+                });
 
                 // Calcular horas ajustadas após compensação
                 const totalSegundosNormais = funcionarioData.totais.total_horas_normais;
