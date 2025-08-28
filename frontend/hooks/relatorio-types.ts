@@ -23,6 +23,8 @@ export type RelatorioData = {
         total_horas_normais: string;
         total_horas_extras: string;
         total_horas_desconto: string;
+           total_horas_extras_ajustada: string
+    total_horas_desconto_ajustada: string
     };
 };
 
