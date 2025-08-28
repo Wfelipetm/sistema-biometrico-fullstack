@@ -56,7 +56,12 @@ export default function ModalEditarRegistroPonto({
       errors.horaSaida = "Formato de hora inválido"
     }
 
-    if (horaEntrada && horaSaida && horaEntrada >= horaSaida) {
+    // Só valida se ambos estiverem preenchidos e diferentes de "00:00"
+    if (
+      horaEntrada && horaSaida &&
+      horaEntrada !== "00:00" && horaSaida !== "00:00" &&
+      horaEntrada >= horaSaida
+    ) {
       errors.horaSaida = "Hora de saída deve ser posterior à entrada"
     }
 
@@ -74,20 +79,16 @@ export default function ModalEditarRegistroPonto({
     }
   }, [open, registro])
 
+  // Permite salvar se não houver erros de validação
   const isFormValid = () => {
-    return (
-      registro &&
-      /^\d{2}:\d{2}$/.test(horaEntrada) &&
-      /^\d{2}:\d{2}$/.test(horaSaida) &&
-      horaEntrada < horaSaida &&
-      Object.keys(validationErrors).length === 0
-    )
+    return Object.keys(validationErrors).length === 0
   }
 
+  // Ajuste a função hasChanges para detectar alteração em apenas um campo
   const hasChanges = () => {
     return (
-      horaEntrada !== padHora(registro?.hora_entrada ?? "00:00") ||
-      horaSaida !== padHora(registro?.hora_saida ?? "00:00")
+      (horaEntrada !== padHora(registro?.hora_entrada ?? "00:00") && horaEntrada !== "00:00") ||
+      (horaSaida !== padHora(registro?.hora_saida ?? "00:00") && horaSaida !== "00:00")
     )
   }
 
@@ -112,9 +113,13 @@ export default function ModalEditarRegistroPonto({
     setUploadProgress(0)
 
     try {
-      const payload = {
-        hora_entrada: horaEntrada,
-        hora_saida: horaSaida,
+      // Envie apenas os campos alterados
+      const payload: any = {}
+      if (horaEntrada !== padHora(registro?.hora_entrada ?? "00:00") && horaEntrada !== "00:00") {
+        payload.hora_entrada = horaEntrada
+      }
+      if (horaSaida !== padHora(registro?.hora_saida ?? "00:00") && horaSaida !== "00:00") {
+        payload.hora_saida = horaSaida
       }
 
       // Simular progresso de upload
@@ -315,11 +320,11 @@ export default function ModalEditarRegistroPonto({
 
               <Button
                 onClick={handleSubmit}
-                disabled={loading || !isFormValid() || !hasChanges()}
+                disabled={loading || !isFormValid()}
                 className={`px-8 h-11 font-medium transition-all duration-300 ${
                   loading
                     ? "bg-blue-400 cursor-not-allowed"
-                    : isFormValid() && hasChanges()
+                    : isFormValid()
                       ? "bg-blue-800 hover:bg-blue-900 text-white"
                       : "bg-blue-300 cursor-not-allowed text-blue-500"
                 }`}

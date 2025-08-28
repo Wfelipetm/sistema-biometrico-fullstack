@@ -109,7 +109,206 @@ module.exports = {
     ,
 
 
+
     // POST
+    // Calcular e registrar ponto com base na entrada e saída, considerando a escala do funcionário feito para assistencia
+    async calcularERegistrarPontoAssistencia(req, res) {
+        const { funcionario_id, unidade_id, data, hora_entrada, hora_saida, id_biometrico } = req.body;
+
+        if (!funcionario_id || !unidade_id || !data || !hora_entrada) {
+            return res.status(400).json({ error: 'Campos obrigatórios ausentes.' });
+        }
+
+        try {
+            // 1. Verifica se existe saída em aberto para o funcionário
+            const pendenteResult = await db.query(
+                `SELECT id, data_hora, hora_entrada FROM registros_ponto 
+                 WHERE funcionario_id = $1 AND hora_saida IS NULL 
+                 ORDER BY data_hora DESC LIMIT 1`,
+                [funcionario_id]
+            );
+            if (pendenteResult.rowCount > 0) {
+                const pendente = pendenteResult.rows[0];
+                const dataPendente = pendente.data_hora instanceof Date
+                    ? pendente.data_hora.toISOString().slice(0, 10)
+                    : pendente.data_hora.split('T')[0];
+                if (dataPendente !== data) {
+                    // Formata a data para dd/MM/yyyy
+                    const [ano, mes, dia] = dataPendente.split('-');
+                    const dataFormatada = `${dia}/${mes}/${ano}`;
+                    return res.status(400).json({
+                        error: `Você tem saída em aberto no dia ${dataFormatada}. Favor procurar o RH!`
+                    });
+                }
+            }
+
+            // Verifica se o funcionário está ativo
+            const statusResult = await db.query(
+                `SELECT status, tipo_escala FROM funcionarios WHERE id = $1`,
+                [funcionario_id]
+            );
+            if (!statusResult.rows.length || statusResult.rows[0].status !== 1) {
+                return res.status(403).json({ error: 'Funcionário inativo não pode bater ponto.' });
+            }
+            const escala = statusResult.rows[0]?.tipo_escala || '8h';
+
+            const jornadas = {
+                '24h': 22, '24x72': 22, '8h': 8, '12h': 12, '16h': 16,
+                '12x36': 12, '32h': 32, '20h': 20, 'default': 8
+            };
+            const jornadaEsperada = jornadas[escala] || jornadas['default'];
+
+            let pausaAlmoco = 0;
+            if (['24h', '24x72', '16h'].includes(escala)) {
+                pausaAlmoco = 2;
+            } else if (['8h', '12h'].includes(escala)) {
+                pausaAlmoco = 1;
+            }
+
+            // Se hora_saida não foi enviada, é registro de entrada (INSERT)
+            if (!hora_saida) {
+                // Verifica se já existe registro COMPLETO (entrada e saída) para o dia
+                const registroCompleto = await db.query(
+                    `SELECT id FROM registros_ponto 
+                     WHERE funcionario_id = $1 
+                       AND unidade_id = $2
+                       AND data_hora::date = $3
+                       AND hora_entrada IS NOT NULL 
+                       AND hora_saida IS NOT NULL`,
+                    [funcionario_id, unidade_id, data]
+                );
+                if (registroCompleto.rowCount > 0) {
+                    return res.status(400).json({
+                        error: `Você já registrou entrada e saída neste dia. Não é possível registrar nova entrada.`
+                    });
+                }
+
+                const result = await db.query(
+                    `
+                    INSERT INTO registros_ponto (
+                        funcionario_id, unidade_id, data_hora, hora_entrada, hora_saida, id_biometrico
+                    ) VALUES ($1, $2, $3, $4, $5, $6)
+                    RETURNING *
+                    `,
+                    [
+                        funcionario_id, unidade_id, data, hora_entrada, null, id_biometrico || null
+                    ]
+                );
+                return res.status(201).json(result.rows[0]);
+            }
+
+            // Se hora_saida foi enviada, é registro de saída (UPDATE)
+            // Busca o registro de entrada do funcionário e unidade SEM saída (independente da data)
+            const registroResult = await db.query(
+                `SELECT * FROM registros_ponto WHERE funcionario_id = $1 AND unidade_id = $2 AND hora_saida IS NULL ORDER BY data_hora DESC LIMIT 1`,
+                [funcionario_id, unidade_id]
+            );
+            if (registroResult.rowCount === 0) {
+                return res.status(404).json({ error: 'Registro de entrada não encontrado para o dia.' });
+            }
+            const registro = registroResult.rows[0];
+
+            // dataEntrada: sempre do registro do banco (data_hora + hora_entrada)
+            const dataEntradaStr = registro.data_hora instanceof Date
+                ? registro.data_hora.toISOString().slice(0, 10)
+                : registro.data_hora.split('T')[0];
+            const dataEntrada = new Date(`${dataEntradaStr}T${registro.hora_entrada}`);
+
+            // dataSaida: use a data e hora enviados no payload (que pode ser o dia seguinte)
+            let dataSaida = new Date(`${data}T${hora_saida}`);
+
+            // Se a saída for menor ou igual à entrada, soma 1 dia (virada de dia)
+            if (dataSaida <= dataEntrada) {
+                dataSaida.setDate(dataSaida.getDate() + 1);
+            }
+
+            // Calcula tempo trabalhado em horas (com fração de segundos)
+            let tempoTrabalhado = (dataSaida - dataEntrada) / (1000 * 60 * 60);
+
+            // Desconta pausa de almoço só se trabalhou mais que a pausa
+            let horasTrabalhadas = tempoTrabalhado;
+            if (tempoTrabalhado > pausaAlmoco) {
+                horasTrabalhadas = tempoTrabalhado - pausaAlmoco;
+            }
+
+            // Calcula diferença para jornada esperada
+            let diferenca = horasTrabalhadas - jornadaEsperada;
+            let horaExtra = 0;
+            let horaDesconto = 0;
+
+            if (diferenca > 0) {
+                horaExtra = diferenca;
+            } else if (diferenca < 0) {
+                horaDesconto = Math.abs(diferenca);
+            }
+
+            let horasNormais = Math.min(horasTrabalhadas, jornadaEsperada);
+            let totalTrabalhado = horasTrabalhadas;
+            let horaSaidaAjustada = dataSaida.toTimeString().slice(0, 8);
+
+            // Função para converter para formato interval PostgreSQL
+            function toPgInterval(hours) {
+                const h = Math.floor(hours);
+                const m = Math.round((hours - h) * 60);
+                return `${h}:${m.toString().padStart(2, '0')}:00`;
+            }
+
+            // Atualiza o registro preenchendo hora_saida e os campos calculados
+            const result = await db.query(
+                `
+                UPDATE registros_ponto
+                SET hora_saida = $1,
+                    horas_normais = $2::interval,
+                    hora_extra = $3::interval,
+                    hora_desconto = $4::interval,
+                    total_trabalhado = $5::interval,
+                    hora_saida_ajustada = $6::interval,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = $7
+                RETURNING *
+                `,
+                [
+                    hora_saida,
+                    toPgInterval(horasNormais),
+                    toPgInterval(horaExtra),
+                    toPgInterval(horaDesconto),
+                    toPgInterval(totalTrabalhado),
+                    toPgInterval((dataSaida - dataEntrada) / (1000 * 60 * 60)),
+                    registro.id
+                ]
+            );
+
+            console.log('--- DEPURAÇÃO REGISTRO DE SAÍDA ---');
+            console.log('dataEntrada:', dataEntrada);
+            console.log('dataSaida:', dataSaida);
+            console.log('horasTrabalhadas:', horasTrabalhadas);
+            console.log('jornadaEsperada:', jornadaEsperada);
+            console.log('diferenca:', diferenca);
+            console.log('horaExtra:', horaExtra);
+            console.log('horaDesconto:', horaDesconto);
+            console.log('toPgInterval(horaDesconto):', toPgInterval(horaDesconto));
+            console.log('horasNormais:', horasNormais);
+            console.log('totalTrabalhado:', totalTrabalhado);
+            console.log('horaSaidaAjustada:', horaSaidaAjustada);
+
+            return res.status(200).json({
+                ...result.rows[0],
+                horas_normais: toPgInterval(horasNormais),
+                hora_extra: toPgInterval(horaExtra),
+                hora_desconto: toPgInterval(horaDesconto),
+                total_trabalhado: toPgInterval(totalTrabalhado),
+                hora_saida_ajustada: horaSaidaAjustada
+            });
+
+        } catch (error) {
+            console.error('[ERRO] Falha ao criar registro de ponto:', error);
+            return res.status(500).json({ error: 'Erro ao registrar ponto.', detalhe: error.message, stack: error.stack });
+        }
+    },
+
+
+
+
     // Calcular e registrar ponto com base na entrada e saída, considerando a escala do funcionário.
     async calcularERegistrarPonto(req, res) {
         const { funcionario_id, unidade_id, data, hora_entrada, hora_saida, id_biometrico } = req.body;
@@ -153,6 +352,22 @@ module.exports = {
 
             // Se hora_saida não foi enviada, é registro de entrada (INSERT)
             if (!hora_saida) {
+                // Verifica se já existe registro COMPLETO (entrada e saída) para o dia
+                const registroCompleto = await db.query(
+                    `SELECT id FROM registros_ponto 
+                     WHERE funcionario_id = $1 
+                       AND unidade_id = $2
+                       AND data_hora::date = $3
+                       AND hora_entrada IS NOT NULL 
+                       AND hora_saida IS NOT NULL`,
+                    [funcionario_id, unidade_id, data]
+                );
+                if (registroCompleto.rowCount > 0) {
+                    return res.status(400).json({
+                        error: `Você já registrou entrada e saída neste dia. Não é possível registrar nova entrada.`
+                    });
+                }
+
                 const result = await db.query(
                     `
                     INSERT INTO registros_ponto (
@@ -576,53 +791,56 @@ module.exports = {
         const { id } = req.params;
         const { hora_entrada, hora_saida } = req.body;
 
-        if (!id || !hora_entrada || !hora_saida) {
-            return res.status(400).json({ error: 'Campos obrigatórios: id, hora_entrada, hora_saida' });
+        if (!id || (!hora_entrada && !hora_saida)) {
+            return res.status(400).json({ error: 'Informe pelo menos hora_entrada ou hora_saida.' });
         }
 
         // Validação simples para formato HH:mm
         const horaRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
-        if (!horaRegex.test(hora_entrada) || !horaRegex.test(hora_saida)) {
-            return res.status(400).json({ error: 'Formato de hora inválido. Use HH:mm (ex: 09:00)' });
+        if (hora_entrada && !horaRegex.test(hora_entrada)) {
+            return res.status(400).json({ error: 'Formato de hora_entrada inválido. Use HH:mm (ex: 09:00)' });
+        }
+        if (hora_saida && !horaRegex.test(hora_saida)) {
+            return res.status(400).json({ error: 'Formato de hora_saida inválido. Use HH:mm (ex: 18:00)' });
         }
 
         try {
             // Busca o registro para pegar funcionario_id, unidade_id, data_hora, id_biometrico
             const registroResult = await db.query(
-                `SELECT funcionario_id, unidade_id, data_hora, id_biometrico FROM registros_ponto WHERE id = $1`,
+                `SELECT funcionario_id, unidade_id, data_hora, id_biometrico, hora_entrada, hora_saida FROM registros_ponto WHERE id = $1`,
                 [id]
             );
             if (registroResult.rowCount === 0) {
                 return res.status(404).json({ error: 'Registro não encontrado' });
             }
-            const { funcionario_id, unidade_id, data_hora, id_biometrico } = registroResult.rows[0];
+            const registro = registroResult.rows[0];
 
-            // Busca a escala do funcionário
-            const escalaResult = await db.query(
-                `SELECT tipo_escala FROM funcionarios WHERE id = $1`,
-                [funcionario_id]
-            );
-            const escala = escalaResult.rows[0]?.tipo_escala || '8h';
+            // Use os valores antigos se não forem enviados novos
+            const novaHoraEntrada = hora_entrada || registro.hora_entrada;
+            const novaHoraSaida = hora_saida || registro.hora_saida;
 
-            // Jornada esperada por escala
-            const jornadas = {
-                '24h': 22, '24x72': 22, '8h': 8, '12h': 12, '16h': 16,
-                '12x36': 12, '32h': 32, '20h': 20, 'default': 8
-            };
-            const jornadaEsperada = jornadas[escala] || jornadas['default'];
-
-            // Pausa de almoço por escala
-            let pausaAlmoco = 0;
-            if (['24h', '24x72', '16h'].includes(escala)) {
-                pausaAlmoco = 2;
-            } else if (['8h', '12h'].includes(escala)) {
-                pausaAlmoco = 1;
+            // Se ainda não tem ambos, apenas atualize o campo informado
+            if (!novaHoraEntrada || !novaHoraSaida) {
+                // Atualiza só o campo informado
+                const result = await db.query(
+                    `
+                UPDATE registros_ponto
+                SET
+                    hora_entrada = COALESCE($1, hora_entrada),
+                    hora_saida = COALESCE($2, hora_saida),
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = $3
+                RETURNING *
+                `,
+                    [hora_entrada, hora_saida, id]
+                );
+                return res.status(200).json(result.rows[0]);
             }
 
             // Monta datas de entrada e saída
-            const data = format(new Date(data_hora), 'yyyy-MM-dd');
-            const dataEntrada = new Date(`${data}T${hora_entrada}`);
-            let dataSaida = new Date(`${data}T${hora_saida}`);
+            const data = format(new Date(registro.data_hora), 'yyyy-MM-dd');
+            const dataEntrada = new Date(`${data}T${novaHoraEntrada}`);
+            let dataSaida = new Date(`${data}T${novaHoraSaida}`);
             if (['24h', '24x72'].includes(escala)) {
                 dataSaida.setDate(dataSaida.getDate() + 1);
             } else if (dataSaida < dataEntrada) {
