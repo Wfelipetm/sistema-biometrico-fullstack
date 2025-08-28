@@ -288,7 +288,7 @@ export function useRelatorioPDF() {
 
       // Totais
       if (data.totais) {
-        const { total_horas_normais, total_horas_extras, total_horas_desconto,total_horas_extras_ajustada,total_horas_desconto_ajustada } = data.totais;
+        const { total_horas_normais, total_horas_extras, total_horas_desconto, total_horas_extras_ajustada, total_horas_desconto_ajustada } = data.totais;
 
         doc.setFontSize(7);
         doc.setTextColor(80, 80, 80);
@@ -306,7 +306,7 @@ export function useRelatorioPDF() {
             { content: "Horas Extras Total", styles: { fontStyle: "bold" as const } },
             { content: total_horas_extras, styles: { fontStyle: "bold" as const } },
             { content: "Horas Desconto Total", styles: { fontStyle: "bold" as const } },
-            { content: total_horas_desconto, styles: { fontStyle: "bold" as const } },            
+            { content: total_horas_desconto, styles: { fontStyle: "bold" as const } },
             { content: "Ajuste Extras", styles: { fontStyle: "bold" as const } },
             { content: total_horas_extras_ajustada, styles: { fontStyle: "bold" as const } },
             { content: "Ajuste Descontos", styles: { fontStyle: "bold" as const } },
@@ -333,7 +333,7 @@ export function useRelatorioPDF() {
             8: { fontStyle: "bold" as const, fillColor: [240, 240, 250] },
           },
           margin: { left: margin, right: margin },
-        })
+        });
 
         // Frase de confirmação (logo abaixo)
         doc.text(
