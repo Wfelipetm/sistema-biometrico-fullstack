@@ -9,6 +9,8 @@ const formatarHora = (hora) => {
 };
 
 module.exports = {
+
+    // Endpoint para gerar relatório de ponto
     async gerarRelatorioPonto(req, res) {
         const { funcionario_id, mes, ano } = req.query;
         if (!funcionario_id || !mes || !ano) return res.status(400).json({ error: 'Parâmetros obrigatórios ausentes.' });
@@ -112,8 +114,7 @@ module.exports = {
             res.status(500).json({ error: 'Erro interno no servidor.' });
         }
     },
-
-
+    // Endpoint para gerar relatório de ponto sem PDF
     async gerarRelatorioPontosemPDF(req, res) {
         const { funcionario_id, mes, ano } = req.query;
         if (!funcionario_id || !mes || !ano) {
@@ -121,36 +122,83 @@ module.exports = {
         }
 
         try {
+            // Query para buscar registros de ponto
             const query = `
-        SELECT 
-            rp.data_hora::DATE AS data, 
-            rp.hora_entrada, 
-            rp.hora_saida, 
-            rp.horas_normais, 
-            rp.hora_extra, 
-            rp.hora_desconto,
-            rp.total_trabalhado,
-            f.nome AS funcionario_nome, 
-            f.data_admissao, 
-            f.cargo, 
-            f.matricula, 
-            f.tipo_escala,
-            f.cpf,
-            f.email,
-            u.nome AS unidade_nome
-        FROM Registros_Ponto rp
-        INNER JOIN funcionarios f ON rp.funcionario_id = f.id
-        INNER JOIN unidades u ON rp.unidade_id = u.id
-        WHERE f.id = $1 AND f.status = 1 AND EXTRACT(MONTH FROM rp.data_hora) = $2 AND EXTRACT(YEAR FROM rp.data_hora) = $3
-        ORDER BY rp.data_hora ASC
-    `;
+            SELECT 
+                rp.data_hora::DATE AS data, 
+                rp.hora_entrada, 
+                rp.hora_saida, 
+                rp.horas_normais, 
+                rp.hora_extra, 
+                rp.hora_desconto,
+                rp.total_trabalhado,
+                f.nome AS funcionario_nome, 
+                f.data_admissao, 
+                f.cargo, 
+                f.matricula, 
+                f.tipo_escala,
+                f.cpf,
+                f.email,
+                u.nome AS unidade_nome
+            FROM Registros_Ponto rp
+            INNER JOIN funcionarios f ON rp.funcionario_id = f.id
+            INNER JOIN unidades u ON rp.unidade_id = u.id
+            WHERE f.id = $1 AND f.status = 1 AND EXTRACT(MONTH FROM rp.data_hora) = $2 AND EXTRACT(YEAR FROM rp.data_hora) = $3
+            ORDER BY rp.data_hora ASC
+        `;
 
             const result = await db.query(query, [funcionario_id, mes, ano]);
-            if (result.rows.length === 0) {
-                return res.status(404).json({ error: 'Nenhum registro encontrado.' });
-            }
 
-            const funcionario = result.rows[0];
+            // Query para buscar férias do funcionário
+            const feriasQuery = `
+            SELECT data_inicio, data_fim 
+            FROM ferias 
+            WHERE funcionario_id = $1 AND 
+                  ((EXTRACT(MONTH FROM data_inicio) = $2 AND EXTRACT(YEAR FROM data_inicio) = $3) OR
+                   (EXTRACT(MONTH FROM data_fim) = $2 AND EXTRACT(YEAR FROM data_fim) = $3))
+        `;
+            const feriasResult = await db.query(feriasQuery, [funcionario_id, mes, ano]);
+            const ferias = feriasResult.rows;
+
+            // Função para verificar se uma data está dentro do período de férias
+            const isFerias = (data) => {
+                return ferias.some(f => {
+                    const inicio = new Date(f.data_inicio);
+                    const fim = new Date(f.data_fim);
+                    return data >= inicio && data <= fim;
+                });
+            };
+
+            // Query para buscar afastamentos do funcionário
+            const afastamentosQuery = `
+    SELECT data_inicio, data_fim, motivo 
+    FROM afastamentos 
+    WHERE funcionario_id = $1 AND 
+          ((EXTRACT(MONTH FROM data_inicio) = $2 AND EXTRACT(YEAR FROM data_inicio) = $3) OR
+           (EXTRACT(MONTH FROM data_fim) = $2 AND EXTRACT(YEAR FROM data_fim) = $3))
+`;
+            const afastamentosResult = await db.query(afastamentosQuery, [funcionario_id, mes, ano]);
+            const afastamentos = afastamentosResult.rows;
+
+            // Função para verificar se uma data está dentro do período de afastamento e retornar o motivo
+            const getMotivoAfastamento = (data) => {
+                const afastamento = afastamentos.find(a => {
+                    const inicio = new Date(a.data_inicio);
+                    const fim = new Date(a.data_fim);
+                    return data >= inicio && data <= fim;
+                });
+                return afastamento ? afastamento.motivo : null;
+            };
+
+            // Gerar todas as datas do mês
+            const diasNoMes = new Date(ano, mes, 0).getDate();
+            const todasAsDatas = Array.from({ length: diasNoMes }, (_, i) => {
+                const dia = i + 1;
+                return new Date(ano, mes - 1, dia);
+            });
+
+            // Mapear registros existentes
+            const registrosMap = new Map(result.rows.map(row => [row.data.toISOString().split('T')[0], row]));
 
             // Totais em segundos
             let totalHorasNormais = 0;
@@ -167,25 +215,65 @@ module.exports = {
                 return `${h}:${m}:${s}`;
             }
 
-            const registros = result.rows.map(row => {
-                const horas_normais = intervalToString(row.horas_normais);
-                const horas_extras = intervalToString(row.hora_extra);
-                const horas_desconto = intervalToString(row.hora_desconto);
+            // Construir registros para o mês inteiro
+            const registros = todasAsDatas.map(data => {
+                const dataISO = data.toISOString().split('T')[0];
+                const registro = registrosMap.get(dataISO);
 
-                if (horas_normais !== '--') totalHorasNormais += timeToSeconds(horas_normais);
-                if (horas_extras !== '--') totalHorasExtras += timeToSeconds(horas_extras);
-                if (horas_desconto !== '--') totalHorasDesconto += timeToSeconds(horas_desconto);
+                const motivoAfastamento = getMotivoAfastamento(data);
+                const justificativa = motivoAfastamento || (isFerias(data) ? 'Férias' : '--');
 
-                return {
-                    data: format(new Date(row.data), 'dd/MM/yyyy'),
-                    hora_entrada: row.hora_entrada || '--',
-                    hora_saida: row.hora_saida || '--',
-                    horas_normais,
-                    horas_extras,
-                    horas_desconto,
-                    justificativa: ' ',
-                };
+                if (registro) {
+                    const horas_normais = intervalToString(registro.horas_normais);
+                    const horas_extras = intervalToString(registro.hora_extra);
+                    const horas_desconto = intervalToString(registro.hora_desconto);
+
+                    if (horas_normais !== '--') totalHorasNormais += timeToSeconds(horas_normais);
+                    if (horas_extras !== '--') totalHorasExtras += timeToSeconds(horas_extras);
+                    if (horas_desconto !== '--') totalHorasDesconto += timeToSeconds(horas_desconto);
+
+                    return {
+                        data: format(data, 'dd/MM/yyyy'),
+                        hora_entrada: registro.hora_entrada || '--',
+                        hora_saida: registro.hora_saida || '--',
+                        horas_normais,
+                        horas_extras,
+                        horas_desconto,
+                        justificativa,
+                    };
+                } else {
+                    return {
+                        data: format(data, 'dd/MM/yyyy'),
+                        hora_entrada: '--',
+                        hora_saida: '--',
+                        horas_normais: '--',
+                        horas_extras: '--',
+                        horas_desconto: '--',
+                        justificativa,
+                    };
+                }
             });
+
+            // Dados do funcionário
+            const funcionario = result.rows[0];
+
+            // Calcular horas ajustadas após compensação
+            let horasExtrasAjustadas = totalHorasExtras;
+            let horasDescontoAjustadas = totalHorasDesconto;
+
+            if (totalHorasExtras > 0 && totalHorasDesconto > 0) {
+                const saldoHoras = totalHorasExtras - totalHorasDesconto;
+
+                if (saldoHoras >= 0) {
+                    // Tem mais extras que descontos
+                    horasExtrasAjustadas = saldoHoras;
+                    horasDescontoAjustadas = 0;
+                } else {
+                    // Tem mais descontos que extras
+                    horasExtrasAjustadas = 0;
+                    horasDescontoAjustadas = Math.abs(saldoHoras);
+                }
+            }
 
             return res.status(200).json({
                 funcionario: {
@@ -200,6 +288,8 @@ module.exports = {
                     total_horas_normais: totalHorasNormais > 0 ? secondsToHora(totalHorasNormais) : '--',
                     total_horas_extras: totalHorasExtras > 0 ? secondsToHora(totalHorasExtras) : '--',
                     total_horas_desconto: totalHorasDesconto > 0 ? secondsToHora(totalHorasDesconto) : '--',
+                    total_horas_extras_ajustada: horasExtrasAjustadas > 0 ? secondsToHora(horasExtrasAjustadas) : '00:00:00',
+                    total_horas_desconto_ajustada: horasDescontoAjustadas > 0 ? secondsToHora(horasDescontoAjustadas) : '00:00:00',
                 },
                 registros,
             });
@@ -209,7 +299,7 @@ module.exports = {
         }
     },
 
-    // Novo endpoint para relatório por unidade sem PDF
+    // Endpoint para relatório por unidade sem PDF
     async gerarRelatorioPorunidadesemPDF(req, res) {
         const { unidade_id, mes, ano } = req.query;
         if (!unidade_id || !mes || !ano) {
@@ -253,6 +343,79 @@ module.exports = {
 
             // Buscar nome da unidade
             const unidadeNome = result.rows[0].unidade_nome;
+
+            // Query para buscar férias de todos os funcionários da unidade
+            const feriasQuery = `
+                SELECT funcionario_id, data_inicio, data_fim 
+                FROM ferias 
+                WHERE funcionario_id IN (
+                    SELECT DISTINCT f.id
+                    FROM funcionarios f
+                    WHERE f.unidade_id = $1
+                )
+                  AND (
+                      (EXTRACT(MONTH FROM data_inicio) = $2 AND EXTRACT(YEAR FROM data_inicio) = $3) OR
+                      (EXTRACT(MONTH FROM data_fim) = $2 AND EXTRACT(YEAR FROM data_fim) = $3)
+                  )
+            `;
+            const feriasResult = await db.query(feriasQuery, [unidade_id, mes, ano]);
+            const feriasMap = new Map();
+            feriasResult.rows.forEach(f => {
+                if (!feriasMap.has(f.funcionario_id)) {
+                    feriasMap.set(f.funcionario_id, []);
+                }
+                feriasMap.get(f.funcionario_id).push({
+                    inicio: new Date(f.data_inicio),
+                    fim: new Date(f.data_fim),
+                });
+            });
+
+            // Query para buscar afastamentos de todos os funcionários da unidade
+            const afastamentosQuery = `
+                SELECT funcionario_id, data_inicio, data_fim, motivo 
+                FROM afastamentos 
+                WHERE funcionario_id IN (
+                    SELECT DISTINCT f.id
+                    FROM funcionarios f
+                    WHERE f.unidade_id = $1
+                )
+                  AND (
+                      (EXTRACT(MONTH FROM data_inicio) = $2 AND EXTRACT(YEAR FROM data_inicio) = $3) OR
+                      (EXTRACT(MONTH FROM data_fim) = $2 AND EXTRACT(YEAR FROM data_fim) = $3)
+                  )
+            `;
+            const afastamentosResult = await db.query(afastamentosQuery, [unidade_id, mes, ano]);
+            const afastamentosMap = new Map();
+            afastamentosResult.rows.forEach(a => {
+                if (!afastamentosMap.has(a.funcionario_id)) {
+                    afastamentosMap.set(a.funcionario_id, []);
+                }
+                afastamentosMap.get(a.funcionario_id).push({
+                    inicio: new Date(a.data_inicio),
+                    fim: new Date(a.data_fim),
+                    motivo: a.motivo
+                });
+            });
+
+            // Função para verificar se uma data está dentro do período de férias
+            const isFerias = (funcionarioId, data) => {
+                const ferias = feriasMap.get(funcionarioId) || [];
+                return ferias.some(f => data >= f.inicio && data <= f.fim);
+            };
+
+            // Função para verificar se uma data está dentro do período de afastamento e retornar o motivo
+            const getMotivoAfastamento = (funcionarioId, data) => {
+                const afastamentos = afastamentosMap.get(funcionarioId) || [];
+                const afastamento = afastamentos.find(a => data >= a.inicio && data <= a.fim);
+                return afastamento ? afastamento.motivo : null;
+            };
+
+            // Gerar todas as datas do mês
+            const diasNoMes = new Date(ano, mes, 0).getDate();
+            const todasAsDatas = Array.from({ length: diasNoMes }, (_, i) => {
+                const dia = i + 1;
+                return new Date(ano, mes - 1, dia);
+            });
 
             // Agrupar registros por funcionário
             const funcionariosMap = new Map();
@@ -310,19 +473,79 @@ module.exports = {
                 });
             });
 
-            // Converter os totais de segundos para formato de hora
-            for (const funcionarioData of funcionariosMap.values()) {
-                funcionarioData.totais.total_horas_normais = funcionarioData.totais.total_horas_normais > 0
-                    ? secondsToHora(funcionarioData.totais.total_horas_normais)
+            // Preencher dias sem registros para cada funcionário
+            for (const [funcionarioId, funcionarioData] of funcionariosMap.entries()) {
+                const registrosMap = new Map(funcionarioData.registros.map(r => [r.data, r]));
+
+                todasAsDatas.forEach(data => {
+                    const dataFormatada = format(data, 'dd/MM/yyyy');
+                    if (!registrosMap.has(dataFormatada)) {
+                        const motivoAfastamento = getMotivoAfastamento(funcionarioId, data);
+                        let justificativa = '--';
+
+                        if (motivoAfastamento) {
+                            justificativa = motivoAfastamento;
+                        } else if (isFerias(funcionarioId, data)) {
+                            justificativa = 'Férias';
+                        }
+
+                        funcionarioData.registros.push({
+                            data: dataFormatada,
+                            hora_entrada: '--',
+                            hora_saida: '--',
+                            horas_normais: '--',
+                            horas_extras: '--',
+                            horas_desconto: '--',
+                            justificativa,
+                        });
+                    }
+                });
+
+                // Ordenar registros por data
+                funcionarioData.registros.sort((a, b) => new Date(a.data) - new Date(b.data));
+
+                // Calcular horas ajustadas após compensação
+                const totalSegundosNormais = funcionarioData.totais.total_horas_normais;
+                const totalSegundosExtras = funcionarioData.totais.total_horas_extras;
+                const totalSegundosDesconto = funcionarioData.totais.total_horas_desconto;
+
+                let horasExtrasAjustadas = totalSegundosExtras;
+                let horasDescontoAjustadas = totalSegundosDesconto;
+
+                if (totalSegundosExtras > 0 && totalSegundosDesconto > 0) {
+                    const saldoHoras = totalSegundosExtras - totalSegundosDesconto;
+
+                    if (saldoHoras >= 0) {
+                        // Tem mais extras que descontos
+                        horasExtrasAjustadas = saldoHoras;
+                        horasDescontoAjustadas = 0;
+                    } else {
+                        // Tem mais descontos que extras
+                        horasExtrasAjustadas = 0;
+                        horasDescontoAjustadas = Math.abs(saldoHoras);
+                    }
+                }
+
+                // Converter totais de segundos para formato de hora
+                funcionarioData.totais.total_horas_normais = totalSegundosNormais > 0
+                    ? secondsToHora(totalSegundosNormais)
                     : '--';
 
-                funcionarioData.totais.total_horas_extras = funcionarioData.totais.total_horas_extras > 0
-                    ? secondsToHora(funcionarioData.totais.total_horas_extras)
+                funcionarioData.totais.total_horas_extras = totalSegundosExtras > 0
+                    ? secondsToHora(totalSegundosExtras)
                     : '--';
 
-                funcionarioData.totais.total_horas_desconto = funcionarioData.totais.total_horas_desconto > 0
-                    ? secondsToHora(funcionarioData.totais.total_horas_desconto)
+                funcionarioData.totais.total_horas_desconto = totalSegundosDesconto > 0
+                    ? secondsToHora(totalSegundosDesconto)
                     : '--';
+
+                funcionarioData.totais.total_horas_extras_ajustada = horasExtrasAjustadas > 0
+                    ? secondsToHora(horasExtrasAjustadas)
+                    : '00:00:00';
+
+                funcionarioData.totais.total_horas_desconto_ajustada = horasDescontoAjustadas > 0
+                    ? secondsToHora(horasDescontoAjustadas)
+                    : '00:00:00';
             }
 
             // Preparar a resposta com todos os funcionários
@@ -347,6 +570,8 @@ module.exports = {
     }
 }
 
+
+
 // Função auxiliar para converter interval para string
 function intervalToString(interval) {
     if (!interval) return '--';
@@ -361,7 +586,6 @@ function timeToSeconds(timeStr) {
     const [h, m, s] = timeStr.split(':').map(Number);
     return h * 3600 + m * 60 + s;
 }
-
 function secondsToHora(totalSeconds) {
     const h = Math.floor(totalSeconds / 3600);
     const m = Math.floor((totalSeconds % 3600) / 60);

@@ -9,6 +9,7 @@ const feriasRoutes = require('./src/routes/feriasRoutes')
 const mailRoutes = require('./src/routes/mail');
 const secretariasRoutes = require('./src/routes/secretariasRoutes');
 const logsRouter = require('./src/routes/logsRoutes')
+const afastamentoRoutes = require('./src/routes/afastamentoRoutes');
 
 const dotenv = require("dotenv")
 const jwt = require('./src/middleware/authMiddleware');
@@ -76,6 +77,7 @@ app.use('/secre', secretariasRoutes);
 app.use('/ferias', feriasRoutes);
 app.use('/funci', funcionarioRoutes);
 app.use('/log', logsRouter);
+app.use('/afastamentos', afastamentoRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'upload', 'upUnidade')));
 
 

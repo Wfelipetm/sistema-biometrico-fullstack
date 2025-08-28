@@ -30,10 +30,10 @@ import {
   Plus,
 } from "lucide-react"
 import { differenceInDays, format, addDays, parseISO, parse } from "date-fns"
-import axios from "axios"
 import { toast } from "@/components/ui/toast-custom"
+import { api } from "@/lib/api"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL
+
 
 type Funcionario = {
   id: number
@@ -67,6 +67,7 @@ export default function CadastrarFeriasModal({
   const [funcionarioId, setFuncionarioId] = useState("")
   const [dataInicio, setDataInicio] = useState("")
   const [dataFim, setDataFim] = useState("")
+  const [motivo, setMotivo] = useState("") // Novo estado para motivo de afastamento
   const [isSalvando, setIsSalvando] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [funcionariosDisponiveis, setFuncionariosDisponiveis] = useState<Funcionario[]>([])
@@ -79,6 +80,7 @@ export default function CadastrarFeriasModal({
     dataInicio?: string
     dataFim?: string
   }>({})
+  const [tipoRegistro, setTipoRegistro] = useState("ferias") // Novo estado para tipo de registro
 
   // Validação em tempo real
   useEffect(() => {
@@ -88,12 +90,12 @@ export default function CadastrarFeriasModal({
       errors.dataFim = "Data de fim deve ser posterior à data de início"
     }
 
-    if (dataInicio && new Date(dataInicio) < new Date()) {
+    if (dataInicio && tipoRegistro !== "afastamento" && new Date(dataInicio) < new Date()) {
       errors.dataInicio = "Data de início não pode ser no passado"
     }
 
     setValidationErrors(errors)
-  }, [dataInicio, dataFim])
+  }, [dataInicio, dataFim, tipoRegistro])
 
   // Definir datas de exemplo quando o modal abrir
   useEffect(() => {
@@ -109,7 +111,7 @@ export default function CadastrarFeriasModal({
 
   const carregarFerias = useCallback(async () => {
     try {
-      const response = await axios.get<{ dados: FeriasItem[] }>(`${API_URL}/ferias/ferias-por-unidade/${unidadeId}`)
+      const response = await api.get<{ dados: FeriasItem[] }>(`/ferias/ferias-por-unidade/${unidadeId}`)
 
       const dadosFerias = response.data.dados ?? []
       setFeriasCadastradas(dadosFerias)
@@ -147,13 +149,13 @@ export default function CadastrarFeriasModal({
     )
   }
 
-  const cadastrarFerias = async () => {
+  const cadastrarRegistro = async () => {
     if (!isFormValid()) {
       setError("Por favor, corrija os erros antes de continuar.")
       return
     }
 
-    const dias_ferias = differenceInDays(new Date(dataFim), new Date(dataInicio)) + 1
+    const dias = differenceInDays(new Date(dataFim), new Date(dataInicio)) + 1
 
     setIsSalvando(true)
     setError("")
@@ -171,29 +173,57 @@ export default function CadastrarFeriasModal({
         })
       }, 200)
 
-      await axios.post(`${API_URL}/ferias`, {
-        funcionario_id: Number(funcionarioId),
-        unidade_id: unidadeId,
-        data_inicio: dataInicio,
-        data_fim: dataFim,
-        dias_ferias,
-        status: "solicitada",
-      })
+      let payload;
+
+      if (tipoRegistro === "ferias") {
+        payload = {
+          funcionario_id: Number(funcionarioId),
+          unidade_id: unidadeId,
+          data_inicio: dataInicio,
+          data_fim: dataFim,
+          dias_ferias: dias,
+          status: "solicitada",
+        };
+      } else if (tipoRegistro === "afastamento") {
+        payload = {
+          funcionario_id: Number(funcionarioId),
+          unidade_id: unidadeId,
+          data_inicio: dataInicio,
+          data_fim: dataFim,
+          dias_afastamento: dias,
+          motivo,
+        };
+      }
+
+      const endpoint = tipoRegistro === "ferias" ? `/ferias` : `/afastamentos`;
+
+      console.log("Tipo de Registro:", tipoRegistro);
+      console.log("Endpoint:", endpoint);
+      console.log("Payload:", payload);
+
+      await api.post(endpoint, payload)
 
       clearInterval(progressInterval)
       setUploadProgress(100)
 
-      toast.success("Férias cadastradas!", `Solicitação de ${dias_ferias} dias criada com sucesso.`)
+      toast.success(
+        `${tipoRegistro === "ferias" ? "Férias" : "Afastamento"} cadastrado!`,
+        `${dias} dias registrados com sucesso.`
+      )
 
       // Reset form
       setFuncionarioId("")
       setDataInicio("")
       setDataFim("")
+      setMotivo("") // Resetar motivo
       carregarFerias()
     } catch (err) {
-      console.error("Erro ao cadastrar férias:", err)
-      setError("Erro ao cadastrar férias. Verifique os dados e tente novamente.")
-      toast.error("Erro no cadastro", "Não foi possível cadastrar as férias. Tente novamente.")
+      console.error(`Erro ao cadastrar ${tipoRegistro}:`, err)
+      setError(`Erro ao cadastrar ${tipoRegistro}. Verifique os dados e tente novamente.`)
+      toast.error(
+        `Erro no cadastro`,
+        `Não foi possível cadastrar o ${tipoRegistro}. Tente novamente.`
+      )
     } finally {
       setIsSalvando(false)
     }
@@ -202,7 +232,7 @@ export default function CadastrarFeriasModal({
   const aprovarFerias = async (idFerias: number, nomeFuncionario: string) => {
     setLoadingAprovar(idFerias)
     try {
-      await axios.put(`${API_URL}/ferias/atualizar-ferias/${idFerias}/aprovar`)
+      await api.put(`/ferias/atualizar-ferias/${idFerias}/aprovar`)
 
       toast.success("Férias aprovadas!", `As férias de ${nomeFuncionario} foram aprovadas.`)
 
@@ -222,7 +252,7 @@ export default function CadastrarFeriasModal({
       async () => {
         setLoadingExcluir(idFerias)
         try {
-          await axios.delete(`${API_URL}/ferias/${idFerias}`)
+          await api.delete(`/ferias/${idFerias}`)
 
           toast.success("Férias excluídas!", `A solicitação de ${nomeFuncionario} foi removida.`)
           setFeriasCadastradas((prev) => prev.filter((f) => f.id !== idFerias))
@@ -269,9 +299,9 @@ export default function CadastrarFeriasModal({
               <CalendarDays className="w-6 h-6 text-blue-700" />
             </div>
             <div>
-              <DialogTitle className="text-2xl font-bold text-blue-900">Gerenciar Férias</DialogTitle>
+              <DialogTitle className="text-2xl font-bold text-blue-900">Gerenciar Recesso</DialogTitle>
               <DialogDescription className="text-blue-700">
-                Cadastre e gerencie as solicitações de férias dos funcionários.
+                Cadastre e gerencie as solicitações de férias e afastamentos dos funcionários.
               </DialogDescription>
             </div>
           </div>
@@ -294,6 +324,23 @@ export default function CadastrarFeriasModal({
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
+
+              {/* Tipo de Registro */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium flex items-center gap-2 text-blue-900">
+                  <Calendar className="w-4 h-4 text-blue-700" />
+                  Tipo de Registro
+                </Label>
+                <Select onValueChange={(value) => setTipoRegistro(value)} disabled={isSalvando}>
+                  <SelectTrigger className="h-12 border-blue-300 focus:border-blue-500 focus:ring-blue-200 text-blue-900">
+                    <SelectValue placeholder="Selecione um tipo" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white text-blue-900 border border-blue-100">
+                    <SelectItem value="ferias">Férias</SelectItem>
+                    <SelectItem value="afastamento">Afastamento</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
               {/* Funcionário */}
               <div className="space-y-2">
@@ -364,6 +411,24 @@ export default function CadastrarFeriasModal({
                 )}
               </div>
 
+              {/* Motivo para Afastamento */}
+              {tipoRegistro === "afastamento" && (
+                <div className="space-y-2">
+                  <Label htmlFor="motivo" className="text-sm font-medium flex items-center gap-2 text-blue-900">
+                    <Calendar className="w-4 h-4 text-blue-700" />
+                    Motivo
+                  </Label>
+                  <Input
+                    id="motivo"
+                    type="text"
+                    value={motivo}
+                    onChange={(e) => setMotivo(e.target.value)}
+                    disabled={isSalvando}
+                    className="h-12 border-blue-300 focus:border-blue-500 focus:ring-blue-200 text-blue-900"
+                  />
+                </div>
+              )}
+
               {/* Informação de dias */}
               {calcularDias() > 0 && (
                 <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
@@ -389,7 +454,7 @@ export default function CadastrarFeriasModal({
 
               {/* Botão de Cadastrar */}
               <Button
-                onClick={cadastrarFerias}
+                onClick={cadastrarRegistro}
                 disabled={isSalvando || !isFormValid()}
                 className={`w-full h-12 font-medium transition-all duration-300 ${
                   isSalvando
@@ -407,7 +472,7 @@ export default function CadastrarFeriasModal({
                 ) : (
                   <div className="flex items-center gap-2">
                     <Save className="w-4 h-4" />
-                    <span>Cadastrar Férias</span>
+                    <span>{tipoRegistro === "ferias" ? "Cadastrar Férias" : "Registrar Afastamento"}</span>
                   </div>
                 )}
               </Button>
