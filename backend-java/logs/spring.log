@@ -1,0 +1,16 @@
+2025-09-02T08:47:50.106-03:00  INFO 26456 --- [biomtria] [main] b.com.bio.biomtria.BiometriaApplication  : Starting BiometriaApplication using Java 23.0.1 with PID 26456 (C:\projetos\springbio\biomtria\target\classes started by wallace.moreira in C:\projetos\springbio\biomtria)
+2025-09-02T08:47:50.114-03:00  INFO 26456 --- [biomtria] [main] b.com.bio.biomtria.BiometriaApplication  : No active profile set, falling back to 1 default profile: "default"
+2025-09-02T08:47:51.394-03:00  INFO 26456 --- [biomtria] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with ports 5000 (https), 8080 (http)
+2025-09-02T08:47:51.411-03:00  INFO 26456 --- [biomtria] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-09-02T08:47:51.412-03:00  INFO 26456 --- [biomtria] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.36]
+2025-09-02T08:47:51.482-03:00  INFO 26456 --- [biomtria] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-09-02T08:47:51.483-03:00  INFO 26456 --- [biomtria] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1301 ms
+2025-09-02T08:47:52.185-03:00  INFO 26456 --- [biomtria] [main] o.a.t.util.net.NioEndpoint.certificate   : Connector [https-jsse-nio-0.0.0.0-5000], TLS virtual host [_default_], certificate type [UNDEFINED] configured from keystore [C:\Users\wallace.moreira\.keystore] using alias [tomcat] with trust store [null]
+2025-09-02T08:47:52.209-03:00  INFO 26456 --- [biomtria] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on ports 5000 (https), 8080 (http) with context path '/'
+2025-09-02T08:47:52.217-03:00  INFO 26456 --- [biomtria] [main] b.com.bio.biomtria.BiometriaApplication  : Started BiometriaApplication in 2.58 seconds (process running for 2.958)
+2025-09-02T08:47:57.574-03:00  INFO 26456 --- [biomtria] [https-jsse-nio-0.0.0.0-5000-exec-5] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-09-02T08:47:57.575-03:00  INFO 26456 --- [biomtria] [https-jsse-nio-0.0.0.0-5000-exec-5] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-09-02T08:47:57.576-03:00  INFO 26456 --- [biomtria] [https-jsse-nio-0.0.0.0-5000-exec-5] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2025-09-02T08:48:01.659-03:00  INFO 26456 --- [biomtria] [https-jsse-nio-0.0.0.0-5000-exec-5] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-09-02T08:48:01.873-03:00  INFO 26456 --- [biomtria] [https-jsse-nio-0.0.0.0-5000-exec-5] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@6376d78e
+2025-09-02T08:48:01.887-03:00  INFO 26456 --- [biomtria] [https-jsse-nio-0.0.0.0-5000-exec-5] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.

@@ -1,0 +1,11 @@
+{
+    "userName": "João da Silva",
+    "cpf": "123.456.789-00",
+    "cargo": "Desenvolvedor",
+    "matricula": "123456",
+    "unidade_id": "1",
+    "data_admissao": "2025-01-01",
+    "tipo_escala": "8h",
+    "telefone": "(11) 98765-4321",
+    "email": "joao.silva@example.com"
+}
