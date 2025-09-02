@@ -1,0 +1,11 @@
+br\com\bio\biomtria\BiometriaApplication.class
+br\com\bio\biomtria\config\HttpsConfig.class
+br\com\bio\biomtria\controller\pontoController.class
+br\com\bio\biomtria\route\registerRoutes.class
+br\com\bio\biomtria\route\identifyRoutes.class
+br\com\bio\biomtria\controller\identifyController.class
+br\com\bio\biomtria\service\BiometricService.class
+br\com\bio\biomtria\config\AppConfig.class
+br\com\bio\biomtria\route\pontoRoutes.class
+br\com\bio\biomtria\controller\registerController.class
+br\com\bio\biomtria\config\CorsConfig.class
