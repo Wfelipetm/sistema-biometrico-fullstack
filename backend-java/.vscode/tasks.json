@@ -1,0 +1,14 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Monitorar logs do Spring",
+			"type": "shell",
+			"command": "tail -f logs/spring.log",
+			"args": [],
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "monitor"
+		}
+	]
+}
