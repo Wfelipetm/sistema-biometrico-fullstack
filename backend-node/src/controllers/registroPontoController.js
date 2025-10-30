@@ -352,7 +352,42 @@ module.exports = {
 
             // Se hora_saida não foi enviada, é registro de entrada (INSERT)
             if (!hora_saida) {
-                // Verifica se já existe registro COMPLETO (entrada e saída) para o dia
+                // 1. Primeiro, verifica se existe registro com saída NULL (entrada sem saída)
+                const registroSemSaida = await db.query(
+                    `SELECT id, hora_entrada, data_hora FROM registros_ponto 
+                     WHERE funcionario_id = $1 
+                       AND unidade_id = $2
+                       AND hora_saida IS NULL
+                     ORDER BY data_hora DESC LIMIT 1`,
+                    [funcionario_id, unidade_id]
+                );
+
+                // Se existe registro sem saída, completa automaticamente
+                if (registroSemSaida.rowCount > 0) {
+                    const registroAnterior = registroSemSaida.rows[0];
+
+                    // Calcula hora_saida como hora_entrada + 10 minutos
+                    const horaEntradaAnterior = registroAnterior.hora_entrada;
+                    const [horas, minutos] = horaEntradaAnterior.split(':').map(Number);
+                    const minutosTotal = horas * 60 + minutos + 10; // adiciona 10 minutos
+                    const novasHoras = Math.floor(minutosTotal / 60) % 24; // garante que não passe de 24h
+                    const novosMinutos = minutosTotal % 60;
+                    const horaSaidaCalculada = `${novasHoras.toString().padStart(2, '0')}:${novosMinutos.toString().padStart(2, '0')}:00`;
+
+                    // Atualiza o registro anterior com saída automática
+                    await db.query(
+                        `UPDATE registros_ponto 
+                         SET hora_saida = $1, 
+                             status = 'não registrado a saída',
+                             updated_at = CURRENT_TIMESTAMP
+                         WHERE id = $2`,
+                        [horaSaidaCalculada, registroAnterior.id]
+                    );
+
+                    console.log(`Registro anterior (ID: ${registroAnterior.id}) completado automaticamente com saída às ${horaSaidaCalculada}`);
+                }
+
+                // 2. Verifica se já existe registro COMPLETO (entrada e saída) para o dia atual
                 const registroCompleto = await db.query(
                     `SELECT id FROM registros_ponto 
                      WHERE funcionario_id = $1 
@@ -368,15 +403,16 @@ module.exports = {
                     });
                 }
 
+                // 3. Cria o novo registro de entrada
                 const result = await db.query(
                     `
                     INSERT INTO registros_ponto (
-                        funcionario_id, unidade_id, data_hora, hora_entrada, hora_saida, id_biometrico
-                    ) VALUES ($1, $2, $3, $4, $5, $6)
+                        funcionario_id, unidade_id, data_hora, hora_entrada, hora_saida, id_biometrico, status
+                    ) VALUES ($1, $2, $3, $4, $5, $6, $7)
                     RETURNING *
                     `,
                     [
-                        funcionario_id, unidade_id, data, hora_entrada, null, id_biometrico || null
+                        funcionario_id, unidade_id, data, hora_entrada, null, id_biometrico || null, 'registrado'
                     ]
                 );
                 return res.status(201).json(result.rows[0]);
