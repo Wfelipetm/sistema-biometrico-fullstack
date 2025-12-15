@@ -7,6 +7,7 @@ from flask_cors import CORS
 from app.routes.registerRoutes import register_routes
 from app.routes.identifyRoutes import identify_routes
 from app.routes.pontoRoutes import ponto_routes
+from app.routes.vinculoRoutes import vinculo_routes
 
 def create_app():
     app = Flask(__name__)
@@ -18,5 +19,6 @@ def create_app():
     register_routes(app)
     identify_routes(app)
     ponto_routes(app)
+    vinculo_routes(app)
 
     return app

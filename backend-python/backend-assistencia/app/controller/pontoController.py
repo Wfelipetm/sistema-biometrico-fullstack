@@ -41,9 +41,20 @@ def register_ponto():
     IndexSearch.ClearDB()  # Limpa base de digitais temporária
     conn = get_db_connection()
     cursor = conn.cursor()
+    
+    # Adiciona funcionários principais
     cursor.execute("SELECT id_biometrico, id FROM funcionarios")
     for row in cursor.fetchall():
         IndexSearch.AddFIR(row[0], int(row[1]))  # Adiciona cada funcionário à base de identificação
+    
+    # Adiciona vínculos adicionais com offset de 1000000
+    VINCULO_OFFSET = 1000000
+    cursor.execute("SELECT id_biometrico, id FROM funcionarios_unidades_adicionais WHERE status = 1")
+    vinculos = cursor.fetchall()
+    for row in vinculos:
+        vinculo_user_id = VINCULO_OFFSET + int(row[1])
+        IndexSearch.AddFIR(row[0], vinculo_user_id)
+    
     conn.close()
 
     # ===========================
@@ -57,18 +68,36 @@ def register_ponto():
     if IndexSearch.UserID == 0:
         return jsonify({"message": "Usuário não identificado. Digital não cadastrada no sistema."}), 401
 
-    funcionario_id = IndexSearch.UserID  # ID do funcionário identificado
+    id_identificado = IndexSearch.UserID  # ID identificado (pode ser funcionário ou vínculo)
 
     # ===========================
-    # 3. Buscar dados do funcionário no banco
+    # 3. Buscar dados do funcionário no banco (Principal ou Vínculo)
     # ===========================
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("""
-        SELECT id, nome, cpf, unidade_id, matricula, cargo, id_biometrico, email
-        FROM funcionarios WHERE id = %s
-    """, (funcionario_id,))
-    user_data = cursor.fetchone()
+    
+    # Verifica se é um vínculo adicional
+    if id_identificado >= VINCULO_OFFSET:
+        # É um vínculo adicional
+        vinculo_id = id_identificado - VINCULO_OFFSET
+        cursor.execute("""
+            SELECT fua.funcionario_id, f.nome, f.cpf, fua.unidade_id, fua.matricula, 
+                   fua.cargo, fua.id_biometrico, f.email
+            FROM funcionarios_unidades_adicionais fua
+            INNER JOIN funcionarios f ON fua.funcionario_id = f.id
+            WHERE fua.id = %s AND fua.status = 1
+        """, (vinculo_id,))
+        user_data = cursor.fetchone()
+        tipo_registro = "vinculo_adicional"
+    else:
+        # É um funcionário principal
+        cursor.execute("""
+            SELECT id, nome, cpf, unidade_id, matricula, cargo, id_biometrico, email
+            FROM funcionarios WHERE id = %s
+        """, (id_identificado,))
+        user_data = cursor.fetchone()
+        tipo_registro = "funcionario_principal"
+    
     if not user_data:
         return jsonify({"message": "Funcionário não encontrado no banco de dados."}), 404
 
@@ -261,6 +290,9 @@ def register_ponto():
         "message": mensagem,
         "funcionario": user_name,
         "matricula": matricula,
+        "cargo": cargo,
+        "unidade_id": unidade_id_funcionario,
         "data_hora": f"{data_registro} {hora_entrada}",
-        "tipo": "entrada" if not ultimo_ponto else "saida"
+        "tipo_ponto": "entrada" if not ultimo_ponto else "saida",
+        "tipo_vinculo": tipo_registro
     }), 200

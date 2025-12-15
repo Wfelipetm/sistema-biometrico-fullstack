@@ -1,0 +1,223 @@
+================================================================================
+    COMO USAR A API DE VÍNCULOS ADICIONAIS PARA FUNCIONÁRIOS
+================================================================================
+
+ROTA: POST https://leitor.itaguai.rj.gov.br:5000/api/funcionarios/vinculos
+
+DESCRIÇÃO:
+Esta API permite criar vínculos adicionais para funcionários em outras unidades.
+Um funcionário pode trabalhar em múltiplas unidades com matrículas diferentes,
+e esta rota registra essas relações adicionais com biometria separada.
+
+================================================================================
+REQUISITOS:
+================================================================================
+
+1. O funcionário DEVE existir no sistema
+2. A matrícula fornecida deve ser ÚNICA (não pode existir em funcionarios ou 
+   funcionarios_unidades_adicionais)
+3. O tipo_escala deve ser um dos valores válidos
+
+================================================================================
+CAMPOS OBRIGATÓRIOS (JSON):
+================================================================================
+
+{
+    "funcionario_id": 123,           // ID do funcionário já cadastrado no sistema
+    "unidade_id": 5,                 // ID da unidade adicional
+    "matricula": "12345",            // Nova matrícula para esta unidade (única)
+    "tipo_escala": "12x36",          // Tipo de escala de trabalho
+    "cargo": "ENFERMEIRO"            // Cargo para este vínculo (pode ser diferente do cargo principal)
+}
+
+================================================================================
+TIPOS DE ESCALA VÁLIDOS:
+================================================================================
+
+- "8h"
+- "12h"
+- "16h"
+- "24h"
+- "12x36"
+- "24x72"
+- "32h"
+- "20h"
+
+================================================================================
+EXEMPLO DE USO (cURL):
+================================================================================
+
+curl -X POST https://leitor.itaguai.rj.gov.br:5000/api/funcionarios/vinculos \
+  -H "Content-Type: application/json" \
+  -d '{
+    "funcionario_id": 15,
+    "unidade_id": 3,
+    "matricula": "FUNC-2024-001",
+    "tipo_escala": "12x36",
+    "cargo": "ENFERMEIRO"
+  }'
+
+================================================================================
+EXEMPLO DE USO (JavaScript/Fetch):
+================================================================================
+
+fetch('https://leitor.itaguai.rj.gov.br:5000/api/funcionarios/vinculos', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    funcionario_id: 15,
+    unidade_id: 3,
+    matricula: 'FUNC-2024-001',
+    tipo_escala: '12x36',
+    cargo: 'ENFERMEIRO'
+  })
+})
+.then(response => response.json())
+.then(data => console.log(data))
+.catch(error => console.error('Erro:', error));
+
+================================================================================
+EXEMPLO DE USO (Python/Requests):
+================================================================================
+
+import requests
+
+url = 'https://leitor.itaguai.rj.gov.br:5000/api/funcionarios/vinculos'
+payload = {
+    "funcionario_id": 15,
+    "unidade_id": 3,
+    "matricula": "FUNC-2024-001",
+    "tipo_escala": "12x36",
+    "cargo": "ENFERMEIRO"
+}
+
+response = requests.post(url, json=payload)
+print(response.json())
+
+================================================================================
+RESPOSTAS POSSÍVEIS:
+================================================================================
+
+✅ SUCESSO (201 Created):
+{
+    "message": "Vínculo adicional criado com sucesso",
+    "vinculo": {
+        "funcionario_id": 15,
+        "funcionario_nome": "João da Silva",
+        "unidade_id": 3,
+        "matricula": "FUNC-2024-001",
+        "id_biometrico": 150,
+        "tipo_escala": "12x36",
+        "cargo": "ENFERMEIRO",
+        "status": 1
+    }
+}
+
+❌ ERRO - Campos faltando (400 Bad Request):
+{
+    "message": "funcionario_id, unidade_id, matricula, tipo_escala e cargo são obrigatórios"
+}
+
+❌ ERRO - Tipo de escala inválido (400 Bad Request):
+{
+    "message": "Tipo de escala inválido. Valores válidos: 8h, 12h, 16h, 24h, 12x36, 24x72, 32h, 20h"
+}
+
+❌ ERRO - Funcionário não encontrado (404 Not Found):
+{
+    "message": "Funcionário não encontrado"
+}
+
+❌ ERRO - Matrícula já existe (400 Bad Request):
+{
+    "message": "Matrícula já existe"
+}
+OU
+{
+    "message": "Matrícula já existe nos vínculos adicionais"
+}
+
+❌ ERRO - Falha no registro biométrico (500 Internal Server Error):
+{
+    "message": "Erro durante o registro biométrico: [detalhes do erro]"
+}
+
+❌ ERRO - Erro geral (500 Internal Server Error):
+{
+    "message": "Erro ao criar vínculo adicional: [detalhes do erro]"
+}
+
+================================================================================
+PROCESSO EXECUTADO PELA API:
+================================================================================
+
+1. Valida se todos os campos obrigatórios foram enviados
+2. Verifica se o tipo_escala é válido
+3. Busca o funcionário no banco de dados
+4. Verifica se o funcionário existe
+5. Verifica se a matrícula já existe (em funcionarios ou funcionarios_unidades_adicionais)
+6. Registra a biometria usando o leitor biométrico (enroll_user)
+7. Insere o registro na tabela funcionarios_unidades_adicionais com status = 1 (ativo)
+8. Retorna sucesso com os dados do vínculo criado
+
+================================================================================
+DADOS SALVOS NO BANCO:
+================================================================================
+
+Tabela: funcionarios_unidades_adicionais
+
+Campos:
+- funcionario_id: ID do funcionário principal
+- unidade_id: ID da unidade adicional
+- matricula: Matrícula única para este vínculo
+- id_biometrico: ID gerado pelo leitor biométrico
+- tipo_escala: Escala de trabalho nesta unidade
+- cargo: Cargo específico para este vínculo (pode diferir do cargo principal)
+- status: 1 (ativo por padrão)
+
+================================================================================
+OBSERVAÇÕES IMPORTANTES:
+================================================================================
+
+⚠️  Durante a criação do vínculo, será solicitado que o funcionário coloque o 
+    dedo no leitor biométrico para registrar a digital.
+
+⚠️  Cada vínculo adicional terá um ID biométrico único, permitindo que o 
+    funcionário bata ponto em diferentes unidades.
+
+⚠️  A matrícula deve ser única em todo o sistema (não pode ser repetida 
+    nem na tabela funcionarios, nem em funcionarios_unidades_adicionais).
+
+⚠️  Qualquer funcionário pode ter vínculos adicionais, não há restrição por cargo.
+
+⚠️  Um funcionário pode ter cargo diferente em cada vínculo. Por exemplo:
+    - Vínculo principal: ENFERMEIRO
+    - Vínculo adicional: TÉCNICO DE ENFERMAGEM
+
+⚠️  O status padrão é 1 (ativo). Para desativar um vínculo, atualize o campo
+    status para 0 diretamente no banco de dados.
+
+================================================================================
+ESTRUTURA DA TABELA funcionarios_unidades_adicionais:
+================================================================================
+
+CREATE TABLE funcionarios_unidades_adicionais (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    funcionario_id INT NOT NULL,
+    unidade_id INT NOT NULL,
+    matricula VARCHAR(50) UNIQUE NOT NULL,
+    id_biometrico INT UNIQUE NOT NULL,
+    tipo_escala VARCHAR(10) NOT NULL,
+    cargo VARCHAR(100) NOT NULL,
+    status TINYINT DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id),
+    FOREIGN KEY (unidade_id) REFERENCES unidades(id)
+);
+
+================================================================================
+FIM DO DOCUMENTO
+================================================================================
